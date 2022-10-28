@@ -1,11 +1,7 @@
-class Rule {
+class Result {
 	#type;
 	#value;
 	#rest;
-
-	static create(codeString) {
-		throw new ReferenceError('Rule.create not implemented');
-	}
 
 	constructor(type, value, rest) {
 		if(typeof type !== 'string')
@@ -37,11 +33,16 @@ class Rule {
 	toJSON() {
 		return {
 			type: this.type,
-			value: this.value
+			value: Util.cloneJSON(this.value)
 		};
 	}
 
 	toString(pretty = false) {
+		if(typeof pretty !== 'boolean')
+			throw new TypeError('Expected pretty to be a Boolean');
+
 		return JSON.stringify(this.JSON(), null, pretty ? '\t' : undefined);
 	}
 }
+
+module.exports = Result;
