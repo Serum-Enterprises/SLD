@@ -21,6 +21,10 @@ class Range {
 		return this.#end;
 	}
 
+	clone() {
+		return new Range(this.#start, this.#end);
+	}
+
 	toJSON() {
 		return {
 			start: this.#start,

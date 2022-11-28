@@ -1,6 +1,6 @@
 class Position {
-	#line = 0;
-	#column = 0;
+	#line;
+	#column;
 
 	constructor(line, column) {
 		if (!Number.isSafeInteger(line))
@@ -21,10 +21,14 @@ class Position {
 		return this.#column;
 	}
 
+	clone() {
+		return new Position(this.#line, this.#column);
+	}
+
 	toJSON() {
 		return {
-			line: this.line,
-			column: this.column
+			line: this.#line,
+			column: this.#column
 		};
 	}
 
