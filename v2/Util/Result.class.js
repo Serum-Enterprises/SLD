@@ -1,48 +1,18 @@
 const Node = require('./Node.class');
 
-class Result {}
-
-class ErrorResult extends Result {
-	#error;
-
-	constructor(error) {
-		super();
-
-		if (!(error instanceof Error))
-			throw new TypeError('Expected error to be an instance of Error');
-
-		this.#error = error;
-	}
-
-	get error() {
-		return this.#error;
-	}
-}
-
-class SuccessResult extends Result {
-	#type;
+class Result {
 	#node;
 	#rest;
 
-	constructor(type, node, rest) {
-		super();
-
-		if (typeof type !== 'string')
-			throw new TypeError('Expected type to be a string');
-
+	constructor(node, rest) {
 		if (!(node instanceof Node))
 			throw new TypeError('Expected node to be an instance of Node');
 
 		if (typeof rest !== 'string')
 			throw new TypeError('Expected rest to be a string');
 
-		this.#type = type;
 		this.#node = node;
 		this.#rest = rest;
-	}
-
-	get type() {
-		return this.#type;
 	}
 
 	get node() {
@@ -53,9 +23,12 @@ class SuccessResult extends Result {
 		return this.#rest;
 	}
 
+	clone() {
+		return new Result(this.#node.clone(), this.#rest);
+	}
+
 	toJSON() {
 		return {
-			type: this.#type,
 			node: this.#node.toJSON(),
 			rest: this.#rest
 		};
@@ -66,4 +39,4 @@ class SuccessResult extends Result {
 	}
 }
 
-module.exports = {Result, ErrorResult, SuccessResult};
+module.exports = Result;
