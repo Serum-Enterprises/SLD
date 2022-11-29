@@ -20,7 +20,9 @@ class Location {
 		else if(precedingLocation instanceof Location) {
 			return new Location(
 				new Position(precedingLocation.end.line, precedingLocation.end.column + 1),
-				new Position(start.line + lines.length, lines[lines.length - 1].length)
+				lines.length === 1 ? 
+				new Position(precedingLocation.end.line, precedingLocation.end.column + lines[0].length) : 
+				new Position(precedingLocation.end.line + lines.length - 1, lines[lines.length - 1].length)
 			);
 		}
 		else
