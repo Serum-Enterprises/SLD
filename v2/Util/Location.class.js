@@ -1,6 +1,31 @@
+const Position = require('./Position.class');
+
 class Location {
-	#start = new Position(0, 0);
-	#end = new Position(0, 0);
+	#start;
+	#end;
+
+	// Calculate a new Location based on a previous Location and the given codeString
+	static calculateLocation(precedingLocation, codeString) {
+		if (typeof codeString !== 'string')
+			throw new TypeError('Expected codeString to be a String');
+
+		const lines = codeString.split(/\r\n|\r|\n/);
+
+		if(precedingLocation === null) {
+			return new Location(
+				new Position(1, 1),
+				new Position(lines.length, lines[lines.length - 1].length)
+			);
+		}
+		else if(precedingLocation instanceof Location) {
+			return new Location(
+				new Position(precedingLocation.end.line, precedingLocation.end.column + 1),
+				new Position(start.line + lines.length, lines[lines.length - 1].length)
+			);
+		}
+		else
+			throw new TypeError('Expected precedingLocation to be an instance of Location or null');
+	}
 
 	constructor(start, end) {
 		if (!(start instanceof Position))
@@ -19,6 +44,10 @@ class Location {
 
 	get end() {
 		return this.#end;
+	}
+
+	clone() {
+		return new Location(this.#start.clone(), this.#end.clone());
 	}
 
 	toJSON() {
