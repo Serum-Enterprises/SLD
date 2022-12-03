@@ -12,7 +12,7 @@ export interface NodeJSON {
 export class Node {
 	static createNode(precedingNode: Node | null, type: string, data: Util.JSON_T, codeString: string): Node;
 
-	constructor(type: string, data: unknown, range: Range.Range, location: Location.Location);
+	constructor(type: string, data: Util.JSON_T, range: Range.Range, location: Location.Location);
 
 	get type(): string;
 
