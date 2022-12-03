@@ -1,0 +1,16 @@
+JSON 			=> Primitive | Container .
+Identifier 		=> /[a-zA-Z]+/
+Primitive 		=> Null | Boolean | Number | String | Identifier .
+Container 		=> Array | Object .
+
+Null 			=> 'null' .
+Boolean 		=> 'true' | 'false' .
+Number 			=> /[0-9]+\.[0-9]+/ | /[0-9]+/ .
+String 			=> /"((?<=\\)"|[^"])*"/ .
+
+Array 			=> '[' > ArrayBody > ']' .
+ArrayBody		=> JSON > ',' > ArrayBody | JSON .
+
+Object 			=> '{' > ObjectBody > '}' .
+ObjectBody		=> KeyValuePair > ',' > ObjectBody | KeyValuePair .
+KeyValuePair	=> ((String | Identifier) > ':' > JSON) | Identifier .

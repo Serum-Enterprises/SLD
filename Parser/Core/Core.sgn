@@ -1,6 +1,0 @@
-namespace Core {
-	export Identifier => (name : /[a-zA-Z_]+/u) as {
-		type: 'Identifier',
-		value: name
-	};
-}

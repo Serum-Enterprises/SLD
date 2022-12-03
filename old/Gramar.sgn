@@ -1,0 +1,73 @@
+/*
+	Serum Grammar Notation Grammar.
+	Note this for RegExp regex: https://stackoverflow.com/questions/17843691/javascript-regex-to-match-a-regex
+*/
+
+namespace SGN : {
+	export default SGN 						=> Namespace .
+
+	Identifier	 							=> value : /[a-zA-Z]+/ as {
+													type: 'Identifier',
+													value
+												} .
+
+	namespace NameSpace : {
+		export default NameSpace 			=> 'namespace' > (name : Identifier) > ':' > '{' > NameSpaceContent > '}' .
+		NameSpaceContent 					=> (currentContent : (NameSpace | Rule)) > (nextContent : NameSpaceContent) as {
+													type: 'NameSpaceContent',
+													currentContent,
+													nextContent
+												} .
+		} | (NameSpace | Rule) .
+	}
+
+	namespace NameSpaceContent : {
+		export default NameSpaceContent 	=> NameSpace | RuleList .
+	}
+
+	namespace Literal : {
+		export default  					=> String | RegExp .
+
+		export Null 						=> 'null' .
+		export Boolean 						=> 'true' | 'false' .
+		export Number 						=> Float | Integer .
+		Integer 							=> /[0-9]+/ .
+		Float 								=> /[0-9]+\.[0-9]+/ .
+		export String 						=> /"((?<=\\)"|[^"])*"/ | /'((?<=\\)'|[^'])*'/ .
+		RegExp 								=> /\/(?![*+?])(?:[^\r\n\[/\\]|\\.|\[(?:[^\r\n\]\\]|\\.)*\])+\// .
+	}
+
+	namespace Rule {
+		export default RuleList 			=> (Rule > RuleList) | Rule .
+
+		Rule 								=> ('export' > 'default' > Identifier > '=>' > Symbol > 'as' > ExportMapping > '.') |
+												('export' > 'default' > Identifier > '=>' > Symbol > '.') | 
+												('export' > Identifier > '=>' > Symbol > 'as' > ExportMapping > '.') |
+												('export' > Identifier > '=>' > Symbol > '.') |
+												(Identifier > '=>' > Symbol > 'as' > ExportMapping > '.') |
+												(Identifier > '=>' > Symbol > '.') .
+	}	
+
+	namespace ExportMapping : {
+		export default ExportMapping 		=> Primitive | Container .
+
+		Primitive 							=> Literal.Null | Literal.Boolean | Literal.Number | Literal.String | Identifier .
+		Container 							=> Array | Object .
+
+		Array 								=> '[' > ArrayBody > ']' .
+		ArrayBody							=> JSON > ',' > ArrayBody | JSON .
+
+		Object 								=> '{' > ObjectBody > '}' .
+		ObjectBody							=> KeyValuePair > ',' > ObjectBody | KeyValuePair .
+		KeyValuePair						=> ((Literal.String | Identifier) > ':' > JSON) | Identifier .
+	}
+
+	namespace Symbol : {
+		export default Symbol 				=> Assignment | Alternation | Concatenation | Grouping | Identifier | Literal .
+
+		Assignment 							=> Identifier > ':' > Symbol .
+		Alternation 						=> Symbol > '|' > Symbol .
+		Concatenation 						=> Symbol > ('>' | '>=') > Symbol .
+		Grouping 							=> '(' > Symbol > ')' .
+	}
+}

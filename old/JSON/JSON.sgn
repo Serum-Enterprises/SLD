@@ -1,0 +1,73 @@
+import '../Core/Core.sgn' as Core;
+
+namespace JSON {
+	export default JSON 			=> Primitive | Container;
+
+	namespace Primitive {
+		export default Primitive [
+			Null | Boolean | Number | String
+		]
+
+		Null [
+			(value: /null/u)									as		{type: 'JSON.Null', value}
+		]
+
+		Boolean [
+			(value: /true|false/u)								as		{type: 'JSON.Boolean', value}
+		]
+
+		Number [
+			(value: Float | Integer)							as 		{type: 'JSON.Number', value}
+		]
+
+		Integer [
+			/(+|-)?\d+/u
+		]
+
+		Float [
+			/(\+|-)?\d+(\.\d+)?/u
+		]
+
+		export String [
+			(value: /"((?<=\\)"|[^"])+"/u)						as 		{type: 'JSON.String', value}
+		]
+	}
+
+	namespace Container {
+		export default Container [
+			Array | Object
+		]
+									
+		Array [
+			'[' > (value: ArrayBody) > ']'						as 		{type: 'JSON.Array', value}
+			'[' > ']'											as 		{type: 'JSON.Array', value: []}
+			'[' > (value: ArrayBody)							throw	'Missing closing Bracket'
+			'['													throw 	'Missing closing Bracket'
+		]
+
+		ArrayBody [
+			(value: JSON) > ',' > (previous: ArrayBody) 		as 		{type: 'JSON.Array', value: [value, ...previous]}
+			(value: JSON) > ','									throw 	'Missing value after Comma'
+			(value: JSON) 										as 		{type: 'JSON.Array', value: [value]}
+		]
+
+		Object [
+			'{' > (value: ObjectBody) > '}'						as 		{type: 'JSON.Object', value.value}
+			'{' > '}'											as 		{type: 'JSON.Object', value: []}
+			'{' > (value: ObjectBody)							throw 	'Missing closing Bracket'
+			'{'													throw 	'Missing closing Bracket'
+		]
+
+		ObjectBody [
+			(value: Pair) > ',' > (previous: ObjectBody) 		as 		{type: 'JSON.ObjectBody, value: [value.value, ...previous]}
+			(value: Pair) > ','									throw 	'Missing Pair after Comma'
+			(value: Pair) 										as 		{type: 'JSON.ObjectBody, value: [value.value]}
+		]
+
+		Pair [
+			(key: Primitive.String) > ':' > (value: JSON) 		as 		{type: 'JSON.Pair, value: {key, value}}
+			(key: Primitive.String) > ':'						throw 	'Missing value after Colon in Pair'
+			(key: Primitive.String) 							throw 	'Missing Colon and value in Pair'
+		]
+	}
+}
