@@ -60,6 +60,8 @@ class Debug {
 				.forEach(line => console.log(`[${this.#namespace}] ${line}`));
 		else
 			throw new TypeError('Expected message to be a String, JSON or an instance of Error');
+
+		return this;
 	}
 
 	warn(message) {
@@ -73,6 +75,8 @@ class Debug {
 				.forEach(line => console.warn(`[${this.#namespace}] ${line}`));
 		else
 			throw new TypeError('Expected message to be a String, JSON or an instance of Error');
+
+		return this;
 	}
 
 	error(message) {
@@ -86,6 +90,8 @@ class Debug {
 				.forEach(line => console.error(`[${this.#namespace}] ${line}`));
 		else
 			throw new TypeError('Expected message to be a String, JSON or an instance of Error');
+
+		return this;
 	}
 }
 
