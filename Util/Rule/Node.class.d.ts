@@ -3,18 +3,15 @@ import * as Range from './Range.class';
 import * as Location from './Location.class';
 
 export interface NodeJSON {
-	type: string;
 	data: Util.JSON_T;
 	range: Range.RangeJSON;
 	location: Location.LocationJSON;
 }
 
 export class Node {
-	static createNode(precedingNode: Node | null, type: string, data: Util.JSON_T, codeString: string): Node;
+	static createNode(precedingNode: Node | null, data: Util.JSON_T, codeString: string): Node;
 
-	constructor(type: string, data: Util.JSON_T, range: Range.Range, location: Location.Location);
-
-	get type(): string;
+	constructor(data: Util.JSON_T, range: Range.Range, location: Location.Location);
 
 	get data(): Util.JSON_T;
 

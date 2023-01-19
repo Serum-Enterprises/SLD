@@ -1,27 +1,23 @@
 const Util = require('./Util.class');
-const Range = require('./Range.class');
-const Location = require('./Location.class');
+
 
 class Node {
-	#type;
 	#data;
 	#range;
 	#location;
 
-	static createNode(precedingNode, type, data, codeString) {
+	static createNode(precedingNode, data, codeString) {
 		if(typeof codeString !== 'string')
 			throw new TypeError('Expected codeString to be a string');
 
 		if(precedingNode instanceof Node) 
 			return new Node(
-				type,
 				data,
 				new Range(precedingNode.range.end + 1, precedingNode.range.end + codeString.length),
 				Location.calculateLocation(precedingNode.location, codeString)
 			);
 		else if(precedingNode === null)
 			return new Node(
-				type,
 				data,
 				new Range(0, codeString.length - 1),
 				Location.calculateLocation(null, codeString)
@@ -30,10 +26,7 @@ class Node {
 			throw new TypeError('Expected precedingNode to be null or an instance of Node');
 	}
 
-	constructor(type, data, range, location) {
-		if (typeof type !== 'string')
-			throw new TypeError('Expected type to be a string');
-
+	constructor(data, range, location) {
 		if (!Util.isJSON(data))
 			throw new TypeError('Expected data to be valid JSON');
 
@@ -43,14 +36,9 @@ class Node {
 		if (!(location instanceof Location))
 			throw new TypeError('Expected location to be an instance of Location');
 
-		this.#type = type;
 		this.#data = data;
 		this.#range = range;
 		this.#location = location;
-	}
-
-	get type() {
-		return this.#type;
 	}
 
 	get data() {
@@ -66,12 +54,11 @@ class Node {
 	}
 
 	clone() {
-		return new Node(this.#type, Util.cloneJSON(this.#data), this.#range.clone(), this.#location.clone());
+		return new Node(Util.cloneJSON(this.#data), this.#range.clone(), this.#location.clone());
 	}
 
 	toJSON() {
 		return {
-			type: this.#type,
 			data: Util.cloneJSON(this.#data),
 			range: this.#range.toJSON(),
 			location: this.#location.toJSON()
