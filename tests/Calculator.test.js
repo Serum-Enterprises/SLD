@@ -1,6 +1,6 @@
 const { Parser, RuleSet, Rule } = require('../index.js');
 const fs = require('fs');
-const Util = require('../Util/Util.class');
+const Util = require('../lib/Util.class');
 
 const Expression = RuleSet
 	.addRule(
