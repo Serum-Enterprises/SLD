@@ -112,6 +112,29 @@ class Component {
 			return new Result(result.node, result.remainingInput);
 		}, varName);
 	}
+
+	static matchWhitespaces(varName = null) {
+		if (varName !== null && typeof varName !== 'string')
+			throw new TypeError('Expected varName to be a String or null');
+
+		return new Component((input, precedingNode, parentRule) => {
+			if (typeof input !== 'string')
+				throw new TypeError('Expected input to be a String');
+
+			if (precedingNode !== null && !(precedingNode instanceof Node))
+				throw new TypeError('Expected precedingNode to be a Node or null');
+
+			if (!(parentRule instanceof Rule))
+				throw new TypeError('Expected parentRule to be a Rule');
+
+			const match = /^\s+/.exec(input);
+
+			if (match === null)
+				return null;
+
+			return new Result(new Node(match[0], precedingNode, parentRule), input.slice(match[0].length));
+		}, varName);
+	}
 }
 
 module.exports = Component;
