@@ -6,8 +6,10 @@ const debug = new Debug('Parser');
 class ParserError extends Error { }
 class LookupError extends ParserError { }
 
+const optionalResult = Symbol('optionalResult');
+
 /**
- * @type {(input: string, precedingNode: Node | null, parserContext: Parser) => Result | null} matchFunction
+ * @type {(input: string, precedingNode: Node | null, parserContext: Parser) => Result | optionalResult | null} matchFunction
  */
 
 class Component {
@@ -63,11 +65,6 @@ class Component {
         if (varName !== null && typeof varName !== 'string')
             throw new TypeError('Expected varName to be a String or null');
 
-        // Debug
-        {
-            debug.extend('Component').log(`Creating a matchString Component for "${string}"`);
-        }
-
         return new Component((input, precedingNode, parserContext) => {
             if (typeof input !== 'string')
                 throw new TypeError('Expected input to be a String');
@@ -101,11 +98,6 @@ class Component {
         if (varName !== null && typeof varName !== 'string')
             throw new TypeError('Expected varName to be a String or null');
 
-        // Debug
-        {
-            debug.extend('Component').log(`Creating a matchRegex Component for "${regex}"`);
-        }
-
         return new Component((input, precedingNode, parserContext) => {
             if (typeof input !== 'string')
                 throw new TypeError('Expected input to be a String');
@@ -121,8 +113,6 @@ class Component {
             if (match === null)
                 return null;
 
-            console.log(match[0]);
-
             if (precedingNode === null)
                 return new Result(Node.createNode(match[0], match[0]), input.slice(match[0].length));
 
@@ -136,7 +126,32 @@ class Component {
      * @returns {Component}
      */
     static matchWhitespace(varName = null) {
-        return Component.matchRegex(/^\s*/, varName);
+        if (varName !== null && typeof varName !== 'string')
+            throw new TypeError('Expected varName to be a String or null');
+
+        return new Component((input, precedingNode, parserContext) => {
+            if (typeof input !== 'string')
+                throw new TypeError('Expected input to be a String');
+
+            if (precedingNode !== null && !(precedingNode instanceof Node))
+                throw new TypeError('Expected precedingNode to be a Node or null');
+
+            if (!(parserContext instanceof Parser))
+                throw new TypeError('Expected parserContext to be a Parser');
+
+            const match = input.match(/^\s*/);
+
+            if (match === null)
+                return null;
+
+            if (match[0] === '')
+                return optionalResult;
+
+            if (precedingNode === null)
+                return new Result(Node.createNode(match[0], match[0]), input.slice(match[0].length));
+
+            return new Result(precedingNode.calculateNode(match[0], match[0]), input.slice(match[0].length));
+        }, varName);
     }
 
     /**
@@ -151,11 +166,6 @@ class Component {
 
         if (varName !== null && typeof varName !== 'string')
             throw new TypeError('Expected varName to be a String or null');
-
-        // Debug
-        {
-            debug.extend('Component').log(`Creating a matchRuleSet Component for "${ruleSetName}"`);
-        }
 
         return new Component((input, precedingNode, parserContext) => {
             if (typeof input !== 'string')
@@ -294,11 +304,15 @@ class Rule extends Array {
             if (result === null)
                 return null;
 
+            if (result === optionalResult)
+                continue;
+
             if (component.varName !== null)
                 varData[component.varName] = result.node;
 
-            results.push(result.node);
             rest = result.rest;
+            results.push(result.node);
+            currentNode = result.node;
         }
 
         const handlerResult = this.#handler ? this.#handler.bind(varData)() : varData;
@@ -320,15 +334,6 @@ class RuleSet extends Array {
             throw new TypeError('Expected rules to be an Array of Rules');
 
         super(...rules);
-
-        // Debug
-        {
-            debug.extend('RuleSet').log(`Created RuleSet with ${rules.length} Rule${rules.length > 1 ? 's' : ''}:`);
-
-            this.forEach((rule, index) => {
-                debug.extend('RuleSet').log(`Rule ${index + 1} with ${rule.length} Component${rule.length > 1 ? 's' : ''}`);
-            });
-        }
     }
 
     /**
@@ -347,12 +352,6 @@ class RuleSet extends Array {
 
         if (!(parserContext instanceof Parser))
             throw new TypeError('Expected parserContext to be a Parser');
-
-        // Find this in Parser
-        Array.from(parserContext.entries()).forEach(([name, ruleSet]) => {
-            if (ruleSet === this)
-                debug.extend('RuleSet').log(`Executing RuleSet ${name}`);
-        });
 
         for (const rule of this) {
             const result = rule.execute(input, precedingNode, parserContext);
@@ -382,14 +381,7 @@ class Parser extends Map {
 
         if (!(Array.isArray(ruleSets) && ruleSets.every(([name, ruleSet]) => typeof name === 'string' && ruleSet instanceof RuleSet)))
             throw new TypeError('Expected ruleSets to be an Array of RuleSets');
-        
-        // Debug
-        {
-            debug.log(`Created Parser with ${ruleSets.length} RuleSet${ruleSets.length > 1 ? 's' : ''}:`);
 
-            for (const [name, ruleSet] of ruleSets)
-                debug.log(`RuleSet ${name} with ${ruleSet.length} Rule${ruleSet.length > 1 ? 's' : ''}`)
-        }
         super(ruleSets);
         this.#rootRuleSet = rootRuleSet;
     }
@@ -402,8 +394,6 @@ class Parser extends Map {
     execute(input) {
         if (typeof input !== 'string')
             throw new TypeError('Expected input to be a String');
-
-        debug.extend('EXEC').log(`Executing rootRuleSet with ${input}`);
 
         const result = this.#rootRuleSet.execute(input, null, this);
 
