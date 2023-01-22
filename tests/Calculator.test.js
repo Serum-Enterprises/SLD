@@ -7,7 +7,11 @@ const Expression = new RuleSet([
         .followedBy(Component.matchRegex(/^[+-]/, 'operator'))
         .followedBy(Component.matchRuleSet('Expression', 'right'))
         .end(function () {
-            return eval(this.left.data + this.operator.data + this.right.data);
+            return {
+                operator: this.operator,
+                left: this.left,
+                right: this.right
+            };
         }),
     Rule.begin(Component.matchRuleSet('Term', 'value'))
         .end(function () {
@@ -22,8 +26,18 @@ const Expression = new RuleSet([
 const Term = new RuleSet([
     Rule.begin(Component.matchRuleSet('Factor', 'left'))
         .followedBy(Component.matchRegex(/^[*\/]/, 'operator'))
-        .followedBy(Component.matchRuleSet('Term', 'right')),
-    Rule.begin(Component.matchRuleSet('Factor', 'value')),
+        .followedBy(Component.matchRuleSet('Term', 'right'))
+        .end(function () {
+            return {
+                operator: this.operator,
+                left: this.left,
+                right: this.right
+            };
+        }),
+    Rule.begin(Component.matchRuleSet('Factor', 'value'))
+        .end(function () {
+            return this.value.data;
+        }),
     Rule.begin(Component.matchRuleSet('Factor', 'left'))
         .followedBy(Component.matchRegex(/^[*\/]/, 'operator'))
         .throw('Expected Term after operator'),
@@ -33,8 +47,14 @@ const Term = new RuleSet([
 const Factor = new RuleSet([
     Rule.begin(Component.matchString('('))
         .followedBy(Component.matchRuleSet('Expression', 'expression'))
-        .followedBy(Component.matchString(')')),
-    Rule.begin(Component.matchRegex(/^[0-9]+/, 'value')),
+        .followedBy(Component.matchString(')'))
+        .end(function () {
+            return this.expression.data;
+        }),
+    Rule.begin(Component.matchRegex(/^[0-9]+/, 'value'))
+        .end(function () {
+            return parseInt(this.value.data);
+        }),
     Rule.begin(Component.matchString('('))
         .followedBy(Component.matchRuleSet('Expression', 'expression'))
         .throw('Expected LPARAN after expression'),
@@ -49,9 +69,9 @@ const parser = new Parser(Expression, [
 ]);
 
 const expression1 = '1 + 2 * 3 - 4 / 5';
-fs.writeFileSync('./output/expression1.json', JSON.stringify(parser.execute(expression1), null, 2));
+fs.writeFileSync('./output/expression1.json', JSON.stringify(parser.execute(expression1), null, 4));
 Util.printCharTable(expression1);
 
-const expression2 = '1 + 2 * (3\n - 4) / 5';
-fs.writeFileSync('./output/expression2.json', JSON.stringify(parser.execute(expression2), null, 2));
+const expression2 = '1 + 2 * (3\r\n - 4) / 5';
+fs.writeFileSync('./output/expression2.json', JSON.stringify(parser.execute(expression2), null, 4));
 Util.printCharTable(expression2);
