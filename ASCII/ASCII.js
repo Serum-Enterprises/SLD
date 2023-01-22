@@ -1,5 +1,5 @@
-const Node = require('../Util/Node.class');
-const Result = require('../Util/Result.class');
+const Node = require('../Util/Rule/Node.class');
+const Result = require('../Util/Rule/Result.class');
 
 /**
  * This Library provides Rules for all ASCII Control and Structural Characters
