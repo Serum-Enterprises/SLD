@@ -1,7 +1,5 @@
-const Result = require('./lib/Result/Result.class');
-const Node = Result.Node;
-const Debug = require('./lib/Debug.class');
-const debug = new Debug('Parser');
+const Result = require('./lib/parser_util/Result.class');
+const Node = require('./lib/parser_util/Node.class');
 
 class ParserError extends Error { }
 class LookupError extends ParserError { }
