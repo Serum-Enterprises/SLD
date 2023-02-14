@@ -1,4 +1,4 @@
-const Position = require('../lib/Position.class');
+const Position = require('../lib/Meta/Position.class');
 
 /**
  * Methods:

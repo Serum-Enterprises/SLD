@@ -1,4 +1,4 @@
-const Range = require('../lib/Range.class');
+const Range = require('../lib/Meta/Range.class');
 
 /**
  * Methods:

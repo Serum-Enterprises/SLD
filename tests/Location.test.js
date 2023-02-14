@@ -1,5 +1,5 @@
-const Location = require('../lib/Location.class');
-const Position = require('../lib/Position.class');
+const Location = require('../lib/Meta/Location.class');
+const Position = require('../lib/Meta/Position.class');
 
 /**
  * Methods:
