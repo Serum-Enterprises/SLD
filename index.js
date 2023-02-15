@@ -1,12 +1,11 @@
-const Result = require('./Result.class');
-const Node = require('./Node.class');
-const Optional = require('./Optional.class');
+const Result = require('./lib/Result.class');
+const Node = require('./lib/Node.class');
 
 class ParserError extends Error { }
 class LookupError extends ParserError { }
 
 /**
- * @type {(input: string, precedingNode: Node | null, parserContext: Parser) => Optional | null} matchFunction
+ * @type {(input: string, precedingNode: Node | null, parserContext: Parser) => Result | null} matchFunction
  */
 
 class Component {
@@ -76,9 +75,9 @@ class Component {
                 return null;
 
             if (precedingNode === null)
-                return new Optional(new Result(Node.createNode(string, string), input.slice(string.length)));
+                return new Result(Node.createNode(string, string), input.slice(string.length));
 
-            return new Optional(new Result(precedingNode.calculateNode(string, string), input.slice(string.length)));
+            return new Result(precedingNode.calculateNode(string, string), input.slice(string.length));
         }, varName);
     }
 
@@ -111,9 +110,9 @@ class Component {
                 return null;
 
             if (precedingNode === null)
-                return new Optional(new Result(Node.createNode(match[0], match[0]), input.slice(match[0].length)));
+                return new Result(Node.createNode(match[0], match[0]), input.slice(match[0].length));
 
-            return new Optional(new Result(precedingNode.calculateNode(match[0], match[0]), input.slice(match[0].length)));
+            return new Result(precedingNode.calculateNode(match[0], match[0]), input.slice(match[0].length));
         }, varName);
     }
 
@@ -141,13 +140,10 @@ class Component {
             if (match === null)
                 return null;
 
-            if (match[0] === '')
-                return new Optional();
-
             if (precedingNode === null)
-                return new Optional(new Result(Node.createNode(match[0], match[0]), input.slice(match[0].length)));
+                return new Result(Node.createNode(match[0], match[0]), input.slice(match[0].length));
 
-            return new Optional(new Result(precedingNode.calculateNode(match[0], match[0]), input.slice(match[0].length)));
+            return new Result(precedingNode.calculateNode(match[0], match[0]), input.slice(match[0].length));
         }, varName);
     }
 
@@ -179,7 +175,7 @@ class Component {
             if (!ruleSet)
                 throw new LookupError(`RuleSet ${ruleSetName} not found.`);
 
-            return new Optional(ruleSet.execute(input, precedingNode, parserContext));
+            return ruleSet.execute(input, precedingNode, parserContext);
         }, varName);
     }
 }
@@ -237,7 +233,7 @@ class Rule extends Array {
      * @param {Component} component 
      * @returns {Rule}
      */
-    directyFollowedBy(component) {
+    directlyFollowedBy(component) {
         if (!(component instanceof Component))
             throw new TypeError('Expected component to be an instance of Component');
 
@@ -296,15 +292,10 @@ class Rule extends Array {
         let currentNode = precedingNode;
 
         for (const component of this) {
-            const optional = component.matchFunction(rest, currentNode, parserContext);
+            const result = component.matchFunction(rest, currentNode, parserContext);
 
             if (result === null)
                 return null;
-
-            if (!optional.isSet())
-                continue;
-
-            const result = optional.get();
 
             if (component.varName !== null)
                 varData[component.varName] = result.node;
