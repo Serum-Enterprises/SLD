@@ -37,7 +37,7 @@ class Component {
 	}
 
 	static matchWhitespace() {
-		return Component.matchRegex(/^\s*/);
+		return Component.matchRegex(/^\s+/);
 	}
 
 	static matchRuleSet(ruleSetName) {
