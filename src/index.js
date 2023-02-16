@@ -302,12 +302,12 @@ class Parser {
 		if (result === null)
 			return null;
 
-		return JSON.parse(JSON.stringify(result.node, metaData ? function (key, value) {
+		return JSON.parse(JSON.stringify(result.node, metaData ? null : function (key, value) {
 			if (this[key] instanceof Meta)
 				return undefined;
 
 			return value;
-		} : null, 0));
+		}, 0));
 	}
 }
 
