@@ -1,11 +1,11 @@
-const Result = require('../lib/Result.class');
-const Node = require('../lib/Node.class');
+const { Result } = require('../lib/Result.class');
+const { Node } = require('../lib/Node.class');
 
 const { LookupError } = require('./Errors.class');
 
 class Component {
 	static matchString(string) {
-		if(typeof string !== 'string')
+		if (typeof string !== 'string')
 			throw new TypeError('Expected string to be a String');
 
 		return (input, precedingNode) => {
@@ -20,7 +20,7 @@ class Component {
 	}
 
 	static matchRegex(regex) {
-		if(!(regex instanceof RegExp))
+		if (!(regex instanceof RegExp))
 			throw new TypeError('Expected regex to be an instance of RegExp');
 
 		return (input, precedingNode) => {
@@ -41,11 +41,11 @@ class Component {
 	}
 
 	static matchRuleSet(ruleSetName) {
-		if(typeof ruleSetName !== 'string')
+		if (typeof ruleSetName !== 'string')
 			throw new TypeError('Expected ruleSetName to be a String');
 
 		return (input, precedingNode, parserContext) => {
-			if(!parserContext.has(ruleSetName))
+			if (!parserContext.has(ruleSetName))
 				throw new LookupError(`RuleSet ${ruleSetName} not found.`);
 
 			const ruleSet = parserContext.get(ruleSetName);
