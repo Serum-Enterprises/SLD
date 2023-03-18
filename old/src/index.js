@@ -1,17 +1,67 @@
-const { Result } = require('../lib/Result.class');
-const { Node } = require('../lib/Node.class');
-const { Meta } = require('../lib/Meta');
+const { Result } = require('../../MetaLib/Result.class');
+const { Node } = require('../../MetaLib/Node.class');
+const { Meta } = require('../../MetaLib/Meta.class');
 
-const { ParseError, LookupError } = require('./Errors.class');
-const { Component } = require('./Component.class');
+class ParseError extends Error {}
+class LookupError extends Error {}
+
+/**
+ * @typedef {null | boolean | number | string | Array<JSON_T> | {[string]: JSON_T}} JSON_T
+ * 
+ * @typedef {{start: number, end: number}} RangeInterface
+ * @typedef {{line: number, column: number}} PositionInterface
+ * @typedef {{start: PositionInterface, end: PositionInterface}} LocationInterface
+ * @typedef {{location: LocationInterface, range: RangeInterface}} MetaInterface
+ * 
+ * @typedef {"SUCCESS" | "ERROR" | "RECOVER"} NodeType_Enum
+ * @typedef {{type: NodeType_Enum, data: JSON_T, raw: string, meta: MetaInterface}} NodeInterface
+ * 
+ * @typedef {(input: string, previousNode: NodeInterface, parserContext: Parser) => Result} matchFunction
+ */
 
 class Rule {
-	#rules;
-	#handler;
-	static #constructPrivate = true;
+	/**
+	 * @type {Array<matchFunction>}
+	 */
+	#rules = [];
+	/**
+	 * TODO
+	 * @type {() => unknown | null}
+	 */
+	#handler = null;
+	/**
+	 * TODO
+	 * @type {() => unknown | null}
+	 */
+	#recover = null;
+	/**
+	 * A Static Private Flag to prevent direct instantiation of Rule.
+	 * @type {boolean}
+	 */
+	static #privateConstructor = true;
+
+	/**
+	 * Factory function to create a matchFunction that matches a string.
+	 * @param {string} string 
+	 * @returns {matchFunction}
+	 */
+	static matchString(string) {
+		if (typeof string !== 'string')
+			throw new TypeError('Expected string to be a String');
+
+		return (input, previousNode) => {
+			if (!input.startsWith(string))
+				return null;
+
+			if (precedingNode === null)
+				return new Result(Node.createNode(string, string), input.slice(string.length));
+
+			return new Result(Node.calculateNode(previosNode, string, string), input.slice(string.length));
+		};
+	}
 
 	constructor() {
-		if (Rule.#constructPrivate)
+		if (Rule.#privateConstructor)
 			throw new ReferenceError('Can only create Rule from Rule.begin()');
 
 		this.#rules = [];
@@ -32,9 +82,9 @@ class Rule {
 		if (typeof varName !== 'string' && varName !== null)
 			throw new TypeError('Expected varName to be a String or null');
 
-		Rule.#constructPrivate = false;
+		Rule.#privateConstructor = false;
 		const rule = new Rule();
-		Rule.#constructPrivate = true;
+		Rule.#privateConstructor = true;
 
 		if (typeof matchFunction === 'function') {
 			rule.directlyFollowedBy(matchFunction, varName, optional);
@@ -50,6 +100,21 @@ class Rule {
 
 		return rule;
 	}
+
+	/**
+	 * Create a new Rule that always throws an error.
+	 * @param {unknown} error
+	 * @returns {Rule}
+	 */
+	static throw(error) {
+		Rule.#privateConstructor = false;
+		const rule = new Rule();
+		Rule.#privateConstructor = true;
+
+		rule.throw(error);
+		return rule;
+	}
+
 	/**
 	 * Adds a matchFunction to the Rule.
 	 * @param {Function | string | RegExp} matchFunction
@@ -113,22 +178,18 @@ class Rule {
 
 	/**
 	 * Add a Handler to the Rule.
-	 * @param {() => unknown)} handler 
-	 * @returns {Rule}
+	 * @param {() => unknown)} handler
 	 */
 	end(handler) {
 		if (typeof handler !== 'function')
 			throw new TypeError('Expected handler to be a Function');
 
 		this.#handler = handler;
-
-		return this;
 	}
 
 	/**
 	 * Add a throwing Handler to the Rule
-	 * @param {string} message 
-	 * @returns {Rule}
+	 * @param {string} message
 	 */
 	throw(message) {
 		if (typeof message !== 'string')
@@ -137,8 +198,18 @@ class Rule {
 		this.#handler = () => {
 			throw new ParseError(message);
 		};
+	}
 
-		return this;
+	recover(matchFunction) {
+		if (typeof message !== 'string')
+			throw new TypeError('Expected message to be a String');
+
+		this.#handler = () => {
+			return (input, precedingNode, parserContext) => {
+				return new Result(precedingNode.calculateNode(match[0], match[0]), input.slice(match[0].length));
+			};
+			throw new ParseError(message, true);
+		};
 	}
 
 	/**
