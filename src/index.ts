@@ -59,11 +59,12 @@ namespace Meta {
 			.filter(value => value !== '');
 	}
 
-	function endsWithLineBreak(source: string): boolean {
+	function endsWithLineBreak(source: string): number {
 		if (source.length === 0)
 			throw new RangeError('Expected source to be a non-empty String');
 
-		return /(\r\n|\r|\n)$/.test(source);
+		const match = source.match(/(\r\n|\r|\n)$/);
+		return match ? match[0].length : 0;
 	}
 
 	export function create(source: string): Meta {
@@ -71,7 +72,7 @@ namespace Meta {
 			throw new RangeError('Expected source to be a non-empty String');
 
 		const lines: Array<string> = splitSource(source);
-		const lineBreak: boolean = endsWithLineBreak(lines[lines.length - 1]);
+		const lineBreakLength = endsWithLineBreak(lines[lines.length - 1]);
 
 		return {
 			range: {
@@ -85,11 +86,11 @@ namespace Meta {
 				},
 				end: {
 					line: lines.length,
-					column: lines[lines.length - 1].length
+					column: lines[lines.length - 1].length - lineBreakLength
 				},
 				next: {
-					line: lines.length > 0 ? (lineBreak ? lines.length + 1 : lines.length) : 1,
-					column: lines.length > 0 ? (lineBreak ? 1 : lines[lines.length - 1].length + 1) : 1
+					line: lines.length > 0 ? (lineBreakLength ? lines.length + 1 : lines.length) : 1,
+					column: lines.length > 0 ? (lineBreakLength ? 1 : lines[lines.length - 1].length + 1) : 1
 				}
 			}
 		};
@@ -100,7 +101,7 @@ namespace Meta {
 			throw new RangeError('Expected source to be a non-empty String');
 
 		const lines = splitSource(source);
-		const lineBreak = endsWithLineBreak(source);
+		const lineBreakLength = endsWithLineBreak(source);
 
 		return {
 			range: {
@@ -114,17 +115,18 @@ namespace Meta {
 				},
 				end: {
 					line: precedingMeta.location.next.line + lines.length - 1,
-					column: lines.length === 1 ? precedingMeta.location.next.column + source.length - 1 : lines[lines.length - 1].length
+					column: lines.length === 1 ? precedingMeta.location.next.column + source.length - 1 - lineBreakLength : lines[lines.length - 1].length - lineBreakLength
 				},
 				next: {
-					line: lineBreak ?
+					line: lineBreakLength ?
 						precedingMeta.location.next.line + lines.length :
 						precedingMeta.location.next.line + lines.length - 1,
-					column: lineBreak ? 1 : precedingMeta.location.next.column + lines[lines.length - 1].length
+					column: lineBreakLength ? 1 : precedingMeta.location.next.column + lines[lines.length - 1].length - lineBreakLength
 				}
 			}
 		};
 	}
+
 }
 
 namespace Node {
@@ -234,7 +236,7 @@ namespace Result {
 	}
 
 	export function calculateRaw(firstResult: OK_Result, lastResult: OK_Result): string {
-		return firstResult.node.raw + firstResult.rest.slice(0, lastResult.rest.length);
+		return firstResult.node.raw + firstResult.rest.slice(0, firstResult.rest.length - lastResult.rest.length);
 	}
 }
 
@@ -280,7 +282,7 @@ class Rule {
 	//private _handler: (nodes: { [key: string]: Node.Node }) => JSON_T | { [key: string]: Node.Node } = (nodes) => nodes;
 	//private _recover: Function = () => null;
 
-	private constructor() {}
+	private constructor() { }
 
 	static begin(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
 		return (new Rule()).directlyFollowedBy(matcher, name, optional);
@@ -349,10 +351,10 @@ class Rule {
 			currentPrecedingNode = result.node;
 		}
 
-		if(firstResult === null)
+		if (firstResult === null)
 			return Result.createERROR(input);
 
-		if(lastResult === null)
+		if (lastResult === null)
 			return Result.createERROR(input);
 
 		if (precedingNode === null)
