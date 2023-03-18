@@ -20,7 +20,7 @@ function printCharTable(str: string) {
 	);
 }
 
-namespace Meta { 
+namespace Meta {
 	export interface Range {
 		start: number,
 		end: number
@@ -364,4 +364,25 @@ class Rule {
 	}
 }
 
-export default Rule;
+class RuleVariant extends Array<Rule> {
+	constructor(...rules: Array<Rule>) {
+		super(...rules);
+	}
+
+	static create(ruleArray: Array<Rule>): RuleVariant {
+		return new RuleVariant(...ruleArray);
+	}
+
+	execute(input: string, precedingNode: null | Node.Node): Result.Result {
+		for (const rule of this) {
+			const result = rule.execute(input, precedingNode);
+
+			if (result.status === Result.STATUS.OK)
+				return result;
+		}
+
+		return Result.createERROR(input);
+	}
+}
+
+export { Rule, RuleVariant };
