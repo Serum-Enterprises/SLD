@@ -131,8 +131,8 @@ namespace Meta {
 
 namespace Node {
 	export enum TYPE {
-		MATCH,
-		RECOVER
+		MATCH = 'MATCH',
+		RECOVER = 'RECOVER'
 	}
 
 	export interface Node {
@@ -185,8 +185,8 @@ namespace Node {
 
 namespace Result {
 	export enum STATUS {
-		OK,
-		ERROR
+		OK = 'OK',
+		ERROR = 'ERROR'
 	}
 
 	export interface OK_Result {
