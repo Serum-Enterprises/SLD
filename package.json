@@ -1,26 +1,28 @@
 {
   "name": "serum-language-designer",
   "version": "1.0.0",
-  "description": "A Library for creating Language Parsers",
+  "description": "",
   "main": "index.js",
   "directories": {
-    "lib": "lib",
-    "test": "tests"
+    "lib": "lib"
   },
   "scripts": {
-    "test": "jest --coverage"
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Serum-Enterprises/Serum-Language-Designer.git"
   },
+  "keywords": [],
   "author": "",
-  "license": "MIT",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Serum-Enterprises/Serum-Language-Designer/issues"
   },
   "homepage": "https://github.com/Serum-Enterprises/Serum-Language-Designer#readme",
   "devDependencies": {
-    "jest": "^29.3.1"
+    "@types/node": "^18.15.3",
+    "typescript": "^4.9.5"
   }
 }

@@ -1,3 +1,0 @@
-# Serum Language Designer
-
-## Introduction
