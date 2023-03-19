@@ -277,12 +277,17 @@ namespace Matcher {
 	}
 }
 
+type transformFunction = (nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => unknown;
+
 class Rule {
-	private _matchers: { matchFunction: Matcher.matchFunction, name: null | string, optional: boolean }[] = [];
-	//private _handler: (nodes: { [key: string]: Node.Node }) => JSON_T | { [key: string]: Node.Node } = (nodes) => nodes;
+	private _matchers: { matchFunction: Matcher.matchFunction, name: null | string, optional: boolean }[];
+	private _transformer: transformFunction;
 	//private _recover: Function = () => null;
 
-	private constructor() { }
+	private constructor() {
+		this._matchers = [];
+		this._transformer = nodes => nodes;
+	}
 
 	public static begin(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
 		return (new Rule()).directlyFollowedBy(matcher, name, optional);
@@ -323,6 +328,11 @@ class Rule {
 		return this;
 	}
 
+	public transform(transformer: transformFunction): Rule {
+		this._transformer = transformer;
+		return this;
+	}
+
 	public execute(input: string, precedingNode: null | Node.Node): Result.Result {
 		let rest: string = input;
 		let firstResult: null | Result.OK_Result = null;
@@ -351,16 +361,17 @@ class Rule {
 			currentPrecedingNode = result.node;
 		}
 
-		if (firstResult === null)
+		if (firstResult === null || lastResult === null)
 			return Result.createERROR(input);
 
-		if (lastResult === null)
-			return Result.createERROR(input);
+		const raw = Result.calculateRaw(firstResult, lastResult);
+		const meta = precedingNode === null ? Meta.create(raw) : Meta.calculate(precedingNode.meta, raw);
+		const data = this._transformer(namedNodes, raw, meta);
 
 		if (precedingNode === null)
-			return Result.createOK(Node.TYPE.MATCH, namedNodes, Result.calculateRaw(firstResult, lastResult), lastResult.rest);
+			return Result.createOK(Node.TYPE.MATCH, data, raw, lastResult.rest);
 		else
-			return Result.calculateOK(precedingNode, Node.TYPE.MATCH, namedNodes, Result.calculateRaw(firstResult, lastResult), lastResult.rest);
+			return Result.calculateOK(precedingNode, Node.TYPE.MATCH, data, raw, lastResult.rest);
 	}
 }
 
