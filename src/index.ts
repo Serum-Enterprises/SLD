@@ -385,4 +385,21 @@ class RuleVariant extends Array<Rule> {
 	}
 }
 
-export { Rule, RuleVariant };
+class Parser extends Map<string, RuleVariant> {
+	private _rootVariant: RuleVariant;
+
+	constructor(rootVariant: RuleVariant, ...ruleVariants: Array<[string, RuleVariant]>) {
+		super(ruleVariants);
+		this._rootVariant = rootVariant;
+	}
+
+	static create(rootVariant: RuleVariant, ...ruleVariants: Array<[string, RuleVariant]>): Parser {
+		return new Parser(rootVariant, ...ruleVariants);
+	}
+
+	parse(input: string): Result.Result {
+		return this._rootVariant.execute(input, null);
+	}
+}
+
+export { Rule, RuleVariant, Parser };

@@ -5,7 +5,7 @@ const ruleResult = Rule.begin('Hello', 'firstWord')
 	.directlyFollowedBy('World', 'secondWord')
 	.execute('Hello\r\nWorld TEst', null);
 
-const variantResult =  RuleVariant.create([
+const variantResult = RuleVariant.create([
 	// English
 	Rule.begin('Hello', 'firstWord')
 		.followedBy('World', 'secondWord'),
