@@ -197,8 +197,7 @@ export namespace Result {
 
 	export interface ERROR_Result {
 		status: STATUS.ERROR,
-		node: null,
-		rest: string
+		message: string,
 	}
 
 	export type Result = OK_Result | ERROR_Result;
@@ -211,11 +210,10 @@ export namespace Result {
 		};
 	}
 
-	export function createERROR(rest: string): ERROR_Result {
+	export function createERROR(message: string): ERROR_Result {
 		return {
 			status: STATUS.ERROR,
-			node: null,
-			rest: rest
+			message: message
 		};
 	}
 
@@ -223,14 +221,6 @@ export namespace Result {
 		return {
 			status: STATUS.OK,
 			node: Node.calculate(precedingNode, type, data, raw),
-			rest: rest
-		};
-	}
-
-	export function calculateERROR(rest: string): ERROR_Result {
-		return {
-			status: STATUS.ERROR,
-			node: null,
 			rest: rest
 		};
 	}
@@ -249,7 +239,7 @@ export namespace Matcher {
 
 		return (input: string, precedingNode: null | Node.Node): Result.Result => {
 			if (!input.startsWith(string))
-				return Result.createERROR(input);
+				return Result.createERROR(`Expected ${string}`);
 
 			if (precedingNode === null)
 				return Result.createOK(Node.TYPE.MATCH, string, string, input.slice(string.length));
@@ -263,7 +253,7 @@ export namespace Matcher {
 			const match = input.match(regex);
 
 			if (match === null)
-				return Result.createERROR(input);
+				return Result.createERROR(`Expected ${regex}`);
 
 			if (precedingNode === null)
 				return Result.createOK(Node.TYPE.MATCH, match[0], match[0], input.slice(match[0].length));
@@ -340,6 +330,9 @@ export class Rule {
 		const namedNodes: { [key: string]: Node.Node } = {};
 		let currentPrecedingNode: null | Node.Node = precedingNode;
 
+		if(this._matchers.length === 0)
+			return Result.createERROR('Expected Rule to have at least one Matcher');
+
 		for (const { matchFunction, name, optional } of this._matchers) {
 			const result = matchFunction(rest, currentPrecedingNode);
 
@@ -347,7 +340,7 @@ export class Rule {
 				if (optional)
 					continue;
 				else
-					return Result.createERROR(input);
+					return Result.createERROR('Non-Optional Matcher failed');
 			}
 
 			if (name !== null)
@@ -362,7 +355,7 @@ export class Rule {
 		}
 
 		if (firstResult === null || lastResult === null)
-			return Result.createERROR(input);
+		return Result.createERROR('Expected Rule to have at least one Matcher');
 
 		const raw = Result.calculateRaw(firstResult, lastResult);
 		const meta = precedingNode === null ? Meta.create(raw) : Meta.calculate(precedingNode.meta, raw);
@@ -392,7 +385,7 @@ export class RuleVariant extends Array<Rule> {
 				return result;
 		}
 
-		return Result.createERROR(input);
+		return Result.createERROR('No Rule matched');
 	}
 }
 
