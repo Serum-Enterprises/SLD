@@ -284,11 +284,11 @@ class Rule {
 
 	private constructor() { }
 
-	static begin(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
+	public static begin(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
 		return (new Rule()).directlyFollowedBy(matcher, name, optional);
 	}
 
-	followedBy(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
+	public followedBy(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
 		if (typeof matcher === 'function') {
 			this._matchers.push({ matchFunction: Matcher.matchWhitespace(), name: null, optional: true });
 			this._matchers.push({ matchFunction: matcher, name, optional });
@@ -307,7 +307,7 @@ class Rule {
 		return this;
 	}
 
-	directlyFollowedBy(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
+	public directlyFollowedBy(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
 		if (typeof matcher === 'function') {
 			this._matchers.push({ matchFunction: matcher, name, optional });
 		}
@@ -323,7 +323,7 @@ class Rule {
 		return this;
 	}
 
-	execute(input: string, precedingNode: null | Node.Node): Result.Result {
+	public execute(input: string, precedingNode: null | Node.Node): Result.Result {
 		let rest: string = input;
 		let firstResult: null | Result.OK_Result = null;
 		let lastResult: null | Result.OK_Result = null;
@@ -365,15 +365,15 @@ class Rule {
 }
 
 class RuleVariant extends Array<Rule> {
-	constructor(...rules: Array<Rule>) {
+	public constructor(...rules: Array<Rule>) {
 		super(...rules);
 	}
 
-	static create(ruleArray: Array<Rule>): RuleVariant {
+	public static create(ruleArray: Array<Rule>): RuleVariant {
 		return new RuleVariant(...ruleArray);
 	}
 
-	execute(input: string, precedingNode: null | Node.Node): Result.Result {
+	public execute(input: string, precedingNode: null | Node.Node): Result.Result {
 		for (const rule of this) {
 			const result = rule.execute(input, precedingNode);
 
@@ -388,16 +388,16 @@ class RuleVariant extends Array<Rule> {
 class Parser extends Map<string, RuleVariant> {
 	private _rootVariant: RuleVariant;
 
-	constructor(rootVariant: RuleVariant, ...ruleVariants: Array<[string, RuleVariant]>) {
+	public constructor(rootVariant: RuleVariant, ...ruleVariants: Array<[string, RuleVariant]>) {
 		super(ruleVariants);
 		this._rootVariant = rootVariant;
 	}
 
-	static create(rootVariant: RuleVariant, ...ruleVariants: Array<[string, RuleVariant]>): Parser {
+	public static create(rootVariant: RuleVariant, ...ruleVariants: Array<[string, RuleVariant]>): Parser {
 		return new Parser(rootVariant, ...ruleVariants);
 	}
 
-	parse(input: string, optionalMeta: boolean = false): Result.Result {
+	public parse(input: string, optionalMeta: boolean = false): Result.Result {
 		let result: Result.Result;
 
 		if (optionalMeta)
