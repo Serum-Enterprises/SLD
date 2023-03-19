@@ -397,8 +397,15 @@ class Parser extends Map<string, RuleVariant> {
 		return new Parser(rootVariant, ...ruleVariants);
 	}
 
-	parse(input: string): Result.Result {
-		return this._rootVariant.execute(input, null);
+	parse(input: string, optionalMeta: boolean = false): Result.Result {
+		let result: Result.Result;
+
+		if (optionalMeta)
+			result = JSON.parse(JSON.stringify(this._rootVariant.execute(input, null)), (key: string, value: any) => key === 'meta' ? undefined : value);
+		else
+			result = this._rootVariant.execute(input, null);
+
+		return result;
 	}
 }
 
