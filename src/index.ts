@@ -20,7 +20,7 @@ function printCharTable(str: string) {
 	);
 }
 
-namespace Meta {
+export namespace Meta {
 	export interface Range {
 		start: number,
 		end: number
@@ -129,7 +129,7 @@ namespace Meta {
 
 }
 
-namespace Node {
+export namespace Node {
 	export enum TYPE {
 		MATCH = 'MATCH',
 		RECOVER = 'RECOVER'
@@ -183,7 +183,7 @@ namespace Node {
 	}
 }
 
-namespace Result {
+export namespace Result {
 	export enum STATUS {
 		OK = 'OK',
 		ERROR = 'ERROR'
@@ -240,7 +240,7 @@ namespace Result {
 	}
 }
 
-namespace Matcher {
+export namespace Matcher {
 	export type matchFunction = (input: string, precedingNode: null | Node.Node) => Result.Result;
 
 	export function matchString(string: string): matchFunction {
@@ -279,7 +279,7 @@ namespace Matcher {
 
 type transformFunction = (nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => unknown;
 
-class Rule {
+export class Rule {
 	private _matchers: { matchFunction: Matcher.matchFunction, name: null | string, optional: boolean }[];
 	private _transformer: transformFunction;
 	//private _recover: Function = () => null;
@@ -375,7 +375,7 @@ class Rule {
 	}
 }
 
-class RuleVariant extends Array<Rule> {
+export class RuleVariant extends Array<Rule> {
 	public constructor(...rules: Array<Rule>) {
 		super(...rules);
 	}
@@ -396,7 +396,7 @@ class RuleVariant extends Array<Rule> {
 	}
 }
 
-class Parser extends Map<string, RuleVariant> {
+export class Parser extends Map<string, RuleVariant> {
 	private _rootVariant: RuleVariant;
 
 	public constructor(rootVariant: RuleVariant, ...ruleVariants: Array<[string, RuleVariant]>) {
@@ -419,5 +419,3 @@ class Parser extends Map<string, RuleVariant> {
 		return result;
 	}
 }
-
-export { Rule, RuleVariant, Parser };
