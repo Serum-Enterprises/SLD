@@ -4,7 +4,7 @@ import * as Result from '../lib/Result';
 import * as Problem from '../lib/Problem';
 
 export namespace Matcher {
-	export type matchFunction = (input: string, precedingNode: null | Node.Node) => Result.Result;
+	export type matchFunction = (input: string, precedingNode: null | Node.Node, parserContext: Parser) => Result.Result;
 
 	export function matchString(string: string): matchFunction {
 		if (string.length === 0)
@@ -33,6 +33,31 @@ export namespace Matcher {
 
 			return Result.calculateOK(precedingNode, Node.TYPE.MATCH, match[0], match[0], input.slice(match[0].length));
 		};
+	}
+
+	export function matchRuleVariant(name: string): matchFunction {
+		if (name.length === 0)
+			throw new RangeError('Expected name to be a non-empty String');
+
+		return (input: string, precedingNode: null | Node.Node, parserContext: Parser): Result.Result => {
+			if (!parserContext.has(name))
+				throw new ReferenceError(`Expected Parser to have a rule named ${name}`);
+
+			const ruleVariant = parserContext.get(name);
+
+			if (ruleVariant === undefined)
+				throw new ReferenceError(`Expected Parser to have a rule named ${name}`);
+
+			const result = ruleVariant.execute(input, precedingNode, parserContext);
+
+			if (result.status === Result.STATUS.ERROR)
+				return result;
+
+			if (precedingNode === null)
+				return Result.createOK(Node.TYPE.MATCH, result.node, result.node.raw, result.rest);
+
+			return Result.calculateOK(precedingNode, Node.TYPE.MATCH, result.node, result.node.raw, result.rest);
+		}
 	}
 
 	export function matchWhitespace(): matchFunction {
@@ -99,18 +124,17 @@ export class Rule {
 		return this;
 	}
 
-	public execute(input: string, precedingNode: null | Node.Node): Result.Result {
+	public execute(input: string, precedingNode: null | Node.Node, parserContext: Parser): Result.Result {
 		let rest: string = input;
 		const results: Array<Result.OK_Result> = [];
 		const namedNodes: { [key: string]: Node.Node } = {};
 		let currentPrecedingNode: null | Node.Node = precedingNode;
 
-		// Throw an Error if there are no Matchers
 		if (this._matchers.length === 0 || this._matchers.every(({ optional }) => optional))
 			throw new RangeError('Expected Rule to have at least one non-optional Matcher');
 
 		for (const { matchFunction, name, optional } of this._matchers) {
-			const result: Result.Result = matchFunction(rest, currentPrecedingNode);
+			const result: Result.Result = matchFunction(rest, currentPrecedingNode, parserContext);
 
 			switch (result.status) {
 				case Result.STATUS.OK: {
@@ -156,9 +180,9 @@ export class RuleVariant extends Array<Rule> {
 		return new RuleVariant(...ruleArray);
 	}
 
-	public execute(input: string, precedingNode: null | Node.Node): Result.Result {
+	public execute(input: string, precedingNode: null | Node.Node, parserContext: Parser): Result.Result {
 		for (const rule of this) {
-			const result = rule.execute(input, precedingNode);
+			const result = rule.execute(input, precedingNode, parserContext);
 
 			if (result.status === Result.STATUS.OK)
 				return result;
@@ -171,22 +195,22 @@ export class RuleVariant extends Array<Rule> {
 export class Parser extends Map<string, RuleVariant> {
 	private _rootVariant: RuleVariant;
 
-	public constructor(rootVariant: RuleVariant, ...ruleVariants: Array<[string, RuleVariant]>) {
+	public constructor(rootVariant: RuleVariant, ruleVariants: Array<[string, RuleVariant]> = []) {
 		super(ruleVariants);
 		this._rootVariant = rootVariant;
 	}
 
-	public static create(rootVariant: RuleVariant, ...ruleVariants: Array<[string, RuleVariant]>): Parser {
-		return new Parser(rootVariant, ...ruleVariants);
+	public static create(rootVariant: RuleVariant, ruleVariants: Array<[string, RuleVariant]> = []): Parser {
+		return new Parser(rootVariant, ruleVariants);
 	}
 
-	public parse(input: string, optionalMeta: boolean = false): Result.Result {
+	public parse(input: string, showMeta: boolean = false): Result.Result {
 		let result: Result.Result;
 
-		if (optionalMeta)
-			result = JSON.parse(JSON.stringify(this._rootVariant.execute(input, null)), (key: string, value: any) => key === 'meta' ? undefined : value);
+		if (showMeta)
+			result = this._rootVariant.execute(input, null, this);
 		else
-			result = this._rootVariant.execute(input, null);
+			result = JSON.parse(JSON.stringify(this._rootVariant.execute(input, null, this)), (key: string, value: any) => key === 'meta' ? undefined : value);
 
 		return result;
 	}
