@@ -13,7 +13,7 @@
 	"include": [
 		"src/**/*",
 		"lib/**/*"
-	],
+, "test.js"	],
 	"exclude": [
 		"node_modules",
 		"**/*.spec.ts"

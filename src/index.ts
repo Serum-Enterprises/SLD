@@ -65,22 +65,33 @@ export namespace Matcher {
 	}
 }
 
-export type transformFunction = (nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => unknown;
+export type transformFunction = (nodes: { [key: string]: Node.Node }, data: unknown, raw: string, meta: Meta.Meta) => unknown;
 
 export class Rule {
 	private _matchers: { matchFunction: Matcher.matchFunction, name: null | string, optional: boolean }[];
 	private _transformer: transformFunction;
 	private _throwMessage: null | string;
-	//private _recover: Function = () => null;
+	private _globalThrowMessage: null | string;
+	private _recover: null | Matcher.matchFunction;
 
 	private constructor() {
 		this._matchers = [];
 		this._transformer = nodes => nodes;
 		this._throwMessage = null;
+		this._globalThrowMessage = null;
+		this._recover = null;
 	}
 
 	public static begin(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
 		return (new Rule()).directlyFollowedBy(matcher, name, optional);
+	}
+
+	public static throw(message: string): Rule {
+		const rule = new Rule();
+
+		rule._globalThrowMessage = message;
+
+		return rule;
 	}
 
 	public followedBy(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
@@ -99,15 +110,12 @@ export class Rule {
 	}
 
 	public directlyFollowedBy(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
-		if (typeof matcher === 'function') {
+		if (typeof matcher === 'function')
 			this._matchers.push({ matchFunction: matcher, name, optional });
-		}
-		else if (typeof matcher === 'string') {
+		else if (typeof matcher === 'string')
 			this._matchers.push({ matchFunction: Matcher.matchString(matcher), name, optional });
-		}
-		else if (matcher instanceof RegExp) {
+		else if (matcher instanceof RegExp)
 			this._matchers.push({ matchFunction: Matcher.matchRegex(matcher), name, optional });
-		}
 		else
 			throw new TypeError('Expected matcher to be a String, RegExp or Function');
 
@@ -124,6 +132,19 @@ export class Rule {
 		return this;
 	}
 
+	public recover(matcher: string | RegExp | Matcher.matchFunction): Rule {
+		if (typeof matcher === 'function')
+			this._recover = matcher;
+		else if (typeof matcher === 'string')
+			this._recover = Matcher.matchString(matcher);
+		else if (matcher instanceof RegExp)
+			this._recover = Matcher.matchRegex(matcher);
+		else
+			throw new TypeError('Expected matcher to be a String, RegExp or Function');
+
+		return this;
+	}
+
 	public execute(input: string, precedingNode: null | Node.Node, parserContext: Parser): Result.Result {
 		let rest: string = input;
 		const results: Array<Result.OK_Result> = [];
@@ -131,7 +152,10 @@ export class Rule {
 		let currentPrecedingNode: null | Node.Node = precedingNode;
 
 		if (this._matchers.length === 0 || this._matchers.every(({ optional }) => optional))
-			throw new RangeError('Expected Rule to have at least one non-optional Matcher');
+			if (this._throwMessage !== null)
+				return Result.createERROR(Problem.TYPE.ERROR, this._throwMessage);
+			else
+				throw new RangeError('Expected Rule to have at least one non-optional Matcher');
 
 		for (const { matchFunction, name, optional } of this._matchers) {
 			const result: Result.Result = matchFunction(rest, currentPrecedingNode, parserContext);
@@ -149,8 +173,22 @@ export class Rule {
 				case Result.STATUS.ERROR: {
 					if (optional)
 						continue;
-					else
+
+					if (this._recover === null)
 						return result;
+					else {
+						for (let i = 0; i < input.length; i++) {
+							const substring = input.substring(i);
+							const result = matchFunction(substring, null, parserContext);
+
+							if (result.status === Result.STATUS.OK) {
+								const raw = input.substring(0, i + result.node.raw.length);
+								return Result.createOK(Node.TYPE.RECOVER, null, raw, result.rest);
+							}
+						}
+
+						return result;
+					}
 				}
 			}
 		}
@@ -160,7 +198,7 @@ export class Rule {
 
 		const raw = Result.calculateRaw(results[0], results[results.length - 1]);
 		const meta = precedingNode === null ? Meta.create(raw) : Meta.calculate(precedingNode.meta, raw);
-		const data = this._transformer(namedNodes, raw, meta);
+		const data = this._transformer(namedNodes, namedNodes.map(node => node.data), raw, meta);
 
 		return precedingNode === null ?
 			Result.createOK(Node.TYPE.MATCH, data, raw, results[results.length - 1].rest) :

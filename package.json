@@ -8,7 +8,9 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "rm -rf ./build && tsc && node ./build/src/demo.js"
+    "test": "rm -rf ./build && tsc && node ./build/src/demo.js",
+    "wordPlay": "rm -rf ./build && tsc && node ./build/src/demo.js",
+    "jsonDemo": "rm -rf ./build && tsc && node ./build/src/json.js"
   },
   "repository": {
     "type": "git",

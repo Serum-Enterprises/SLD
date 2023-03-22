@@ -4,3 +4,4 @@
 ✓ Add support for guaranteed Error Throwing
 ✓ Add support for recursive Rules
 X Add support for recursive Rule Error Recovery
+X Add support for Global Throw
