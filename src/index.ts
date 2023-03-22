@@ -1,234 +1,7 @@
-type JSON_T = null | boolean | number | string | Array<JSON_T> | { [key: string]: JSON_T };
-
-function printCharTable(str: string) {
-	console.table(str.split(/\n/)
-		.map((line, index, lines) => {
-			const lineWithEnding = line + (index !== lines.length - 1 ? '\n' : '');
-			return lineWithEnding.split('');
-		})
-		.reduce((result, line, i) => {
-			return {
-				...result,
-				[i]: line.reduce((result, char, j) => {
-					return {
-						...result,
-						[j]: char
-					};
-				}, {})
-			};
-		}, {})
-	);
-}
-
-export namespace Meta {
-	export interface Range {
-		start: number,
-		end: number
-	}
-
-	export interface Position {
-		line: number,
-		column: number
-	}
-
-	export interface Location {
-		start: Position,
-		end: Position,
-		next: Position
-	}
-
-	export interface Meta {
-		range: Range,
-		location: Location
-	}
-
-	function splitSource(source: string): Array<string> {
-		if (source.length === 0)
-			throw new RangeError('Expected source to be a non-empty String');
-
-		return source.split(/(\r\n|\r|\n)(?=.*)/g)
-			.reduce((acc: Array<string>, value: string, index: number) => {
-				if (index % 2 === 0)
-					return [...acc, value];
-				else {
-					acc[acc.length - 1] = acc[acc.length - 1] + value;
-					return acc;
-
-				}
-			}, [])
-			.filter(value => value !== '');
-	}
-
-	function endsWithLineBreak(source: string): number {
-		if (source.length === 0)
-			throw new RangeError('Expected source to be a non-empty String');
-
-		const match = source.match(/(\r\n|\r|\n)$/);
-		return match ? match[0].length : 0;
-	}
-
-	export function create(source: string): Meta {
-		if (source.length === 0)
-			throw new RangeError('Expected source to be a non-empty String');
-
-		const lines: Array<string> = splitSource(source);
-		const lineBreakLength = endsWithLineBreak(lines[lines.length - 1]);
-
-		return {
-			range: {
-				start: 0,
-				end: source.length - 1
-			},
-			location: {
-				start: {
-					line: 1,
-					column: 1
-				},
-				end: {
-					line: lines.length,
-					column: lines[lines.length - 1].length - lineBreakLength
-				},
-				next: {
-					line: lines.length > 0 ? (lineBreakLength ? lines.length + 1 : lines.length) : 1,
-					column: lines.length > 0 ? (lineBreakLength ? 1 : lines[lines.length - 1].length + 1) : 1
-				}
-			}
-		};
-	}
-
-	export function calculate(precedingMeta: Meta, source: string): Meta {
-		if (source.length === 0)
-			throw new RangeError('Expected source to be a non-empty String');
-
-		const lines = splitSource(source);
-		const lineBreakLength = endsWithLineBreak(source);
-
-		return {
-			range: {
-				start: precedingMeta.range.end + 1,
-				end: precedingMeta.range.end + source.length
-			},
-			location: {
-				start: {
-					line: precedingMeta.location.next.line,
-					column: precedingMeta.location.next.column
-				},
-				end: {
-					line: precedingMeta.location.next.line + lines.length - 1,
-					column: lines.length === 1 ? precedingMeta.location.next.column + source.length - 1 - lineBreakLength : lines[lines.length - 1].length - lineBreakLength
-				},
-				next: {
-					line: lineBreakLength ?
-						precedingMeta.location.next.line + lines.length :
-						precedingMeta.location.next.line + lines.length - 1,
-					column: lineBreakLength ? 1 : precedingMeta.location.next.column + lines[lines.length - 1].length - lineBreakLength
-				}
-			}
-		};
-	}
-
-}
-
-export namespace Node {
-	export enum TYPE {
-		MATCH = 'MATCH',
-		RECOVER = 'RECOVER'
-	}
-
-	export interface Node {
-		type: TYPE,
-		data: unknown,
-		raw: string,
-		meta: Meta.Meta
-	}
-
-	function cloneJSON(data: unknown): unknown {
-		if (data === null || typeof data === 'boolean' || Number.isFinite(data) || typeof data === 'string')
-			return data;
-		if (Array.isArray(data))
-			return data.reduce((result: Array<unknown>, item: unknown) => {
-				return [...result, cloneJSON(item)];
-			}, []);
-
-		if (typeof data === 'object' && Object.prototype.toString.call(data) === '[object Object]')
-			return Object.entries(data).reduce((result: { [key: string]: unknown }, [key, value]: [string, unknown]) => {
-				return { ...result, [key]: cloneJSON(value) };
-			}, {});
-
-		throw new TypeError('Expected data to be valid JSON');
-	}
-
-	export function create(type: TYPE, data: unknown, raw: string) {
-		if (raw.length === 0)
-			throw new RangeError('Expected raw to be a non-empty String');
-
-		return {
-			type: type,
-			data: cloneJSON(data),
-			raw: raw,
-			meta: Meta.create(raw)
-		};
-	}
-
-	export function calculate(precedingNode: Node, type: TYPE, data: unknown, raw: string) {
-		if (raw.length === 0)
-			throw new RangeError('Expected raw to be a non-empty String');
-
-		return {
-			type: type,
-			data: cloneJSON(data),
-			raw: raw,
-			meta: Meta.calculate(precedingNode.meta, raw)
-		};
-	}
-}
-
-export namespace Result {
-	export enum STATUS {
-		OK = 'OK',
-		ERROR = 'ERROR'
-	}
-
-	export interface OK_Result {
-		status: STATUS.OK,
-		node: Node.Node,
-		rest: string
-	}
-
-	export interface ERROR_Result {
-		status: STATUS.ERROR,
-		message: string,
-	}
-
-	export type Result = OK_Result | ERROR_Result;
-
-	export function createOK(type: Node.TYPE, data: unknown, raw: string, rest: string): OK_Result {
-		return {
-			status: STATUS.OK,
-			node: Node.create(type, data, raw),
-			rest: rest
-		};
-	}
-
-	export function createERROR(message: string): ERROR_Result {
-		return {
-			status: STATUS.ERROR,
-			message: message
-		};
-	}
-
-	export function calculateOK(precedingNode: Node.Node, type: Node.TYPE, data: unknown, raw: string, rest: string): OK_Result {
-		return {
-			status: STATUS.OK,
-			node: Node.calculate(precedingNode, type, data, raw),
-			rest: rest
-		};
-	}
-
-	export function calculateRaw(firstResult: OK_Result, lastResult: OK_Result): string {
-		return firstResult.node.raw + firstResult.rest.slice(0, firstResult.rest.length - lastResult.rest.length);
-	}
-}
+import * as Meta from '../lib/Meta';
+import * as Node from '../lib/Node';
+import * as Result from '../lib/Result';
+import * as Problem from '../lib/Problem';
 
 export namespace Matcher {
 	export type matchFunction = (input: string, precedingNode: null | Node.Node) => Result.Result;
@@ -239,7 +12,7 @@ export namespace Matcher {
 
 		return (input: string, precedingNode: null | Node.Node): Result.Result => {
 			if (!input.startsWith(string))
-				return Result.createERROR(`Expected ${string}`);
+				return Result.createERROR(Problem.TYPE.MISMATCH, `Expected ${string}`);
 
 			if (precedingNode === null)
 				return Result.createOK(Node.TYPE.MATCH, string, string, input.slice(string.length));
@@ -253,7 +26,7 @@ export namespace Matcher {
 			const match = input.match(regex);
 
 			if (match === null)
-				return Result.createERROR(`Expected ${regex}`);
+				return Result.createERROR(Problem.TYPE.MISMATCH, `Expected ${regex}`);
 
 			if (precedingNode === null)
 				return Result.createOK(Node.TYPE.MATCH, match[0], match[0], input.slice(match[0].length));
@@ -267,16 +40,18 @@ export namespace Matcher {
 	}
 }
 
-type transformFunction = (nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => unknown;
+export type transformFunction = (nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => unknown;
 
 export class Rule {
 	private _matchers: { matchFunction: Matcher.matchFunction, name: null | string, optional: boolean }[];
 	private _transformer: transformFunction;
+	private _throwMessage: null | string;
 	//private _recover: Function = () => null;
 
 	private constructor() {
 		this._matchers = [];
 		this._transformer = nodes => nodes;
+		this._throwMessage = null;
 	}
 
 	public static begin(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
@@ -284,18 +59,14 @@ export class Rule {
 	}
 
 	public followedBy(matcher: string | RegExp | Matcher.matchFunction, name: null | string = null, optional: boolean = false): Rule {
-		if (typeof matcher === 'function') {
-			this._matchers.push({ matchFunction: Matcher.matchWhitespace(), name: null, optional: true });
+		this._matchers.push({ matchFunction: Matcher.matchWhitespace(), name: null, optional: true });
+
+		if (typeof matcher === 'function')
 			this._matchers.push({ matchFunction: matcher, name, optional });
-		}
-		else if (typeof matcher === 'string') {
-			this._matchers.push({ matchFunction: Matcher.matchWhitespace(), name: null, optional: true });
+		else if (typeof matcher === 'string')
 			this._matchers.push({ matchFunction: Matcher.matchString(matcher), name, optional });
-		}
-		else if (matcher instanceof RegExp) {
-			this._matchers.push({ matchFunction: Matcher.matchWhitespace(), name: null, optional: true });
+		else if (matcher instanceof RegExp)
 			this._matchers.push({ matchFunction: Matcher.matchRegex(matcher), name, optional });
-		}
 		else
 			throw new TypeError('Expected matcher to be a String, RegExp or matchFunction');
 
@@ -323,53 +94,61 @@ export class Rule {
 		return this;
 	}
 
+	public throw(message: string): Rule {
+		this._throwMessage = message;
+		return this;
+	}
+
 	public execute(input: string, precedingNode: null | Node.Node): Result.Result {
 		let rest: string = input;
-		let firstResult: null | Result.OK_Result = null;
-		let lastResult: null | Result.OK_Result = null;
+		const results: Array<Result.OK_Result> = [];
 		const namedNodes: { [key: string]: Node.Node } = {};
 		let currentPrecedingNode: null | Node.Node = precedingNode;
 
-		if(this._matchers.length === 0)
-			return Result.createERROR('Expected Rule to have at least one Matcher');
+		// Throw an Error if there are no Matchers
+		if (this._matchers.length === 0 || this._matchers.every(({ optional }) => optional))
+			throw new RangeError('Expected Rule to have at least one non-optional Matcher');
 
 		for (const { matchFunction, name, optional } of this._matchers) {
-			const result = matchFunction(rest, currentPrecedingNode);
+			const result: Result.Result = matchFunction(rest, currentPrecedingNode);
 
-			if (result.status !== Result.STATUS.OK) {
-				if (optional)
-					continue;
-				else
-					return Result.createERROR('Non-Optional Matcher failed');
+			switch (result.status) {
+				case Result.STATUS.OK: {
+					if (name !== null)
+						namedNodes[name] = result.node;
+
+					results.push(result);
+					rest = result.rest;
+					currentPrecedingNode = result.node;
+					break;
+				}
+				case Result.STATUS.ERROR: {
+					if (optional)
+						continue;
+					else
+						return result;
+				}
 			}
-
-			if (name !== null)
-				namedNodes[name] = result.node;
-
-			if (firstResult === null)
-				firstResult = result;
-
-			lastResult = result;
-			rest = result.rest;
-			currentPrecedingNode = result.node;
 		}
 
-		if (firstResult === null || lastResult === null)
-		return Result.createERROR('Expected Rule to have at least one Matcher');
+		if (this._throwMessage !== null)
+			return Result.createERROR(Problem.TYPE.ERROR, this._throwMessage);
 
-		const raw = Result.calculateRaw(firstResult, lastResult);
+		const raw = Result.calculateRaw(results[0], results[results.length - 1]);
 		const meta = precedingNode === null ? Meta.create(raw) : Meta.calculate(precedingNode.meta, raw);
 		const data = this._transformer(namedNodes, raw, meta);
 
-		if (precedingNode === null)
-			return Result.createOK(Node.TYPE.MATCH, data, raw, lastResult.rest);
-		else
-			return Result.calculateOK(precedingNode, Node.TYPE.MATCH, data, raw, lastResult.rest);
+		return precedingNode === null ?
+			Result.createOK(Node.TYPE.MATCH, data, raw, results[results.length - 1].rest) :
+			Result.calculateOK(precedingNode, Node.TYPE.MATCH, data, raw, results[results.length - 1].rest);
 	}
 }
 
 export class RuleVariant extends Array<Rule> {
 	public constructor(...rules: Array<Rule>) {
+		if (rules.length === 0)
+			throw new RangeError('Expected RuleVariant to have at least one Rule');
+
 		super(...rules);
 	}
 
@@ -385,7 +164,7 @@ export class RuleVariant extends Array<Rule> {
 				return result;
 		}
 
-		return Result.createERROR('No Rule matched');
+		return Result.createERROR(Problem.TYPE.ERROR, 'No Rule matched');
 	}
 }
 

@@ -1,4 +1,5 @@
 import * as Node from './Node';
+import * as Problem from './Problem';
 
 export enum STATUS {
 	OK = 'OK',
@@ -13,9 +14,7 @@ export interface OK_Result {
 
 export interface ERROR_Result {
 	status: STATUS.ERROR,
-	message: string,
-	node: null | Node.Node,
-	rest: null | string
+	problem: Problem.Problem
 }
 
 export type Result = OK_Result | ERROR_Result;
@@ -28,12 +27,10 @@ export function createOK(type: Node.TYPE, data: unknown, raw: string, rest: stri
 	};
 }
 
-export function createERROR(message: string, node: null | Node.Node = null, rest: null | string = null): ERROR_Result {
+export function createERROR(type: Problem.TYPE, message: string): ERROR_Result {
 	return {
 		status: STATUS.ERROR,
-		message: message,
-		node: node,
-		rest: rest
+		problem: Problem.create(type, message)
 	};
 }
 
