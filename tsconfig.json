@@ -1,19 +1,20 @@
 {
 	"compilerOptions": {
 		"target": "ESNext",
-		"module": "commonjs",
+		"module": "CommonJS",
 		"outDir": "./build",
 		"strict": true,
 		"esModuleInterop": true,
-		"resolveJsonModule": true,
+		"resolveJsonModule": false,
 		"lib": [
 			"ESNext"
 		]
 	},
 	"include": [
 		"src/**/*",
-		"lib/**/*"
-, "test.js"	],
+		"lib/**/*",
+		"demo/**/*"
+, "test.js", "demo"	],
 	"exclude": [
 		"node_modules",
 		"**/*.spec.ts"

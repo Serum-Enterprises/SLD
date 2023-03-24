@@ -1,17 +1,23 @@
-import { Rule, RuleVariant, Parser, Matcher } from './index';
-import * as Meta from '../lib/Meta';
-import * as Node from '../lib/Node';
-import * as Problem from '../lib/Problem';
-import * as Result from '../lib/Result';
+import { Parser, RuleVariant, Rule, MatchEngine, Result, Problem, Node, Meta } from '../src/index';
 
-const OPTIONS: { META: boolean } = {
-	META: false
-};
+
+const jsonRules = {
+	Primitive: {
+		
+	},
+	Container: {
+		Array: RuleVariant.create([]),
+		ArrayBody: RuleVariant.create([]),
+		Object: RuleVariant.create([]),
+		ObjectBody: RuleVariant.create([]),
+		Pair: RuleVariant.create([]),
+	}
+}
 
 // Null
 const nullPrimitive = RuleVariant.create([
 	Rule.begin('null', 'value')
-		.transform((nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => {
+		.transform((nodes: { [key: string]: Node }, raw: string, meta: Meta) => {
 			return {
 				type: 'NullPrimitive',
 				data: null
@@ -21,14 +27,14 @@ const nullPrimitive = RuleVariant.create([
 // Boolean
 const booleanPrimitive = RuleVariant.create([
 	Rule.begin('true', 'value')
-		.transform((nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => {
+		.transform((nodes: { [key: string]: Node }, raw: string, meta: Meta) => {
 			return {
 				type: 'BooleanPrimitive',
 				data: true
 			};
 		}),
 	Rule.begin('false', 'value')
-		.transform((nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => {
+		.transform((nodes: { [key: string]: Node }, raw: string, meta: Meta) => {
 			return {
 				type: 'BooleanPrimitive',
 				data: false
@@ -38,7 +44,7 @@ const booleanPrimitive = RuleVariant.create([
 // Number
 const numberPrimitive = RuleVariant.create([
 	Rule.begin(/\d+/, 'value')
-		.transform((nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => {
+		.transform((nodes: { [key: string]: Node }, raw: string, meta: Meta) => {
 			return {
 				type: 'NumberPrimitive',
 				data: Number.parseInt(nodes.value.data as string)
@@ -50,7 +56,7 @@ const stringPrimitive = RuleVariant.create([
 	Rule.begin('"')
 		.followedBy(/[^"]+/, 'value')
 		.followedBy('"')
-		.transform((nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => {
+		.transform((nodes: { [key: string]: Node }, raw: string, meta: Meta) => {
 			return {
 				type: 'StringPrimitive',
 				data: nodes.value.data as string
@@ -58,7 +64,7 @@ const stringPrimitive = RuleVariant.create([
 		}),
 	Rule.begin('"')
 		.followedBy('"')
-		.transform((nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => {
+		.transform((nodes: { [key: string]: Node }, raw: string, meta: Meta) => {
 			return {
 				type: 'StringPrimitive',
 				data: ''
@@ -73,65 +79,65 @@ const stringPrimitive = RuleVariant.create([
 ]);
 
 const arrayBody = RuleVariant.create([
-	Rule.begin(Matcher.matchRuleVariant('json'), 'value')
+	Rule.begin(MatchEngine.matchRuleVariant('json'), 'value')
 		.followedBy(',')
-		.followedBy(Matcher.matchRuleVariant('arrayBody'), 'arrayBody')
-		.transform((nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => {
+		.followedBy(MatchEngine.matchRuleVariant('arrayBody'), 'arrayBody')
+		.transform((nodes: { [key: string]: Node }, raw: string, meta: Meta) => {
 			console.log(JSON.stringify(JSON.parse(JSON.stringify(nodes), (key: string, value: any) => key === 'meta' ? undefined : value), null, 2));
 			return {
 				type: 'ArrayBody',
-				data: [(nodes.value.data as {data: unknown}).data, ...(nodes.arrayBody.data as {data: {data: unknown[]}}).data.data]
+				data: [(nodes.value.data as { data: unknown }).data, ...(nodes.arrayBody.data as { data: { data: unknown[] } }).data.data]
 			};
 		}),
-	Rule.begin(Matcher.matchRuleVariant('json'))
+	Rule.begin(MatchEngine.matchRuleVariant('json'))
 		.followedBy(',')
 		.throw('Expected a value after ","'),
-	Rule.begin(Matcher.matchRuleVariant('json'), 'value')
-		.transform((nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => {
+	Rule.begin(MatchEngine.matchRuleVariant('json'), 'value')
+		.transform((nodes: { [key: string]: Node }, raw: string, meta: Meta) => {
 			return {
 				type: 'ArrayBody',
-				data: [(nodes.value.data as {data: unknown}).data]
+				data: [(nodes.value.data as { data: unknown }).data]
 			};
 		}),
 ]);
 
 const array = RuleVariant.create([
 	Rule.begin('[')
-		.followedBy(Matcher.matchRuleVariant('arrayBody'), 'body')
+		.followedBy(MatchEngine.matchRuleVariant('arrayBody'), 'body')
 		.followedBy(']')
-		.transform((nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => {
+		.transform((nodes: { [key: string]: Node }, raw: string, meta: Meta) => {
 			return {
 				type: 'Array',
-				data: nodes.body.data as {data: unknown[]}[]
+				data: nodes.body.data as { data: unknown[] }[]
 			};
 		}),
 	Rule.begin('[')
 		.followedBy(']')
 		.transform(() => ({ data: [] })),
 	Rule.begin('[')
-		.followedBy(Matcher.matchRuleVariant('arrayBody'))
+		.followedBy(MatchEngine.matchRuleVariant('arrayBody'))
 		.throw('Expected a closing "]"'),
 	Rule.begin('[')
 		.throw('Expected a value or "]"'),
 ]);
 
 const pair = RuleVariant.create([
-	Rule.begin(Matcher.matchRuleVariant('stringPrimitive'), 'key')
+	Rule.begin(MatchEngine.matchRuleVariant('stringPrimitive'), 'key')
 		.followedBy(':')
-		.followedBy(Matcher.matchRuleVariant('json'), 'value'),
-	Rule.begin(Matcher.matchRuleVariant('stringPrimitive'), 'key')
+		.followedBy(MatchEngine.matchRuleVariant('json'), 'value'),
+	Rule.begin(MatchEngine.matchRuleVariant('stringPrimitive'), 'key')
 		.followedBy(':')
 		.throw('Expected a value after ":"'),
-	Rule.begin(Matcher.matchRuleVariant('stringPrimitive'), 'key')
+	Rule.begin(MatchEngine.matchRuleVariant('stringPrimitive'), 'key')
 		.throw('Expected a ":" after the key'),
 ]);
 
 const objectBody = RuleVariant.create([
-	Rule.begin(Matcher.matchRuleVariant('pair'), 'pair')
+	Rule.begin(MatchEngine.matchRuleVariant('pair'), 'pair')
 		.followedBy(',')
-		.followedBy(Matcher.matchRuleVariant('objectBody'), 'objectBody'),
-	Rule.begin(Matcher.matchRuleVariant('pair'), 'pair'),
-	Rule.begin(Matcher.matchRuleVariant('pair'))
+		.followedBy(MatchEngine.matchRuleVariant('objectBody'), 'objectBody'),
+	Rule.begin(MatchEngine.matchRuleVariant('pair'), 'pair'),
+	Rule.begin(MatchEngine.matchRuleVariant('pair'))
 		.followedBy(',')
 		.throw('Expected a value after ","'),
 ]);
@@ -140,24 +146,24 @@ const objectBody = RuleVariant.create([
 
 const object = RuleVariant.create([
 	Rule.begin('{')
-		.followedBy(Matcher.matchRuleVariant('objectBody'), 'body')
+		.followedBy(MatchEngine.matchRuleVariant('objectBody'), 'body')
 		.followedBy('}'),
 	Rule.begin('{')
 		.followedBy('}'),
 	Rule.begin('{')
-		.followedBy(Matcher.matchRuleVariant('objectBody'))
+		.followedBy(MatchEngine.matchRuleVariant('objectBody'))
 		.throw('Expected a closing "}"'),
 	Rule.begin('{')
 		.throw('Expected a value or "}"'),
 ]);
 
 const json = RuleVariant.create([
-	Rule.begin(Matcher.matchRuleVariant('object'), 'object'),
-	Rule.begin(Matcher.matchRuleVariant('array'), 'array'),
-	Rule.begin(Matcher.matchRuleVariant('stringPrimitive'), 'string'),
-	Rule.begin(Matcher.matchRuleVariant('numberPrimitive'), 'number'),
-	Rule.begin(Matcher.matchRuleVariant('booleanPrimitive'), 'boolean'),
-	Rule.begin(Matcher.matchRuleVariant('nullPrimitive'), 'null'),
+	Rule.begin(MatchEngine.matchRuleVariant('object'), 'object'),
+	Rule.begin(MatchEngine.matchRuleVariant('array'), 'array'),
+	Rule.begin(MatchEngine.matchRuleVariant('stringPrimitive'), 'string'),
+	Rule.begin(MatchEngine.matchRuleVariant('numberPrimitive'), 'number'),
+	Rule.begin(MatchEngine.matchRuleVariant('booleanPrimitive'), 'boolean'),
+	Rule.begin(MatchEngine.matchRuleVariant('nullPrimitive'), 'null'),
 	Rule.throw('Expected Null, Boolean, Number, String, Array or Object')
 ]);
 

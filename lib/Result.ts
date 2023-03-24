@@ -19,10 +19,10 @@ export interface ERROR_Result {
 
 export type Result = OK_Result | ERROR_Result;
 
-export function createOK(type: Node.TYPE, data: unknown, raw: string, rest: string): OK_Result {
+export function createOK(type: Node.TYPE, children: { [key: string]: Node.Node } | null, data: unknown | null, raw: string, rest: string): OK_Result {
 	return {
 		status: STATUS.OK,
-		node: Node.create(type, data, raw),
+		node: Node.create(type, children, data, raw),
 		rest: rest
 	};
 }
@@ -34,10 +34,10 @@ export function createERROR(type: Problem.TYPE, message: string): ERROR_Result {
 	};
 }
 
-export function calculateOK(precedingNode: Node.Node, type: Node.TYPE, data: unknown, raw: string, rest: string): OK_Result {
+export function calculateOK(precedingNode: Node.Node, type: Node.TYPE, children: { [key: string]: Node.Node } | null, data: unknown | null, raw: string, rest: string): OK_Result {
 	return {
 		status: STATUS.OK,
-		node: Node.calculate(precedingNode, type, data, raw),
+		node: Node.calculate(precedingNode, type, children, data, raw),
 		rest: rest
 	};
 }
