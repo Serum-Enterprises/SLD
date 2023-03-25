@@ -53,9 +53,9 @@ export function matchRuleVariant(name: string): matchFunction {
 			return result;
 
 		if (precedingNode === null)
-			return Result.createOK(Node.TYPE.MATCH, result.node.children, result.node.data, result.node.raw, result.rest);
+			return Result.createOK(Node.TYPE.MATCH, result.node.childNodes, result.node.data, result.node.raw, result.rest);
 
-		return Result.calculateOK(precedingNode, Node.TYPE.MATCH, result.node.children, result.node.data, result.node.raw, result.rest);
+		return Result.calculateOK(precedingNode, Node.TYPE.MATCH, result.node.childNodes, result.node.data, result.node.raw, result.rest);
 	}
 }
 

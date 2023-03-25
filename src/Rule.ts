@@ -5,7 +5,7 @@ import * as Result from '../lib/Result';
 import * as MatchEngine from './MatchEngine';
 import { Parser } from './Parser';
 
-export type transformFunction = (nodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => unknown;
+export type transformFunction = (childNodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => unknown;
 
 export class Rule {
 	private _matchers: { matchFunction: MatchEngine.matchFunction, name: null | string, optional: boolean }[];

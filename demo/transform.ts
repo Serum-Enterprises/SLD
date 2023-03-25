@@ -5,19 +5,19 @@ const expression: SLD.Variant = SLD.Variant.create([
 	SLD.Rule.begin(/\d+/, 'firstValue')
 		.followedBy('+')
 		.followedBy(/\d+/, 'secondValue')
-		.transform((nodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
+		.transform((childNodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
 			return {
 				TYPE: 'ADD',
-				VALUE: parseInt(nodes.firstValue.raw) + parseInt(nodes.secondValue.raw)
+				VALUE: parseInt(childNodes.firstValue.raw) + parseInt(childNodes.secondValue.raw)
 			};
 		}),
 	SLD.Rule.begin(/\d+/, 'firstValue')
 		.followedBy('-')
 		.followedBy(/\d+/, 'secondValue')
-		.transform((nodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
+		.transform((childNodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
 			return {
 				TYPE: 'SUBTRACT',
-				VALUE: parseInt(nodes.firstValue.raw) - parseInt(nodes.secondValue.raw)
+				VALUE: parseInt(childNodes.firstValue.raw) - parseInt(childNodes.secondValue.raw)
 			};
 		})
 ]);

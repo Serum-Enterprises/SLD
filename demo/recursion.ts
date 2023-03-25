@@ -5,14 +5,14 @@ const expression: SLD.Variant = SLD.Variant.create([
 	SLD.Rule.begin(/\d+/, 'firstValue')
 		.followedBy('+')
 		.followedBy(SLD.MatchEngine.matchRuleVariant('expression'), 'secondValue')
-		.transform((nodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
-			return parseInt(nodes.firstValue.raw) + (nodes.secondValue.data as number);
+		.transform((childNodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
+			return parseInt(childNodes.firstValue.raw) + (childNodes.secondValue.data as number);
 		}),
 	SLD.Rule.begin(/\d+/, 'firstValue')
 		.followedBy('-')
 		.followedBy(SLD.MatchEngine.matchRuleVariant('expression'), 'secondValue')
-		.transform((nodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
-			return parseInt(nodes.firstValue.raw) - (nodes.secondValue.data as number);
+		.transform((childNodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
+			return parseInt(childNodes.firstValue.raw) - (childNodes.secondValue.data as number);
 		}),
 
 	// Incomplete Expressions
@@ -26,8 +26,8 @@ const expression: SLD.Variant = SLD.Variant.create([
 
 	// Single-Value Expression
 	SLD.Rule.begin(/\d+/, 'value')
-		.transform((nodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
-			return parseInt(nodes.value.raw);
+		.transform((childNodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
+			return parseInt(childNodes.value.raw);
 		}),
 
 	// Missing Expression
