@@ -7,6 +7,7 @@
 		"prebuild": "rm -rf ./build",
 		"build": "tsc",
 		"install": "npm run build",
+		"demo": "npm run build && node ./build/demo/simple.js && node ./build/demo/throw.js && node ./build/demo/transform.js && node ./build/demo/recursion.js",
 		"predemo-simple": "npm run build",
 		"demo-simple": "node ./build/demo/simple.js",
 		"predemo-throw": "npm run build",
