@@ -4,7 +4,7 @@ import * as Result from '../lib/Result';
 import { Rule } from './Rule';
 import * as Parser from './Parser';
 
-export class RuleVariant extends Array<Rule> {
+export class Variant extends Array<Rule> {
 	public constructor(...rules: Array<Rule>) {
 		if (rules.length === 0)
 			throw new RangeError('Expected RuleVariant to have at least one Rule');
@@ -12,8 +12,8 @@ export class RuleVariant extends Array<Rule> {
 		super(...rules);
 	}
 
-	public static create(ruleArray: Array<Rule>): RuleVariant {
-		return new RuleVariant(...ruleArray);
+	public static create(ruleArray: Array<Rule>): Variant {
+		return new Variant(...ruleArray);
 	}
 
 	public execute(input: string, precedingNode: null | Node.Node, parserContext: Parser.Parser): Result.Result {

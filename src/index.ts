@@ -1,5 +1,5 @@
 export { Parser } from './Parser';
-export { RuleVariant } from './RuleVariant';
+export { Variant as Variant } from './Variant';
 export { Rule } from './Rule';
 export * as MatchEngine from './MatchEngine';
 export { Result } from '../lib/Result';

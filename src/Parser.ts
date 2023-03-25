@@ -1,15 +1,15 @@
 import * as Result from '../lib/Result';
-import * as RuleVariant from './RuleVariant';
+import * as RuleVariant from './Variant';
 
-export class Parser extends Map<string, RuleVariant.RuleVariant> {
-	private _rootVariant: RuleVariant.RuleVariant;
+export class Parser extends Map<string, RuleVariant.Variant> {
+	private _rootVariant: RuleVariant.Variant;
 
-	public constructor(rootVariant: RuleVariant.RuleVariant, ruleVariants: Array<[string, RuleVariant.RuleVariant]> = []) {
+	public constructor(rootVariant: RuleVariant.Variant, ruleVariants: Array<[string, RuleVariant.Variant]> = []) {
 		super(ruleVariants);
 		this._rootVariant = rootVariant;
 	}
 
-	public static create(rootVariant: RuleVariant.RuleVariant, ruleVariants: Array<[string, RuleVariant.RuleVariant]> = []): Parser {
+	public static create(rootVariant: RuleVariant.Variant, ruleVariants: Array<[string, RuleVariant.Variant]> = []): Parser {
 		return new Parser(rootVariant, ruleVariants);
 	}
 

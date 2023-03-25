@@ -1,6 +1,6 @@
 import * as SLD from '../src/index';
 
-const expression: SLD.RuleVariant = SLD.RuleVariant.create([
+const expression: SLD.Variant = SLD.Variant.create([
 	// Addition and Subtraction
 	SLD.Rule.begin(/\d+/, 'firstValue')
 		.followedBy('+')

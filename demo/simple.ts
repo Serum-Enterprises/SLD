@@ -1,6 +1,6 @@
 import * as SLD from '../src/index';
 
-const multiLangRuleVariant: SLD.RuleVariant = SLD.RuleVariant.create([
+const multiLangRuleVariant: SLD.Variant = SLD.Variant.create([
 	// English
 	SLD.Rule.begin('Hello', 'firstWord')
 		.followedBy('World', 'secondWord'),
