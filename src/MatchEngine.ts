@@ -34,7 +34,7 @@ export function matchRegex(regex: RegExp): matchFunction {
 	};
 }
 
-export function matchRuleVariant(name: string): matchFunction {
+export function matchVariant(name: string): matchFunction {
 	if (name.length === 0)
 		throw new RangeError('Expected name to be a non-empty String');
 
