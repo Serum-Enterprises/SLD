@@ -13,14 +13,15 @@ export class Parser extends Map<string, RuleVariant.Variant> {
 		return new Parser(rootVariant, ruleVariants);
 	}
 
-	public parse(input: string, showMeta: boolean = false): Result.Result {
-		let result: Result.Result;
+	public parse(input: string, showMeta: boolean = false, showChildNodes: boolean = false): Result.Result {
+		return JSON.parse(JSON.stringify(this._rootVariant.execute(input, null, this)), (key: string, value: any) => {
+			if (!showMeta && key === 'meta')
+				return undefined;
 
-		if (showMeta)
-			result = this._rootVariant.execute(input, null, this);
-		else
-			result = JSON.parse(JSON.stringify(this._rootVariant.execute(input, null, this)), (key: string, value: any) => key === 'meta' ? undefined : value);
+			if (!showChildNodes && key === 'childNodes')
+				return undefined;
 
-		return result;
+			return value;
+		});
 	}
 }
