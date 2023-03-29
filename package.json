@@ -1,12 +1,12 @@
 {
-	"name": "serum-language-designer",
+	"name": "@serum-enterprises/serum-language-designer",
 	"version": "2.0.0-beta.1",
 	"description": "A Parsing Expression Grammar Interpreter",
 	"main": "./build/src/index.js",
 	"scripts": {
 		"prebuild": "rm -rf ./build",
 		"build": "tsc",
-		"install": "npm run build",
+		"postinstall": "npm run build",
 		"demo": "npm run build && node ./build/demo/demo.js",
 		"test": "npm run build && jest ./build/tests --coverage"
 	},
