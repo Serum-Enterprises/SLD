@@ -7,7 +7,8 @@
 		"prebuild": "rm -rf ./build",
 		"build": "tsc",
 		"install": "npm run build",
-		"demo": "npm run build && node ./build/demo/demo.js"
+		"demo": "npm run build && node ./build/demo/demo.js",
+		"test": "npm run build && jest ./build/tests --coverage"
 	},
 	"repository": {
 		"type": "git",
