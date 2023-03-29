@@ -1,4 +1,3 @@
-
 export interface Range {
 	start: number,
 	end: number
@@ -21,9 +20,6 @@ export interface Meta {
 }
 
 function splitSource(source: string): Array<string> {
-	if (source.length === 0)
-		throw new RangeError('Expected source to be a non-empty String');
-
 	return source.split(/(\r\n|\r|\n)(?=.*)/g)
 		.reduce((acc: Array<string>, value: string, index: number) => {
 			if (index % 2 === 0)
@@ -38,9 +34,6 @@ function splitSource(source: string): Array<string> {
 }
 
 function endsWithLineBreak(source: string): number {
-	if (source.length === 0)
-		throw new RangeError('Expected source to be a non-empty String');
-
 	const match = source.match(/(\r\n|\r|\n)$/);
 	return match ? match[0].length : 0;
 }
@@ -67,8 +60,12 @@ export function create(source: string): Meta {
 				column: lines[lines.length - 1].length - lineBreakLength
 			},
 			next: {
-				line: lines.length > 0 ? (lineBreakLength ? lines.length + 1 : lines.length) : 1,
-				column: lines.length > 0 ? (lineBreakLength ? 1 : lines[lines.length - 1].length + 1) : 1
+				line: lineBreakLength ?
+					lines.length + 1 :
+					lines.length,
+				column: lineBreakLength ?
+					1 :
+					lines[lines.length - 1].length + 1,
 			}
 		}
 	};
@@ -93,13 +90,17 @@ export function calculate(precedingMeta: Meta, source: string): Meta {
 			},
 			end: {
 				line: precedingMeta.location.next.line + lines.length - 1,
-				column: lines.length === 1 ? precedingMeta.location.next.column + source.length - 1 - lineBreakLength : lines[lines.length - 1].length - lineBreakLength
+				column: lines.length === 1 ?
+					precedingMeta.location.next.column + source.length - 1 :
+					lines[lines.length - 1].length
 			},
 			next: {
 				line: lineBreakLength ?
 					precedingMeta.location.next.line + lines.length :
 					precedingMeta.location.next.line + lines.length - 1,
-				column: lineBreakLength ? 1 : precedingMeta.location.next.column + lines[lines.length - 1].length - lineBreakLength
+				column: lineBreakLength ?
+					1 :
+					precedingMeta.location.next.column + lines[lines.length - 1].length - lineBreakLength
 			}
 		}
 	};
