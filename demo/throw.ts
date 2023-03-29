@@ -2,18 +2,18 @@ import * as SLD from '../src/index';
 
 const multiLangRuleVariant: SLD.Variant = SLD.Variant.create([
 	// English
-	SLD.Rule.begin('Hello', 'firstWord')
-		.followedBy('World', 'secondWord'),
+	SLD.Rule.matchOne('Hello', 'firstWord')
+		.followedByOne('World', 'secondWord'),
 	// German
-	SLD.Rule.begin('Hallo', 'firstWord')
-		.followedBy('Welt', 'secondWord'),
+	SLD.Rule.matchOne('Hallo', 'firstWord')
+		.followedByOne('Welt', 'secondWord'),
 
 	// Mixup Throw
-	SLD.Rule.begin('Hello', 'firstWord')
-		.followedBy('Welt', 'secondWord')
+	SLD.Rule.matchOne('Hello', 'firstWord')
+		.followedByOne('Welt', 'secondWord')
 		.throw('Mixup of languages'),
-	SLD.Rule.begin('Hallo', 'firstWord')
-		.followedBy('World', 'secondWord')
+	SLD.Rule.matchOne('Hallo', 'firstWord')
+		.followedByOne('World', 'secondWord')
 		.throw('Mixup of languages'),
 
 	// Global Throw

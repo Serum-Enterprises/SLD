@@ -2,18 +2,18 @@ import * as SLD from '../src/index';
 
 const expression: SLD.Variant = SLD.Variant.create([
 	// Addition and Subtraction
-	SLD.Rule.begin(/\d+/, 'firstValue')
-		.followedBy('+')
-		.followedBy(/\d+/, 'secondValue')
+	SLD.Rule.matchOne(/\d+/, 'firstValue')
+		.followedByOne('+')
+		.followedByOne(/\d+/, 'secondValue')
 		.transform((childNodes: { [key: string]: SLD.Node | SLD.Node[] }, raw: string, meta: SLD.Meta) => {
 			return {
 				TYPE: 'ADD',
 				VALUE: parseInt((childNodes.firstValue as SLD.Node).raw) + parseInt((childNodes.secondValue as SLD.Node).raw)
 			};
 		}),
-	SLD.Rule.begin(/\d+/, 'firstValue')
-		.followedBy('-')
-		.followedBy(/\d+/, 'secondValue')
+	SLD.Rule.matchOne(/\d+/, 'firstValue')
+		.followedByOne('-')
+		.followedByOne(/\d+/, 'secondValue')
 		.transform((childNodes: { [key: string]: SLD.Node | SLD.Node[] }, raw: string, meta: SLD.Meta) => {
 			return {
 				TYPE: 'SUBTRACT',

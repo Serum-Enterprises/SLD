@@ -2,11 +2,13 @@ import * as SLD from '../src/index';
 
 const multiLangRuleVariant: SLD.Variant = SLD.Variant.create([
 	// English
-	SLD.Rule.begin('Hello', 'firstWord')
-		.followedBy('World', 'secondWord'),
+	SLD.Rule.match.one('Hello', 'firstWord')
+		.followedBy.one('World', 'secondWord'),
 	// German
-	SLD.Rule.begin('Hallo', 'firstWord')
-		.followedBy('Welt', 'secondWord')
+	SLD.Rule.matchOne('Hallo', 'firstWord')
+		.followedByOne('Welt', 'secondWord')
+
+	//Note: Both examples are Identical, but the first one is more readable
 ]);
 
 const input = {

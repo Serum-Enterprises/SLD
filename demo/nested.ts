@@ -1,7 +1,7 @@
 import * as SLD from '../src/index';
 
 const Expression: SLD.Variant = SLD.Variant.create([
-	SLD.Rule.begin(/\d+/, 'value')
+	SLD.Rule.matchOne(/\d+/, 'value')
 		.followedByZeroOrMore(SLD.MatchEngine.matchVariant('expressionPart'), 'expressionParts')
 		.transform((childNodes: { [key: string]: SLD.Node | SLD.Node[] }, raw: string, meta: SLD.Meta) => {
 			let result: number = parseInt((childNodes.value as SLD.Node).raw);
@@ -27,11 +27,11 @@ const Expression: SLD.Variant = SLD.Variant.create([
 ]);
 
 const ExpressionPart: SLD.Variant = SLD.Variant.create([
-	SLD.Rule.begin(SLD.MatchEngine.matchWhitespace(), null, true)
-		.followedBy(/[-+]/, 'operator')
-		.followedBy(/\d+/, 'value'),
+	SLD.Rule.matchZeroOrOne(SLD.MatchEngine.matchWhitespace(), null)
+		.followedByOne(/[-+]/, 'operator')
+		.followedByOne(/\d+/, 'value'),
 
-	SLD.Rule.begin(/[-+]/, 'operator')
+	SLD.Rule.matchOne(/[-+]/, 'operator')
 		.throw('Expected a Value after the operator'),
 
 	// Missing ExpressionPart
