@@ -8,14 +8,15 @@
 		"resolveJsonModule": false,
 		"lib": [
 			"ESNext"
-		]
+		],
+		"declaration": true,
+		"declarationDir": "./types",
+		"declarationMap": false,
+		"rootDir": ".",
 	},
 	"include": [
 		"src/**/*",
-		"src/lib/**/*",
-		"demo/**/*",
-		"test.js",
-		"demo"
+		"tests/**/*"
 	],
 	"exclude": [
 		"node_modules",
