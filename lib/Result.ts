@@ -19,7 +19,7 @@ export interface ERROR_Result {
 
 export type Result = OK_Result | ERROR_Result;
 
-export function createOK(type: Node.TYPE, childNodes: { [key: string]: Node.Node } | null, data: unknown | null, raw: string, rest: string): OK_Result {
+export function createOK(type: Node.TYPE, childNodes: { [key: string]: Node.Node | Node.Node[] } | null, data: unknown | null, raw: string, rest: string): OK_Result {
 	return {
 		status: STATUS.OK,
 		node: Node.create(type, childNodes, data, raw),
@@ -34,7 +34,7 @@ export function createERROR(type: Problem.TYPE, message: string): ERROR_Result {
 	};
 }
 
-export function calculateOK(precedingNode: Node.Node, type: Node.TYPE, childNodes: { [key: string]: Node.Node } | null, data: unknown | null, raw: string, rest: string): OK_Result {
+export function calculateOK(precedingNode: Node.Node, type: Node.TYPE, childNodes: { [key: string]: Node.Node | Node.Node[] } | null, data: unknown | null, raw: string, rest: string): OK_Result {
 	return {
 		status: STATUS.OK,
 		node: Node.calculate(precedingNode, type, childNodes, data, raw),

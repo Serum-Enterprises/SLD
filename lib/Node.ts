@@ -8,12 +8,12 @@ export enum TYPE {
 export interface Node {
 	type: TYPE,
 	data: unknown | null,
-	childNodes: { [key: string]: Node } | null,
+	childNodes: { [key: string]: Node | Node[] } | null,
 	raw: string,
 	meta: Meta.Meta
 }
 
-export function create(type: TYPE, childNodes: { [key: string]: Node } | null, data: unknown | null, raw: string): Node {
+export function create(type: TYPE, childNodes: { [key: string]: Node | Node[] } | null, data: unknown | null, raw: string): Node {
 	if (raw.length === 0)
 		throw new RangeError('Expected raw to be a non-empty String');
 
@@ -26,7 +26,7 @@ export function create(type: TYPE, childNodes: { [key: string]: Node } | null, d
 	};
 }
 
-export function calculate(precedingNode: Node, type: TYPE, childNodes: { [key: string]: Node } | null, data: unknown | null, raw: string): Node {
+export function calculate(precedingNode: Node, type: TYPE, childNodes: { [key: string]: Node | Node[] } | null, data: unknown | null, raw: string): Node {
 	if (raw.length === 0)
 		throw new RangeError('Expected raw to be a non-empty String');
 

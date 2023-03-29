@@ -27,11 +27,9 @@ const input = {
 	INVALID: 'Hola Mundo'
 };
 
-const output = {
-	GERMAN: SLD.Parser.create(multiLangRuleVariant).parse(input.GERMAN),
-	ENGLISH: SLD.Parser.create(multiLangRuleVariant).parse(input.ENGLISH),
-	MIXUP: SLD.Parser.create(multiLangRuleVariant).parse(input.MIXUP),
-	INVALID: SLD.Parser.create(multiLangRuleVariant).parse(input.INVALID)
+export const output = {
+	GERMAN: SLD.Parser.create(multiLangRuleVariant).parse(input.GERMAN, true, true),
+	ENGLISH: SLD.Parser.create(multiLangRuleVariant).parse(input.ENGLISH, true, true),
+	MIXUP: SLD.Parser.create(multiLangRuleVariant).parse(input.MIXUP, true, true),
+	INVALID: SLD.Parser.create(multiLangRuleVariant).parse(input.INVALID, true, true)
 };
-
-console.log(JSON.stringify(output, null, 2));

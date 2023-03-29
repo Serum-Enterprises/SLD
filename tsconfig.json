@@ -13,8 +13,10 @@
 	"include": [
 		"src/**/*",
 		"lib/**/*",
-		"demo/**/*"
-, "test.js", "demo"	],
+		"demo/**/*",
+		"test.js",
+		"demo"
+	],
 	"exclude": [
 		"node_modules",
 		"**/*.spec.ts"

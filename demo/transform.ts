@@ -5,19 +5,19 @@ const expression: SLD.Variant = SLD.Variant.create([
 	SLD.Rule.begin(/\d+/, 'firstValue')
 		.followedBy('+')
 		.followedBy(/\d+/, 'secondValue')
-		.transform((childNodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
+		.transform((childNodes: { [key: string]: SLD.Node | SLD.Node[] }, raw: string, meta: SLD.Meta) => {
 			return {
 				TYPE: 'ADD',
-				VALUE: parseInt(childNodes.firstValue.raw) + parseInt(childNodes.secondValue.raw)
+				VALUE: parseInt((childNodes.firstValue as SLD.Node).raw) + parseInt((childNodes.secondValue as SLD.Node).raw)
 			};
 		}),
 	SLD.Rule.begin(/\d+/, 'firstValue')
 		.followedBy('-')
 		.followedBy(/\d+/, 'secondValue')
-		.transform((childNodes: { [key: string]: SLD.Node }, raw: string, meta: SLD.Meta) => {
+		.transform((childNodes: { [key: string]: SLD.Node | SLD.Node[] }, raw: string, meta: SLD.Meta) => {
 			return {
 				TYPE: 'SUBTRACT',
-				VALUE: parseInt(childNodes.firstValue.raw) - parseInt(childNodes.secondValue.raw)
+				VALUE: parseInt((childNodes.firstValue as SLD.Node).raw) - parseInt((childNodes.secondValue as SLD.Node).raw)
 			};
 		})
 ]);
@@ -27,9 +27,7 @@ const input = {
 	SUBTRACTION: '1 - 2',
 };
 
-const output = {
-	ADDITION: SLD.Parser.create(expression).parse(input.ADDITION),
-	SUBTRACTION: SLD.Parser.create(expression).parse(input.SUBTRACTION)
+export const output = {
+	ADDITION: SLD.Parser.create(expression).parse(input.ADDITION, true, true),
+	SUBTRACTION: SLD.Parser.create(expression).parse(input.SUBTRACTION, true, true)
 };
-
-console.log(JSON.stringify(output, null, 2));

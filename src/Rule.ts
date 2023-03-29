@@ -4,11 +4,12 @@ import * as Problem from '../lib/Problem';
 import * as Result from '../lib/Result';
 import * as MatchEngine from './MatchEngine';
 import { Parser } from './Parser';
+import * as fs from 'fs';
 
-export type transformFunction = (childNodes: { [key: string]: Node.Node }, raw: string, meta: Meta.Meta) => unknown;
+export type transformFunction = (childNodes: { [key: string]: Node.Node | Node.Node[] }, raw: string, meta: Meta.Meta) => unknown;
 
 export class Rule {
-	private _matchers: { matchFunction: MatchEngine.matchFunction, name: null | string, optional: boolean }[];
+	private _matchers: { matchFunction: MatchEngine.matchFunction, name: null | string, optional: boolean, greedy: boolean }[];
 	private _transformer: transformFunction | null;
 	private _throwMessage: null | string;
 	private _globalThrowMessage: null | string;
@@ -35,27 +36,60 @@ export class Rule {
 	}
 
 	followedBy(matcher: string | RegExp | MatchEngine.matchFunction, name: null | string = null, optional: boolean = false): Rule {
-		this._matchers.push({ matchFunction: MatchEngine.matchWhitespace(), name: null, optional: true });
+		this._matchers.push({ matchFunction: MatchEngine.matchWhitespace(), name: null, optional: true, greedy: false });
 
-		if (typeof matcher === 'function')
-			this._matchers.push({ matchFunction: matcher, name, optional });
-		else if (typeof matcher === 'string')
-			this._matchers.push({ matchFunction: MatchEngine.matchString(matcher), name, optional });
-		else if (matcher instanceof RegExp)
-			this._matchers.push({ matchFunction: MatchEngine.matchRegex(matcher), name, optional });
-		else
-			throw new TypeError('Expected matcher to be a String, RegExp or matchFunction');
-
-		return this;
+		return this.directlyFollowedBy(matcher, name, optional);
 	}
 
 	directlyFollowedBy(matcher: string | RegExp | MatchEngine.matchFunction, name: null | string = null, optional: boolean = false): Rule {
 		if (typeof matcher === 'function')
-			this._matchers.push({ matchFunction: matcher, name, optional });
+			this._matchers.push({ matchFunction: matcher, name, optional, greedy: false });
 		else if (typeof matcher === 'string')
-			this._matchers.push({ matchFunction: MatchEngine.matchString(matcher), name, optional });
+			this._matchers.push({ matchFunction: MatchEngine.matchString(matcher), name, optional, greedy: false });
 		else if (matcher instanceof RegExp)
-			this._matchers.push({ matchFunction: MatchEngine.matchRegex(matcher), name, optional });
+			this._matchers.push({ matchFunction: MatchEngine.matchRegex(matcher), name, optional, greedy: false });
+		else
+			throw new TypeError('Expected matcher to be a String, RegExp or Function');
+
+		return this;
+	}
+
+	followedByOneOrMore(matcher: string | RegExp | MatchEngine.matchFunction, name: null | string = null): Rule {
+		this._matchers.push({ matchFunction: MatchEngine.matchWhitespace(), name: null, optional: true, greedy: false });
+
+		return this.directlyFollowedByOneOrMore(matcher, name);
+	}
+	directlyFollowedByOneOrMore(matcher: string | RegExp | MatchEngine.matchFunction, name: null | string = null): Rule {
+		if (typeof matcher === 'function') {
+			this._matchers.push({ matchFunction: matcher, name, optional: false, greedy: false });
+			this._matchers.push({ matchFunction: matcher, name, optional: true, greedy: true });
+		}
+		else if (typeof matcher === 'string') {
+			this._matchers.push({ matchFunction: MatchEngine.matchString(matcher), name, optional: false, greedy: false });
+			this._matchers.push({ matchFunction: MatchEngine.matchString(matcher), name, optional: true, greedy: true });
+		}
+		else if (matcher instanceof RegExp) {
+			this._matchers.push({ matchFunction: MatchEngine.matchRegex(matcher), name, optional: false, greedy: false });
+			this._matchers.push({ matchFunction: MatchEngine.matchRegex(matcher), name, optional: true, greedy: true });
+		}
+		else
+			throw new TypeError('Expected matcher to be a String, RegExp or Function');
+
+		return this;
+	}
+
+	followedByZeroOrMore(matcher: string | RegExp | MatchEngine.matchFunction, name: null | string = null): Rule {
+		this._matchers.push({ matchFunction: MatchEngine.matchWhitespace(), name: null, optional: true, greedy: false });
+
+		return this.directlyFollowedByZeroOrMore(matcher, name);
+	}
+	directlyFollowedByZeroOrMore(matcher: string | RegExp | MatchEngine.matchFunction, name: null | string = null): Rule {
+		if (typeof matcher === 'function')
+			this._matchers.push({ matchFunction: matcher, name, optional: true, greedy: true });
+		else if (typeof matcher === 'string')
+			this._matchers.push({ matchFunction: MatchEngine.matchString(matcher), name, optional: true, greedy: true });
+		else if (matcher instanceof RegExp)
+			this._matchers.push({ matchFunction: MatchEngine.matchRegex(matcher), name, optional: true, greedy: true });
 		else
 			throw new TypeError('Expected matcher to be a String, RegExp or Function');
 
@@ -85,25 +119,55 @@ export class Rule {
 		return this;
 	}
 
+	private _recovery(result: Result.ERROR_Result, input: string, precedingNode: null | Node.Node, parserContext: Parser): Result.Result {
+		if (this._recover === null)
+			return result;
+		else {
+			for (let i: number = 0; i < input.length; i++) {
+				const substring: string = input.substring(i);
+				const result: Result.Result = this._recover(substring, null, parserContext);
+
+				if (result.status === Result.STATUS.OK) {
+					const raw = input.substring(0, i + result.node.raw.length);
+
+					if (precedingNode === null)
+						return Result.createOK(Node.TYPE.RECOVER, null, null, raw, result.rest);
+					else
+						return Result.calculateOK(precedingNode, Node.TYPE.RECOVER, null, null, raw, result.rest);
+				}
+			}
+
+			return result;
+		}
+	}
+
 	execute(input: string, precedingNode: null | Node.Node, parserContext: Parser): Result.Result {
 		let rest: string = input;
 		const results: Array<Result.OK_Result> = [];
-		const namedNodes: { [key: string]: Node.Node } = {};
+		const childNodes: { [key: string]: Node.Node | Node.Node[] } = {};
 		let currentPrecedingNode: null | Node.Node = precedingNode;
 
-		if (this._matchers.length === 0 || this._matchers.every(({ optional }) => optional))
+		if (this._matchers.length === 0) {
 			if (this._globalThrowMessage !== null)
 				return Result.createERROR(Problem.TYPE.ERROR, this._globalThrowMessage);
 			else
 				throw new RangeError('Expected Rule to have at least one non-optional Matcher');
+		}
 
-		for (const { matchFunction, name, optional } of this._matchers) {
-			const result: Result.Result = matchFunction(rest, currentPrecedingNode, parserContext);
+		if (this._matchers.every(({ optional }) => optional)) {
+			if (this._throwMessage !== null)
+				return Result.createERROR(Problem.TYPE.ERROR, this._throwMessage);
+			else
+				throw new RangeError('Expected Rule to have at least one non-optional Matcher');
+		}
+
+		for (const { matchFunction, name, optional, greedy } of this._matchers) {
+			let result: Result.Result = matchFunction(rest, currentPrecedingNode, parserContext);
 
 			switch (result.status) {
 				case Result.STATUS.OK: {
 					if (name !== null)
-						namedNodes[name] = result.node;
+						childNodes[name] = result.node;
 
 					results.push(result);
 					rest = result.rest;
@@ -114,34 +178,39 @@ export class Rule {
 					if (optional)
 						continue;
 
-					if (this._recover === null)
-						return result;
-					else {
-						for (let i: number = 0; i < input.length; i++) {
-							const substring: string = input.substring(i);
-							const result: Result.Result = this._recover(substring, null, parserContext);
+					return this._recovery(result, input, precedingNode, parserContext);
+				}
+			}
 
-							if (result.status === Result.STATUS.OK) {
-								const raw = input.substring(0, i + result.node.raw.length);
-								return Result.createOK(Node.TYPE.RECOVER, null, null, raw, result.rest);
-							}
-						}
+			if (greedy) {
+				while (result.status !== Result.STATUS.ERROR) {
+					result = matchFunction(rest, currentPrecedingNode, parserContext);
 
-						return result;
+					if (result.status === Result.STATUS.OK) {
+						if (name !== null)
+							if (!Array.isArray(childNodes[name]))
+								childNodes[name] = [childNodes[name] as Node.Node, result.node];
+							else
+								(childNodes[name] as Node.Node[]).push(result.node);
+
+						results.push(result);
+						rest = result.rest;
+						currentPrecedingNode = result.node;
 					}
 				}
 			}
+
 		}
 
 		if (this._throwMessage !== null)
 			return Result.createERROR(Problem.TYPE.ERROR, this._throwMessage);
-
+			
 		const raw: string = Result.calculateRaw(results[0], results[results.length - 1]);
 		const meta: Meta.Meta = precedingNode === null ? Meta.create(raw) : Meta.calculate(precedingNode.meta, raw);
-		const data: unknown | null = this._transformer === null ? null : this._transformer(namedNodes, raw, meta);
+		const data: unknown | null = this._transformer === null ? null : this._transformer(childNodes, raw, meta);
 
 		return precedingNode === null ?
-			Result.createOK(Node.TYPE.MATCH, namedNodes, data, raw, results[results.length - 1].rest) :
-			Result.calculateOK(precedingNode, Node.TYPE.MATCH, namedNodes, data, raw, results[results.length - 1].rest);
+			Result.createOK(Node.TYPE.MATCH, childNodes, data, raw, results[results.length - 1].rest) :
+			Result.calculateOK(precedingNode, Node.TYPE.MATCH, childNodes, data, raw, results[results.length - 1].rest);
 	}
 }
