@@ -1,4 +1,4 @@
-import * as Result from '../lib/Result';
+import * as Result from './lib/Result';
 import * as RuleVariant from './Variant';
 
 export class Parser extends Map<string, RuleVariant.Variant> {

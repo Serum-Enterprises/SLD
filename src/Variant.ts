@@ -1,6 +1,6 @@
-import * as Node from '../lib/Node';
-import * as Problem from '../lib/Problem';
-import * as Result from '../lib/Result';
+import * as Node from './lib/Node';
+import * as Problem from './lib/Problem';
+import * as Result from './lib/Result';
 import { Rule } from './Rule';
 import * as Parser from './Parser';
 

@@ -12,7 +12,7 @@
 	},
 	"include": [
 		"src/**/*",
-		"lib/**/*",
+		"src/lib/**/*",
 		"demo/**/*",
 		"test.js",
 		"demo"

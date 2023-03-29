@@ -1,6 +1,6 @@
-import * as Node from '../lib/Node';
-import * as Problem from '../lib/Problem';
-import * as Result from '../lib/Result';
+import * as Node from './lib/Node';
+import * as Problem from './lib/Problem';
+import * as Result from './lib/Result';
 import * as Parser from './Parser';
 
 export type matchFunction = (input: string, precedingNode: null | Node.Node, parserContext: Parser.Parser) => Result.Result;

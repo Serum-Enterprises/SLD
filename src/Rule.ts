@@ -1,7 +1,7 @@
-import * as Meta from '../lib/Meta';
-import * as Node from '../lib/Node';
-import * as Problem from '../lib/Problem';
-import * as Result from '../lib/Result';
+import * as Meta from './lib/Meta';
+import * as Node from './lib/Node';
+import * as Problem from './lib/Problem';
+import * as Result from './lib/Result';
 import * as MatchEngine from './MatchEngine';
 import { Parser } from './Parser';
 
