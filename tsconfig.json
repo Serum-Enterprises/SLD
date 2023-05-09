@@ -1,5 +1,7 @@
 {
 	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": false,
 		"target": "ESNext",
 		"module": "CommonJS",
 		"outDir": "./build",
