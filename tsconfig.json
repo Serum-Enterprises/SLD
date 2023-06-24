@@ -1,9 +1,8 @@
 {
 	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": false,
+		"allowJs": false,
 		"target": "ESNext",
-		"module": "CommonJS",
+		"module": "ESNext",
 		"outDir": "./build",
 		"strict": true,
 		"esModuleInterop": true,
@@ -11,14 +10,10 @@
 		"lib": [
 			"ESNext"
 		],
-		"declaration": true,
-		"declarationDir": "./types",
-		"declarationMap": false,
 		"rootDir": ".",
 	},
 	"include": [
-		"src/**/*",
-		"tests/**/*"
+		"ts/**/*.ts"
 	],
 	"exclude": [
 		"node_modules",
