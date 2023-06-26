@@ -136,8 +136,16 @@ class Component {
         return data;
     }
 
-    static fromJSON(json) {
-        return new Component(json.type.toUpperCase(), json.value, json.name, json.optional, json.greedy);
+    static fromJSON(json, varName = 'json') {
+        const verifiedData = Component.verify(json, varName);
+
+        return new Component(
+            verifiedData.type.toUpperCase(),
+            verifiedData.value,
+            verifiedData.name,
+            verifiedData.optional,
+            verifiedData.greedy
+        );
     }
 }
 
