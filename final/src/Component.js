@@ -136,15 +136,13 @@ class Component {
         return data;
     }
 
-    static fromJSON(json, varName = 'json') {
-        const verifiedData = Component.verify(json, varName);
-
+    static fromJSON(data) {
         return new Component(
-            verifiedData.type.toUpperCase(),
-            verifiedData.value,
-            verifiedData.name,
-            verifiedData.optional,
-            verifiedData.greedy
+            data.type.toUpperCase(),
+            data.value,
+            data.name,
+            data.optional,
+            data.greedy
         );
     }
 }

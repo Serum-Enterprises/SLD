@@ -141,12 +141,10 @@ class Rule {
     }
 
     static fromJSON(data) {
-        const verifiedData = Rule.verify(data);
-
         return new Rule(
-            verifiedData.components.map((component) => Component.Component.fromJSON(component)),
-            verifiedData.autoThrow,
-            verifiedData.autoRecover ? Component.Component.fromJSON(verifiedData.autoRecover) : null
+            data.components.map((component) => Component.Component.fromJSON(component)),
+            data.autoThrow,
+            data.autoRecover ? Component.Component.fromJSON(data.autoRecover) : null
         );
     }
 }
