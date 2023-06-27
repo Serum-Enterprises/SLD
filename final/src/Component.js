@@ -1,27 +1,67 @@
+const Parser = require('./Parser');
+
 const Node = require('../lib/Node');
 const MisMatchError = require('../lib/errors/MisMatchError');
 
 class TYPE {
+    /**
+     * @returns {'STRING'}
+     */
     static get STRING() {
         return 'STRING';
     }
 
+    /**
+     * @returns {'REGEXP'}
+     */
     static get REGEXP() {
         return 'REGEXP';
     }
 
+    /**
+     * @returns {'VARIANT'}
+     */
     static get VARIANT() {
         return 'VARIANT';
     }
 }
 
 class Component {
+    /**
+     * @type {'STRING' | 'REGEXP' | 'VARIANT'}
+     */
     #type;
+    /**
+     * @type {string}
+     */
     #value;
+    /**
+     * @type {string | null}
+     */
     #name;
+    /**
+     * @type {boolean}
+     */
     #optional;
+    /**
+     * @type {boolean}
+     */
     #greedy;
 
+    /**
+     * Create a new Component Instance
+     * @param {'STRING' | 'REGEXP' | 'VARIANT'} type 
+     * @param {string} value 
+     * @param {string | null} name 
+     * @param {boolean} optional 
+     * @param {boolean} greedy
+     * @throws {TypeError} if type is not a String
+     * @throws {RangeError} if type is not "STRING", "REGEXP" or "VARIANT"
+     * @throws {TypeError} if value is not a String
+     * @throws {TypeError} if name is not a String or null
+     * @throws {TypeError} if optional is not a Boolean
+     * @throws {TypeError} if greedy is not a Boolean
+     */
     constructor(type, value, name = null, optional = false, greedy = false) {
         if (typeof type !== 'string')
             throw new TypeError('Expected type to be a String');
@@ -48,26 +88,44 @@ class Component {
         this.#greedy = greedy;
     }
 
+    /**
+     * @returns {'STRING' | 'REGEXP' | 'VARIANT'}
+     */
     get type() {
         return this.#type;
     }
 
+    /**
+     * @returns {string}
+     */
     get value() {
         return this.#value;
     }
 
+    /**
+     * @returns {string | null}
+     */
     get name() {
         return this.#name;
     }
 
+    /**
+     * @returns {boolean}
+     */
     get optional() {
         return this.#optional;
     }
 
+    /**
+     * @returns {boolean}
+     */
     get greedy() {
         return this.#greedy;
     }
 
+    /**
+     * @returns {(input: string, precedingNode: Node.Node | null, parserContext: Parser) => Node.Node}
+     */
     get matchFunction() {
         switch (this.#type) {
             case TYPE.STRING:
@@ -99,51 +157,6 @@ class Component {
                     return ruleVariant.execute(input, precedingNode, parserContext);
                 };
         }
-    }
-
-    toJSON() {
-        return {
-            type: this.#type,
-            value: this.#value,
-            name: this.#name,
-            optional: this.#optional,
-            greedy: this.#greedy
-        };
-    }
-
-    static verify(data, varName = 'data') {
-        if (Object.prototype.toString.call(data) !== '[object Object]')
-            throw new TypeError(`Expected ${varName} to be an Object`);
-
-        if (typeof data.type !== 'string')
-            throw new TypeError(`Expected ${varName}.type to be a String`);
-
-        if (!['STRING', 'REGEXP', 'VARIANT'].includes(data.type.toUpperCase()))
-            throw new RangeError(`Expected ${varName}.type to be "STRING", "REGEXP" or "VARIANT"`);
-
-        if (typeof data.value !== 'string')
-            throw new TypeError(`Expected ${varName}.value to be a String`);
-
-        if (data.name !== null && typeof data.name !== 'string')
-            throw new TypeError(`Expected ${varName}.name to be a String or null`);
-
-        if (typeof data.optional !== 'boolean')
-            throw new TypeError(`Expected ${varName}.optional to be a Boolean`);
-
-        if (typeof data.greedy !== 'boolean')
-            throw new TypeError(`Expected ${varName}.greedy to be a Boolean`);
-
-        return data;
-    }
-
-    static fromJSON(data) {
-        return new Component(
-            data.type.toUpperCase(),
-            data.value,
-            data.name,
-            data.optional,
-            data.greedy
-        );
     }
 }
 

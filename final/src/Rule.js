@@ -1,13 +1,32 @@
 const Component = require('./Component');
-const Node = require('../lib/Node');
 const Parser = require('./Parser');
+
+const Node = require('../lib/Node');
 const AutoThrowError = require('../lib/errors/AutoThrowError');
 
 class Rule {
+    /**
+     * @type {Component.Component[]}
+     */
     #components;
+    /**
+     * @type {string | null}
+     */
     #autoThrow;
+    /**
+     * @type {Component.Component | null}
+     */
     #autoRecover;
 
+    /**
+     * Create a new Rule Instance
+     * @param {Component.Component[]} components 
+     * @param {string | null} autoThrow 
+     * @param {Component.Component | null} autoRecover
+     * @throws {TypeError} if components is not an Array of Component Instances
+     * @throws {TypeError} if autoThrow is not a String or null
+     * @throws {TypeError} if autoRecover is not an instance of Component or null
+     */
     constructor(components, autoThrow = null, autoRecover = null) {
         if (!(Array.isArray(components) && components.every(component => component instanceof Component.Component)))
             throw new TypeError('Expected components to be an Array of Component Instances');
@@ -23,18 +42,39 @@ class Rule {
         this.#autoRecover = autoRecover;
     }
 
+    /**
+     * @returns {Component.Component[]}
+     */
     get components() {
         return this.#components;
     }
 
+    /**
+     * @returns {string | null}
+     */
     get autoThrow() {
         return this.#autoThrow;
     }
 
+    /**
+     * @returns {Component.Component | null}
+     */
     get autoRecover() {
         return this.#autoRecover;
     }
 
+    /**
+     * Executes the Rule on a source String with an optionally preceding Node and a Parser Context
+     * @param {string} input 
+     * @param {Node.Node | null} precedingNode 
+     * @param {Parser} parentParser 
+     * @returns {unknown}
+     * @throws {TypeError} if input is not a String
+     * @throws {TypeError} if precedingNode is not an instance of Node or null
+     * @throws {TypeError} if parentParser is not an instance of Parser
+     * @throws {AutoThrowError} if autoThrow is not null
+     * 
+     */
     execute(input, precedingNode, parentParser) {
         if (typeof input !== 'string')
             throw new TypeError('Expected input to be a String');
@@ -112,40 +152,6 @@ class Rule {
             precedingNode ? precedingNode.range[1] + 1 : 0,
             precedingNode ? precedingNode.range[1] + raw.length : raw.length
         ]);
-    }
-
-    toJSON() {
-        return {
-            components: this.#components.map(component => component.toJSON()),
-            autoThrow: this.#autoThrow,
-            autoRecover: this.#autoRecover ? this.#autoRecover.toJSON() : null
-        };
-    }
-
-    static verify(data, varName = 'data') {
-        if (Object.prototype.toString.call(data) !== '[object Object]')
-            throw new TypeError(`Expected ${varName} to be an Object`);
-
-        if (!Array.isArray(data.components))
-            throw new TypeError(`Expected ${varName}.components to be an Array`);
-
-        data.components.forEach((component, index) => Component.Component.verify(component, `${varName}.components[${index}]`));
-
-        if (data.autoThrow !== null && typeof data.autoThrow !== 'string')
-            throw new TypeError(`Expected ${varName}.autoThrow to be a String or null`);
-
-        if (data.autoRecover !== null)
-            Component.Component.verify(data.autoRecover, `${varName}.autoRecover`);
-
-        return data;
-    }
-
-    static fromJSON(data) {
-        return new Rule(
-            data.components.map((component) => Component.Component.fromJSON(component)),
-            data.autoThrow,
-            data.autoRecover ? Component.Component.fromJSON(data.autoRecover) : null
-        );
     }
 }
 
