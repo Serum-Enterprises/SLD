@@ -3,24 +3,16 @@
 	"version": "2.0.0-beta.1",
 	"description": "A Parsing Expression Grammar Interpreter",
 	"main": "./build/src/index.js",
-	"scripts": {
-		"prebuild": "rm -rf ./build",
-		"build": "tsc",
-		"postinstall": "npm run build"
-	},
+	"scripts": {},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Serum-Enterprises/Serum-Language-Designer.git"
 	},
 	"keywords": [],
 	"author": "Philipp Steckenbauer",
-	"license": "ISC",
+	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/Serum-Enterprises/Serum-Language-Designer/issues"
 	},
-	"homepage": "https://github.com/Serum-Enterprises/Serum-Language-Designer#readme",
-	"devDependencies": {
-		"@types/node": "^18.15.3",
-		"typescript": "^4.9.5"
-	}
+	"homepage": "https://github.com/Serum-Enterprises/Serum-Language-Designer#readme"
 }
