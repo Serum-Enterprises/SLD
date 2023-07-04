@@ -1,8 +1,8 @@
 class Node {
-    #type = 'MATCH';
-    #raw = '';
-    #children = {};
-    #range = [0, 0];
+    #type;
+    #raw;
+    #children;
+    #range;
 
     constructor(type, raw, children, range) {
         if (typeof type !== 'string')
