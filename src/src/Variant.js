@@ -4,6 +4,10 @@ const Parser = require('./Parser');
 const Node = require('../lib/Node');
 const VariantError = require('../lib/errors/VariantError');
 
+/**
+ * @typedef {{rules: Rule.RuleInterface[]}} VariantInterface
+ */
+
 class Variant {
     /**
      * @type {Rule[]}
@@ -58,6 +62,24 @@ class Variant {
         }
 
         throw new VariantError('No Rule matched', precedingNode ? precedingNode.range[1] + 1 : 0);
+    }
+
+    /**
+     * Verify if the given variant is a valid VariantInterface
+     * @param {unknown} variant 
+     * @param {string} [varName='variant'] 
+     * @returns {VariantInterface}
+     */
+    static verifyInterface(variant, varName = 'variant') {
+        if (Object.prototype.toString.call(variant) !== '[object Object]')
+            throw new TypeError(`Expected ${varName} to be an Object`);
+
+        if (!Array.isArray(variant.rules))
+            throw new TypeError(`Expected ${varName}.rules to be an Array`);
+
+        variant.rules.forEach((rule, index) => Rule.verifyInterface(rule, `${varName}.rule[${index}]`));
+
+        return variant;
     }
 }
 

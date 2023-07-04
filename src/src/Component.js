@@ -3,6 +3,10 @@ const Parser = require('./Parser');
 const Node = require('../lib/Node');
 const MisMatchError = require('../lib/errors/MisMatchError');
 
+/**
+ * @typedef {{type: 'STRING' | 'REGEXP' | 'VARIANT', value: string, name: string | null, greedy: boolean, optional: boolean}} ComponentInterface
+ */
+
 class TYPE {
     /**
      * @returns {'STRING'}
@@ -157,6 +161,37 @@ class Component {
                     return ruleVariant.execute(input, precedingNode, parserContext);
                 };
         }
+    }
+
+    /**
+     * Verify if the given component is a valid ComponentInterface
+     * @param {unknown} component 
+     * @param {string} [varName='component'] 
+     * @returns {ComponentInterface}
+     */
+    static verifyInterface(component, varName = 'component') {
+        if (Object.prototype.toString.call(component) !== '[object Object]')
+            throw new TypeError(`Expected ${varName} to be an Object`);
+
+        if (typeof component.type !== 'string')
+            throw new TypeError(`Expected ${varName}.type to be a String`);
+
+        if (!['STRING', 'REGEXP', 'VARIANT'].includes(component.type.toUpperCase()))
+            throw new RangeError(`Expected ${varName}.type to be "STRING", "REGEXP" or "VARIANT"`);
+
+        if (typeof component.value !== 'string')
+            throw new TypeError(`Expected ${varName}.value to be a String`);
+
+        if (component.name !== null && typeof component.name !== 'string')
+            throw new TypeError(`Expected ${varName}.name to be a String or null`);
+
+        if (typeof component.optional !== 'boolean')
+            throw new TypeError(`Expected ${varName}.optional to be a Boolean`);
+
+        if (typeof component.greedy !== 'boolean')
+            throw new TypeError(`Expected ${varName}.greedy to be a Boolean`);
+
+        return component;
     }
 }
 

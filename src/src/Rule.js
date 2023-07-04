@@ -4,6 +4,10 @@ const Parser = require('./Parser');
 const Node = require('../lib/Node');
 const AutoThrowError = require('../lib/errors/AutoThrowError');
 
+/**
+ * @typedef {{components: Component.ComponentInterface[], autoThrow: string | null, autoRecover: Component.ComponentInterface | null}} RuleInterface
+ */
+
 class Rule {
     /**
      * @type {Component.Component[]}
@@ -152,6 +156,30 @@ class Rule {
             precedingNode ? precedingNode.range[1] + 1 : 0,
             precedingNode ? precedingNode.range[1] + raw.length : raw.length
         ]);
+    }
+
+    /**
+     * Verify if the given rule is a valid RuleInterface
+     * @param {unknown} rule 
+     * @param {string} [varName='rule'] 
+     * @returns {RuleInterface}
+     */
+    static verifyInterface(rule, varName = 'rule') {
+        if (Object.prototype.toString.call(rule) !== '[object Object]')
+            throw new TypeError(`Expected ${varName} to be an Object`);
+
+        if (!Array.isArray(rule.components))
+            throw new TypeError(`Expected ${varName}.components to be an Array`);
+
+        rule.components.forEach((component, index) => Component.verifyInterface(component, `${varName}.components[${index}]`));
+
+        if (rule.autoThrow !== null && typeof rule.autoThrow !== 'string')
+            throw new TypeError(`Expected ${varName}.autoThrow to be a String or null`);
+
+        if (rule.autoRecover !== null)
+            Component.verifyInterface(rule.autoRecover, `${varName}.autoRecover`);
+
+        return rule;
     }
 }
 

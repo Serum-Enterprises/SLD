@@ -1,5 +1,9 @@
 const Variant = require('./Variant');
 
+/**
+ * @typedef {{rootVariant: Variant.VariantInterface, variants: {[name: string]: Variant.VariantInterface}}} ParserInterface
+ */
+
 export class Parser {
     /**
      * @type {Variant.Variant}
@@ -53,6 +57,26 @@ export class Parser {
             throw new TypeError('Expected input to be a string');
 
         return this.#rootVariant.execute(input, null, this);
+    }
+
+    /**
+     * Verify if the given parser is a valid ParserInterface
+     * @param {unknown} parser 
+     * @param {string} varName 
+     * @returns {ParserInterface}
+     */
+    static verifyInterface(parser, varName = 'parser') {
+        if (Object.prototype.toString.call(parser) !== '[object Object]')
+            throw new TypeError(`Expected ${varName} to be an Object`);
+
+        Variant.verifyInterface(parser.rootVariant, `${varName}.rootVariant`);
+
+        if (Object.prototype.toString.call(parser.variants) !== '[object Object]')
+            throw new TypeError(`Expected ${varName}.variants to be an Object`);
+
+        Object.entries(parser.variants).forEach(([key, value]) => Variant.verifyInterface(value, `${varName}.variants[${key}]`));
+
+        return parser;
     }
 }
 
