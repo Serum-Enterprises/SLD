@@ -91,6 +91,19 @@ class Variant {
             rules: this.#rules.map(rule => rule.toJSON())
         };
     }
+
+    static fromJSON(json, path = 'json', safe = true) {
+        if (typeof path !== 'string')
+            throw new TypeError('Expected path to be a string');
+
+        if (typeof safe !== 'boolean')
+            throw new TypeError('Expected safe to be a boolean');
+
+        if (safe)
+            Variant.verifyInterface(json, path);
+
+        return new Variant(json.rules.map((rule, index) => Rule.fromJSON(rule, `${path}.rules[${index}]`, false)));
+    }
 }
 
 module.exports = { Variant };

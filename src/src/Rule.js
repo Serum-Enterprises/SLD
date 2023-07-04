@@ -193,6 +193,30 @@ class Rule {
             autoRecover: this.#autoRecover ? this.#autoRecover.toJSON() : null
         };
     }
+
+    /**
+     * Convert a JSON-compatible RuleInterface to a Rule
+     * @param {RuleInterface} json 
+     * @param {string} [path='json'] - An optional parameter denoting the path to the JSON object 
+     * @param {boolean} [safe=true] - An optional parameter to disable type checking
+     * @returns {Rule}
+     */
+    static fromJSON(json, path = 'json', safe = true) {
+        if (typeof path !== 'string')
+            throw new TypeError('Expected path to be a String');
+
+        if (typeof safe !== 'boolean')
+            throw new TypeError('Expected safe to be a Boolean');
+
+        if (safe)
+            Rule.verifyInterface(json, path);
+
+        return new Rule(
+            json.components.map((component, index) => Component.fromJSON(component, `${path}.components[${index}]`, false)),
+            json.autoThrow,
+            json.autoRecover ? Component.fromJSON(json.autoRecover, `${path}.autoRecover`, false) : null
+        );
+    }
 }
 
 module.exports = { Rule };

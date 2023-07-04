@@ -87,6 +87,24 @@ export class Parser {
             }, {})
         };
     }
+
+    static fromJSON(json, path = 'json', safe = true) {
+        if (typeof path !== 'string')
+            throw new TypeError('Expected path to be a string');
+
+        if (typeof safe !== 'boolean')
+            throw new TypeError('Expected safe to be a boolean');
+
+        if (safe)
+            Parser.verifyInterface(json, path);
+
+        return new Parser(
+            Variant.Variant.fromJSON(json.rootVariant, `${path}.rootVariant`, false),
+            Object.entries(json.variants).reduce((acc, [key, value]) => {
+                return acc.set(key, Variant.Variant.fromJSON(value, `${path}.variants[${key}]`, false));
+            }, new Map())
+        );
+    }
 }
 
 module.exports = { Parser };
