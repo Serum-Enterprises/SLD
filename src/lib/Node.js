@@ -1,12 +1,3 @@
-class TYPE {
-    static get MATCH() {
-        return "MATCH";
-    }
-    static get RECOVER() {
-        return "RECOVER";
-    }
-}
-
 class Node {
     #type = 'MATCH';
     #raw = '';
@@ -28,11 +19,22 @@ class Node {
 
         Object.entries(children).forEach(([key, value]) => {
             if (!((value instanceof Node) || (Array.isArray(value) && value.every(child => child instanceof Node))))
-                throw new TypeError(`Expected children[${key}] to be an instance of Node or an Array of Node Instances`);
+                throw new TypeError(`Expected children.${key} to be an instance of Node or an Array of Node Instances`);
         });
 
-        if (!(Array.isArray(range) && range.length === 2 && range.every(value => Number.isSafeInteger(value))))
-            throw new TypeError('Expected range to be an Array of two Integers');
+        if (!Array.isArray(range))
+            throw new TypeError('Expected range to be an Array');
+
+        if (range.length !== 2)
+            throw new RangeError('Expected range to be an Array of length 2');
+
+        range.forEach((value, index) => {
+            if (!Number.isSafeInteger(value))
+                throw new TypeError(`Expected range[${index}] to be an Integer`);
+
+            if (value < 0)
+                throw new RangeError(`Expected range[${index}] to be greater than or equal to 0`);
+        });
 
         this.#type = type.toUpperCase();
         this.#raw = raw;
@@ -56,7 +58,7 @@ class Node {
         return this.#range;
     }
 
-    verifyInterface(node, varName = 'interface') {
+    static verifyInterface(node, varName = 'interface') {
         if (typeof varName !== 'string')
             throw new TypeError('Expected varName to be a String');
 
@@ -95,17 +97,35 @@ class Node {
         node.range.forEach((value, index) => {
             if (!Number.isSafeInteger(value))
                 throw new TypeError(`Expected ${varName}.range[${index}] to be an Integer`);
+
+            if (value < 0)
+                throw new RangeError(`Expected ${varName}.range[${index}] to be greater than or equal to 0`);
         });
+
+        return node;
     }
 
     toJSON() {
         return {
-            type: this.#type.toUpperCase(),
+            type: this.#type,
             value: this.#raw,
             children: this.#children,
             range: this.#range
         };
     }
+
+    static fromJSON(json, varName = 'json', safe = true) {
+        if (typeof varName !== 'string')
+            throw new TypeError('Expected varName to be a String');
+
+        if (typeof safe !== 'boolean')
+            throw new TypeError('Expected safe to be a Boolean');
+
+        if (safe)
+            Node.verifyInterface(json, varName);
+
+        return new Node(json.type, json.value, json.children, json.range);
+    }
 }
 
-module.exports = { TYPE, Node };
+module.exports = { Node };
