@@ -4,33 +4,11 @@ const Parser = require('./Parser');
 const Node = require('../lib/Node');
 const AutoThrowError = require('../lib/errors/AutoThrowError');
 
-/**
- * @typedef {{components: Component.ComponentInterface[], autoThrow: string | null, autoRecover: Component.ComponentInterface | null}} RuleInterface
- */
-
 class Rule {
-    /**
-     * @type {Component.Component[]}
-     */
     #components;
-    /**
-     * @type {string | null}
-     */
     #autoThrow;
-    /**
-     * @type {Component.Component | null}
-     */
     #autoRecover;
 
-    /**
-     * Create a new Rule Instance
-     * @param {Component.Component[]} components 
-     * @param {string | null} autoThrow 
-     * @param {Component.Component | null} autoRecover
-     * @throws {TypeError} if components is not an Array of Component Instances
-     * @throws {TypeError} if autoThrow is not a String or null
-     * @throws {TypeError} if autoRecover is not an instance of Component or null
-     */
     constructor(components, autoThrow = null, autoRecover = null) {
         if (!(Array.isArray(components) && components.every(component => component instanceof Component.Component)))
             throw new TypeError('Expected components to be an Array of Component Instances');
@@ -46,39 +24,18 @@ class Rule {
         this.#autoRecover = autoRecover;
     }
 
-    /**
-     * @returns {Component.Component[]}
-     */
     get components() {
         return this.#components;
     }
 
-    /**
-     * @returns {string | null}
-     */
     get autoThrow() {
         return this.#autoThrow;
     }
 
-    /**
-     * @returns {Component.Component | null}
-     */
     get autoRecover() {
         return this.#autoRecover;
     }
 
-    /**
-     * Executes the Rule on a source String with an optionally preceding Node and a Parser Context
-     * @param {string} input 
-     * @param {Node.Node | null} precedingNode 
-     * @param {Parser} parentParser 
-     * @returns {unknown}
-     * @throws {TypeError} if input is not a String
-     * @throws {TypeError} if precedingNode is not an instance of Node or null
-     * @throws {TypeError} if parentParser is not an instance of Parser
-     * @throws {AutoThrowError} if autoThrow is not null
-     * 
-     */
     execute(input, precedingNode, parentParser) {
         if (typeof input !== 'string')
             throw new TypeError('Expected input to be a String');
@@ -158,12 +115,6 @@ class Rule {
         ]);
     }
 
-    /**
-     * Verify if the given rule is a valid RuleInterface
-     * @param {unknown} rule 
-     * @param {string} [varName='rule'] 
-     * @returns {RuleInterface}
-     */
     static verifyInterface(rule, varName = 'rule') {
         if (Object.prototype.toString.call(rule) !== '[object Object]')
             throw new TypeError(`Expected ${varName} to be an Object`);
@@ -182,10 +133,6 @@ class Rule {
         return rule;
     }
 
-    /**
-     * Convert this Rule to a JSON-compatible RuleInterface
-     * @returns {RuleInterface}
-     */
     toJSON() {
         return {
             components: this.#components.map(component => component.toJSON()),
@@ -194,13 +141,6 @@ class Rule {
         };
     }
 
-    /**
-     * Convert a JSON-compatible RuleInterface to a Rule
-     * @param {RuleInterface} json 
-     * @param {string} [path='json'] - An optional parameter denoting the path to the JSON object 
-     * @param {boolean} [safe=true] - An optional parameter to disable type checking
-     * @returns {Rule}
-     */
     static fromJSON(json, path = 'json', safe = true) {
         if (typeof path !== 'string')
             throw new TypeError('Expected path to be a String');
