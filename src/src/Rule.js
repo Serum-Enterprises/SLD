@@ -181,6 +181,18 @@ class Rule {
 
         return rule;
     }
+
+    /**
+     * Convert this Rule to a JSON-compatible RuleInterface
+     * @returns {RuleInterface}
+     */
+    toJSON() {
+        return {
+            components: this.#components.map(component => component.toJSON()),
+            autoThrow: this.#autoThrow,
+            autoRecover: this.#autoRecover ? this.#autoRecover.toJSON() : null
+        };
+    }
 }
 
 module.exports = { Rule };

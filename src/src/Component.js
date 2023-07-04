@@ -193,6 +193,20 @@ class Component {
 
         return component;
     }
+
+    /**
+     * Convert this Component to a JSON-compatible ComponentInterface
+     * @returns {ComponentInterface}
+     */
+    toJSON() {
+        return {
+            type: this.#type,
+            value: this.#value,
+            name: this.#name,
+            optional: this.#optional,
+            greedy: this.#greedy
+        };
+    }
 }
 
 module.exports = { TYPE, Component };

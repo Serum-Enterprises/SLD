@@ -81,6 +81,16 @@ class Variant {
 
         return variant;
     }
+
+    /**
+     * Convert this Variant to a JSON-compatible VariantInterface
+     * @returns {VariantInterface}
+     */
+    toJSON() {
+        return {
+            rules: this.#rules.map(rule => rule.toJSON())
+        };
+    }
 }
 
 module.exports = { Variant };

@@ -78,6 +78,15 @@ export class Parser {
 
         return parser;
     }
+
+    toJSON() {
+        return {
+            rootVariant: this.#rootVariant.toJSON(),
+            variants: Array.from(this.#variants.entries()).reduce((acc, [key, value]) => {
+                return { ...acc, [key]: value.toJSON() }
+            }, {})
+        };
+    }
 }
 
 module.exports = { Parser };
