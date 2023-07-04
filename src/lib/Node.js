@@ -56,6 +56,48 @@ class Node {
         return this.#range;
     }
 
+    verifyInterface(node, varName = 'interface') {
+        if (typeof varName !== 'string')
+            throw new TypeError('Expected varName to be a String');
+
+        if (Object.prototype.toString.call(node) !== '[object Object]')
+            throw new TypeError(`Expected ${varName} to be an Object`);
+
+        if (typeof node.type !== 'string')
+            throw new TypeError(`Expected ${varName}.type to be a String`);
+
+        if (!['MATCH', 'RECOVER'].includes(node.type))
+            throw new RangeError(`Expected ${varName}.type to be either "MATCH" or "RECOVER"`);
+
+        if (typeof node.raw !== 'string')
+            throw new TypeError(`Expected ${varName}.raw to be a String`);
+
+        if (Object.prototype.toString.call(node.children) !== '[object Object]')
+            throw new TypeError('Expected children to be an Object');
+
+        Object.entries(node.children).forEach(([name, child]) => {
+            if (Array.isArray(child))
+                child.forEach((child, index) => {
+                    Node.verifyInterface(child, `${varName}.children.${name}[${index}]`);
+                });
+            else if (Object.prototype.toString.call(child) === '[object Object]')
+                Node.verifyInterface(child, `${varName}.children.${name}`);
+            else
+                throw new TypeError(`Expected ${varName}.children.${name} to be a Node Interface or an Array of Node Interfaces`);
+        });
+
+        if (!Array.isArray(node.range))
+            throw new TypeError(`Expected ${varName}.range to be an Array`);
+
+        if (node.range.length !== 2)
+            throw new RangeError(`Expected ${varName}.range to be an Array of length 2`);
+
+        node.range.forEach((value, index) => {
+            if (!Number.isSafeInteger(value))
+                throw new TypeError(`Expected ${varName}.range[${index}] to be an Integer`);
+        });
+    }
+
     toJSON() {
         return {
             type: this.#type,
