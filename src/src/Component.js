@@ -7,29 +7,6 @@ const MisMatchError = require('../lib/errors/MisMatchError');
  * @typedef {{type: 'STRING' | 'REGEXP' | 'VARIANT', value: string, name: string | null, greedy: boolean, optional: boolean}} ComponentInterface
  */
 
-class TYPE {
-	/**
-	 * @returns {'STRING'}
-	 */
-	static get STRING() {
-		return 'STRING';
-	}
-
-	/**
-	 * @returns {'REGEXP'}
-	 */
-	static get REGEXP() {
-		return 'REGEXP';
-	}
-
-	/**
-	 * @returns {'VARIANT'}
-	 */
-	static get VARIANT() {
-		return 'VARIANT';
-	}
-}
-
 class Component {
 	/**
 	 * @type {'STRING' | 'REGEXP' | 'VARIANT'}
@@ -136,11 +113,13 @@ class Component {
 				return (input, precedingNode, parserContext) => {
 					if (!input.startsWith(this.#value))
 						throw new MisMatchError(`Expected ${this.#value}`, precedingNode ? precedingNode.range[1] + 1 : 0);
+						
 					if (precedingNode)
 						return new Node.Node(Node.TYPE.MATCH, this.#value, {}, [
 							precedingNode.range[1] + 1,
 							precedingNode.range[1] + this.#value.length
 						]);
+
 					return new Node.Node(Node.TYPE.MATCH, this.#value, {}, [0, this.#value.length]);
 				};
 			case TYPE.REGEXP:
@@ -148,16 +127,19 @@ class Component {
 					const match = input.match(new RegExp(this.#value));
 					if (!match)
 						throw new MisMatchError(`Expected /${this.#value}/`, precedingNode ? precedingNode.range[1] + 1 : 0);
+
 					if (precedingNode)
 						return new Node.Node(Node.TYPE.MATCH, match[0], {}, [
 							precedingNode.range[1] + 1,
 							precedingNode.range[1] + this.#value.length
 						]);
+
 					return new Node.Node(Node.TYPE.MATCH, this.#value, {}, [0, this.#value.length]);
 				};
 			case TYPE.VARIANT:
 				return (input, precedingNode, parserContext) => {
 					const ruleVariant = parserContext.variants.get(this.#value);
+
 					return ruleVariant.execute(input, precedingNode, parserContext);
 				};
 		}

@@ -17,7 +17,7 @@ class Node {
         if (typeof type !== 'string')
             throw new TypeError('Expected type to be a String');
 
-        if (!['MATCH', 'RECOVER'].includes(type))
+        if (!['MATCH', 'RECOVER'].includes(type.toUpperCase()))
             throw new RangeError('Expected type to be either "MATCH" or "RECOVER"');
 
         if (typeof raw !== 'string')
@@ -34,7 +34,7 @@ class Node {
         if (!(Array.isArray(range) && range.length === 2 && range.every(value => Number.isSafeInteger(value))))
             throw new TypeError('Expected range to be an Array of two Integers');
 
-        this.#type = type;
+        this.#type = type.toUpperCase();
         this.#raw = raw;
         this.#children = children;
         this.#range = range;
@@ -66,7 +66,7 @@ class Node {
         if (typeof node.type !== 'string')
             throw new TypeError(`Expected ${varName}.type to be a String`);
 
-        if (!['MATCH', 'RECOVER'].includes(node.type))
+        if (!['MATCH', 'RECOVER'].includes(node.type.toUpperCase()))
             throw new RangeError(`Expected ${varName}.type to be either "MATCH" or "RECOVER"`);
 
         if (typeof node.raw !== 'string')
@@ -100,7 +100,7 @@ class Node {
 
     toJSON() {
         return {
-            type: this.#type,
+            type: this.#type.toUpperCase(),
             value: this.#raw,
             children: this.#children,
             range: this.#range
