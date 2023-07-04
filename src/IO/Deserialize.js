@@ -1,9 +1,7 @@
-const Component = require('../src/Component');
-const Rule = require('../src/Rule');
-const Variant = require('../src/Variant');
-const Parser = require('../src/Parser');
-
-const Verify = require('./Verify');
+const { Component } = require('../src/Component');
+const { Rule } = require('../src/Rule');
+const { Variant } = require('../src/Variant');
+const { Parser } = require('../src/Parser');
 
 class Deserialize {
 	static #component(data) {
@@ -17,7 +15,7 @@ class Deserialize {
 	}
 
 	static component(component) {
-		const verifiedData = Verify.component(component, 'component');
+		const verifiedData = Component.verifyInterface(component, 'component');
 
 		return Deserialize.#component(verifiedData);
 	}
@@ -31,7 +29,7 @@ class Deserialize {
 	}
 
 	static rule(rule) {
-		const verifiedData = Verify.rule(rule, 'rule');
+		const verifiedData = Rule.verifyInterface(rule, 'rule');
 
 		return Deserialize.#rule(verifiedData);
 	}
@@ -41,7 +39,7 @@ class Deserialize {
 	}
 
 	static variant(variant) {
-		const verifiedData = Verify.variant(variant, 'variant');
+		const verifiedData = Variant.verifyInterface(variant, 'variant');
 
 		return Deserialize.#variant(verifiedData);
 	}
@@ -56,7 +54,7 @@ class Deserialize {
 	}
 
 	static parser(parser) {
-		const verifiedData = Verify.parser(parser, 'parser');
+		const verifiedData = Parser.verifyInterface(parser, 'parser');
 
 		const variantNames = new Set(Object.keys(verifiedData.variants));
 
@@ -65,15 +63,18 @@ class Deserialize {
 			// Verify that the Variant is not empty
 			if (variant.rules.length === 0)
 				throw new RangeError(`Expected Variant ${name} to have at least one Rule`);
+
 			// Verify that all Rules have at least one Component or an autoThrow
 			for (const [index, rule] of variant.rules.entries())
 				if (rule.components.length === 0 && !rule.autoThrow)
 					throw new RangeError(`Expected Rule ${index} of Variant ${name} to have at least one Component or autoThrow set`);
+
 			// Verify that all calls to other Variants are valid
 			for (const [ruleIndex, rule] of variant.rules.entries())
 				for (const [componentIndex, component] of rule.components.entries())
 					if (component.type.toUpperCase() === 'VARIANT' && !variantNames.has(component.value))
 						throw new ReferenceError(`Expected Variant ${name} with Rule ${ruleIndex} in Component ${componentIndex} to reference an existing Variant`);
+
 			// Verify that autoRecover Components are not optional and not greedy
 			for (const [ruleIndex, rule] of variant.rules.entries())
 				if (rule.autoRecover && (rule.autoRecover.optional === true || rule.autoRecover.greedy === true))
