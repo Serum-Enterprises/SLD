@@ -1,7 +1,7 @@
-const Parser = require('./Parser');
+const { Grammar } = require('./Grammar');
 
-const Node = require('../lib/Node');
-const MisMatchError = require('../lib/errors/MisMatchError');
+const { Node } = require('../lib/Node');
+const { MisMatchError } = require('../lib/errors/MisMatchError');
 
 class Component {
 	#type;
@@ -59,64 +59,64 @@ class Component {
 	get matchFunction() {
 		switch (this.#type) {
 			case TYPE.STRING:
-				return (input, precedingNode, parserContext) => {
+				return (input, precedingNode, grammarContext) => {
 					if (typeof input !== 'string')
 						throw new TypeError('Expected input to be a String');
 
-					if (precedingNode !== null && !(precedingNode instanceof Node.Node))
+					if (precedingNode !== null && !(precedingNode instanceof Node))
 						throw new TypeError('Expected precedingNode to be an instance of Node or null');
 
-					if (!(parserContext instanceof Parser.Parser))
-						throw new TypeError('Expected parserContext to be an instance of Parser');
+					if (!(grammarContext instanceof Grammar))
+						throw new TypeError('Expected grammarContext to be an instance of Parser');
 
 					if (!input.startsWith(this.#value))
 						throw new MisMatchError(`Expected ${this.#value}`, precedingNode ? precedingNode.range[1] + 1 : 0);
 
 					if (precedingNode)
-						return new Node.Node(Node.TYPE.MATCH, this.#value, {}, [
+						return new Node('MATCH', this.#value, {}, [
 							precedingNode.range[1] + 1,
 							precedingNode.range[1] + this.#value.length
 						]);
 
-					return new Node.Node(Node.TYPE.MATCH, this.#value, {}, [0, this.#value.length]);
+					return new Node('MATCH', this.#value, {}, [0, this.#value.length]);
 				};
 			case TYPE.REGEXP:
-				return (input, precedingNode, parserContext) => {
+				return (input, precedingNode, grammarContext) => {
 					if (typeof input !== 'string')
 						throw new TypeError('Expected input to be a String');
 
-					if (precedingNode !== null && !(precedingNode instanceof Node.Node))
+					if (precedingNode !== null && !(precedingNode instanceof Node))
 						throw new TypeError('Expected precedingNode to be an instance of Node or null');
 
-					if (!(parserContext instanceof Parser.Parser))
-						throw new TypeError('Expected parserContext to be an instance of Parser');
+					if (!(grammarContext instanceof Grammar))
+						throw new TypeError('Expected grammarContext to be an instance of Parser');
 
 					const match = input.match(new RegExp(this.#value));
 					if (!match)
 						throw new MisMatchError(`Expected /${this.#value}/`, precedingNode ? precedingNode.range[1] + 1 : 0);
 
 					if (precedingNode)
-						return new Node.Node(Node.TYPE.MATCH, match[0], {}, [
+						return new Node('MATCH', match[0], {}, [
 							precedingNode.range[1] + 1,
 							precedingNode.range[1] + this.#value.length
 						]);
 
-					return new Node.Node(Node.TYPE.MATCH, this.#value, {}, [0, this.#value.length - 1]);
+					return new Node('MATCH', this.#value, {}, [0, this.#value.length - 1]);
 				};
 			case TYPE.VARIANT:
-				return (input, precedingNode, parserContext) => {
+				return (input, precedingNode, grammarContext) => {
 					if (typeof input !== 'string')
 						throw new TypeError('Expected input to be a String');
 
-					if (precedingNode !== null && !(precedingNode instanceof Node.Node))
+					if (precedingNode !== null && !(precedingNode instanceof Node))
 						throw new TypeError('Expected precedingNode to be an instance of Node or null');
 
-					if (!(parserContext instanceof Parser.Parser))
-						throw new TypeError('Expected parserContext to be an instance of Parser');
+					if (!(grammarContext instanceof Grammar))
+						throw new TypeError('Expected grammarContext to be an instance of Grammar');
 
-					const ruleVariant = parserContext.variants.get(this.#value);
+					const ruleVariant = grammarContext.variants.get(this.#value);
 
-					return ruleVariant.execute(input, precedingNode, parserContext);
+					return ruleVariant.execute(input, precedingNode, grammarContext);
 				};
 		}
 	}

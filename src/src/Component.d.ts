@@ -1,5 +1,5 @@
-import Node from '../lib/Node';
-import Parser from './Parser';
+import {Node} from '../lib/Node';
+import {Grammar} from './Grammar';
 
 export interface ComponentInterface {
 	type: 'STRING' | 'REGEXP' | 'VARIANT';
@@ -9,7 +9,7 @@ export interface ComponentInterface {
 	optional: boolean;
 }
 
-export type matchFunction = (input: string, precedingNode: Node.Node | null, parserContext: typeof Parser) => Node.Node;
+export type matchFunction = (input: string, precedingNode: Node.Node | null, parserContext: typeof Grammar) => Node.Node;
 
 export class Component {
 	// Verify if the given component is a valid ComponentInterface

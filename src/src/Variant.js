@@ -1,8 +1,8 @@
-const Rule = require('./Rule');
-const Parser = require('./Parser');
+const { Rule } = require('./Rule');
+const { Grammar } = require('./Parser');
 
-const Node = require('../lib/Node');
-const VariantError = require('../lib/errors/VariantError');
+const { Node } = require('../lib/Node');
+const { VariantError } = require('../lib/errors/VariantError');
 
 class Variant {
     #rules;
@@ -18,19 +18,19 @@ class Variant {
         return this.#rules;
     }
 
-    execute(input, precedingNode, parentParser) {
+    execute(input, precedingNode, grammarContext) {
         if (typeof input !== 'string')
             throw new TypeError('Expected input to be a string');
 
-        if (!(precedingNode instanceof Node.Node) && (precedingNode !== null))
+        if (!(precedingNode instanceof Node) && (precedingNode !== null))
             throw new TypeError('Expected precedingNode to be an instance of Node or null');
 
-        if (!(parentParser instanceof Parser))
-            throw new TypeError('Expected parentParser to be an instance of Parser');
+        if (!(grammarContext instanceof Grammar))
+            throw new TypeError('Expected grammarContext to be an instance of Parser');
 
         for (const rule of this.#rules) {
             try {
-                return rule.execute(input, precedingNode, parentParser);
+                return rule.execute(input, precedingNode, grammarContext);
             }
             catch (error) { }
         }

@@ -1,8 +1,8 @@
-const Component = require('./Component');
-const Parser = require('./Parser');
+const { Component } = require('./Component');
+const { Grammar } = require('./Parser');
 
-const Node = require('../lib/Node');
-const AutoThrowError = require('../lib/errors/AutoThrowError');
+const { Node } = require('../lib/Node');
+const { AutoThrowError } = require('../lib/errors/AutoThrowError');
 
 class Rule {
     #components;
@@ -10,7 +10,7 @@ class Rule {
     #autoRecover;
 
     constructor(components, autoThrow = null, autoRecover = null) {
-        if (!(Array.isArray(components) && components.every(component => component instanceof Component.Component)))
+        if (!(Array.isArray(components) && components.every(component => component instanceof Component)))
             throw new TypeError('Expected components to be an Array of Component Instances');
 
         if (!(typeof autoThrow === 'string' || autoThrow === null))
@@ -36,15 +36,15 @@ class Rule {
         return this.#autoRecover;
     }
 
-    execute(input, precedingNode, parentParser) {
+    execute(input, precedingNode, grammarContext) {
         if (typeof input !== 'string')
             throw new TypeError('Expected input to be a String');
 
-        if (!(precedingNode instanceof Node.Node || precedingNode === null))
+        if (!(precedingNode instanceof Node || precedingNode === null))
             throw new TypeError('Expected precedingNode to be an instance of Node or null');
 
-        if (!(parentParser instanceof Parser))
-            throw new TypeError('Expected parentParser to be an instance of Parser');
+        if (!(grammarContext instanceof Grammar))
+            throw new TypeError('Expected grammarContext to be an instance of Parser');
 
         let rest = input;
         let nodes = [];
@@ -59,7 +59,7 @@ class Rule {
                 const matchFunction = component.matchFunction;
 
                 try {
-                    let result = matchFunction(rest, currentPrecedingNode, parentParser);
+                    let result = matchFunction(rest, currentPrecedingNode, grammarContext);
 
                     if (component.name)
                         namedNodes[component.name] = result;
@@ -73,7 +73,7 @@ class Rule {
 
                         while (!didThrow) {
                             try {
-                                result = matchFunction(rest, currentPrecedingNode, parentParser);
+                                result = matchFunction(rest, currentPrecedingNode, grammarContext);
 
                                 if (component.name) {
                                     if (!Array.isArray(namedNodes[component.name]))
@@ -101,15 +101,18 @@ class Rule {
             }
         }
         catch (error) {
-            if (this.#autoRecover)
-                return this.#autoRecover.matchFunction(input, precedingNode, parentParser);
+            if (this.#autoRecover) {
+                const recoverNode = this.#autoRecover.matchFunction(input, precedingNode, grammarContext);
+
+                return new Node('RECOVER', recoverNode.raw, recoverNode.namedNodes, recoverNode.children, recoverNode.range);
+            }
 
             throw error;
         }
 
         const raw = input.slice(0, input.length - rest.length);
 
-        return new Node.Node(Node.TYPE.MATCH, raw, namedNodes, [
+        return new Node('MATCH', raw, namedNodes, [
             precedingNode ? precedingNode.range[1] + 1 : 0,
             precedingNode ? precedingNode.range[1] + raw.length : raw.length
         ]);
