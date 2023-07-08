@@ -1,6 +1,11 @@
 class VariantError extends Error {
     #index = 0;
 
+    /**
+     * Create a new Variant Error
+     * @param {string} message 
+     * @param {number} index 
+     */
     constructor(message, index) {
         if (typeof message !== 'string')
             throw new TypeError('Expected message to be a String');
@@ -15,9 +20,13 @@ class VariantError extends Error {
         this.#index = index;
     }
 
+    /**
+     * Get the Index
+     * @returns {number}
+     */
     get index() {
         return this.#index;
     }
 }
 
-module.exports = { VariantError };
+module.exports = VariantError;
