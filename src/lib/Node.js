@@ -1,64 +1,20 @@
+/**
+ * @typedef {{type: 'MATCH' | 'RECOVER', raw: string, children: {[key: string]: Node | Node[]}, range: [number, number]}} NodeInterface
+ */
+
 class Node {
     #type;
     #raw;
     #children;
     #range;
 
-    constructor(type, raw, children, range) {
-        if (typeof type !== 'string')
-            throw new TypeError('Expected type to be a String');
-
-        if (!['MATCH', 'RECOVER'].includes(type.toUpperCase()))
-            throw new RangeError('Expected type to be either "MATCH" or "RECOVER"');
-
-        if (typeof raw !== 'string')
-            throw new TypeError('Expected raw to be a String');
-
-        if (Object.prototype.toString.call(children) !== '[object Object]')
-            throw new TypeError('Expected children to be an Object');
-
-        Object.entries(children).forEach(([key, value]) => {
-            if (!((value instanceof Node) || (Array.isArray(value) && value.every(child => child instanceof Node))))
-                throw new TypeError(`Expected children.${key} to be an instance of Node or an Array of Node Instances`);
-        });
-
-        if (!Array.isArray(range))
-            throw new TypeError('Expected range to be an Array');
-
-        if (range.length !== 2)
-            throw new RangeError('Expected range to be an Array of length 2');
-
-        range.forEach((value, index) => {
-            if (!Number.isSafeInteger(value))
-                throw new TypeError(`Expected range[${index}] to be an Integer`);
-
-            if (value < 0)
-                throw new RangeError(`Expected range[${index}] to be greater than or equal to 0`);
-        });
-
-        this.#type = type.toUpperCase();
-        this.#raw = raw;
-        this.#children = children;
-        this.#range = range;
-    }
-
-    get type() {
-        return this.#type;
-    }
-
-    get raw() {
-        return this.#raw;
-    }
-
-    get children() {
-        return this.#children;
-    }
-
-    get range() {
-        return this.#range;
-    }
-
-    static verifyInterface(node, varName = 'interface') {
+    /**
+     * Verify that node is a valid NodeInterface
+     * @param {unknown} node 
+     * @param {string} [varName = 'node']
+     * @returns {NodeInterface}
+     */
+    static verifyInterface(node, varName = 'node') {
         if (typeof varName !== 'string')
             throw new TypeError('Expected varName to be a String');
 
@@ -105,26 +61,128 @@ class Node {
         return node;
     }
 
+    /**
+     * Create a Node from a NodeInterface
+     * @param {NodeInterface} node 
+     * @param {string} [varName = 'node'] 
+     * @returns {Node}
+     */
+    static fromJSON(node, varName = 'node') {
+        if (typeof varName !== 'string')
+            throw new TypeError('Expected varName to be a String');
+
+        Node.verifyInterface(node, varName);
+
+        return new Node(
+            node.type,
+            node.raw,
+            Object.entries(node.children).reduce((children, [name, child]) => {
+                if (Array.isArray(child))
+                    children[name] = child.map(child => Node.fromJSON(child, `${varName}.children.${name}`));
+                else
+                    children[name] = Node.fromJSON(child, `${varName}.children.${name}`);
+
+                return children;
+            }, {}),
+            node.range
+        );
+    }
+
+    /**
+     * Create a new Node
+     * @param {'MATCH' | 'RECOVER'} type 
+     * @param {string} raw 
+     * @param {{ [key: string]: Node | Node[] }} children 
+     * @param {[number, number]} range 
+     */
+    constructor(type, raw, children, range) {
+        if (typeof type !== 'string')
+            throw new TypeError('Expected type to be a String');
+
+        if (!['MATCH', 'RECOVER'].includes(type.toUpperCase()))
+            throw new RangeError('Expected type to be either "MATCH" or "RECOVER"');
+
+        if (typeof raw !== 'string')
+            throw new TypeError('Expected raw to be a String');
+
+        if (Object.prototype.toString.call(children) !== '[object Object]')
+            throw new TypeError('Expected children to be an Object');
+
+        Object.entries(children).forEach(([key, value]) => {
+            if (!((value instanceof Node) || (Array.isArray(value) && value.every(child => child instanceof Node))))
+                throw new TypeError(`Expected children.${key} to be an instance of Node or an Array of Node Instances`);
+        });
+
+        if (!Array.isArray(range))
+            throw new TypeError('Expected range to be an Array');
+
+        if (range.length !== 2)
+            throw new RangeError('Expected range to be an Array of length 2');
+
+        range.forEach((value, index) => {
+            if (!Number.isSafeInteger(value))
+                throw new TypeError(`Expected range[${index}] to be an Integer`);
+
+            if (value < 0)
+                throw new RangeError(`Expected range[${index}] to be greater than or equal to 0`);
+        });
+
+        this.#type = type.toUpperCase();
+        this.#raw = raw;
+        this.#children = children;
+        this.#range = range;
+    }
+
+    /**
+     * Get the type of the Node
+     * @returns {'MATCH' | 'RECOVER'}
+     */
+    get type() {
+        return this.#type;
+    }
+
+    /**
+     * Get the raw value of the Node
+     * @returns {string}
+     */
+    get raw() {
+        return this.#raw;
+    }
+
+    /**
+     * Get the children of the Node
+     * @returns {{ [key: string]: Node | Node[] }}
+     */
+    get children() {
+        return this.#children;
+    }
+
+    /**
+     * Get the range of the Node
+     * @returns {[number, number]}
+     */
+    get range() {
+        return this.#range;
+    }
+
+    /**
+     * Convert the Node to a NodeInterface
+     * @returns {NodeInterface}
+     */
     toJSON() {
         return {
             type: this.#type,
             value: this.#raw,
-            children: this.#children,
+            children: Object.entries(this.#children).reduce((children, [name, child]) => {
+                if (Array.isArray(child))
+                    children[name] = child.map(child => child.toJSON());
+                else
+                    children[name] = child.toJSON();
+
+                return children;
+            }, {}),
             range: this.#range
         };
-    }
-
-    static fromJSON(json, varName = 'json', safe = true) {
-        if (typeof varName !== 'string')
-            throw new TypeError('Expected varName to be a String');
-
-        if (typeof safe !== 'boolean')
-            throw new TypeError('Expected safe to be a Boolean');
-
-        if (safe)
-            Node.verifyInterface(json, varName);
-
-        return new Node(json.type, json.value, json.children, json.range);
     }
 }
 
