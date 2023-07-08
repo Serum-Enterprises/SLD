@@ -2,7 +2,7 @@ const Node = require('../lib/Node');
 const Variant = require('./Variant');
 
 /**
- * @typedef {{[key: string]: Variant}} GrammarInterface
+ * @typedef {{[key: string]: Variant.VariantInterface}} GrammarInterface
  */
 
 class Grammar {
