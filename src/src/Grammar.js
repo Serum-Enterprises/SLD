@@ -1,68 +1,165 @@
-const { Variant } = require('./Variant');
+const Node = require('../lib/Node');
+const Variant = require('./Variant');
 
-export class Grammar {
+/**
+ * @typedef {{[key: string]: Variant}} GrammarInterface
+ */
+
+class Grammar {
     #variants;
 
-    constructor(variants = new Map()) {
-        if (!((variants instanceof Map) && Array.from(variants.entries()).every(([key, value]) => (typeof key === 'string') && (value instanceof Variant))))
-            throw new TypeError('Expected variants to be a Map of Strings and Variant Instances');
-
-        this.#variants = variants;
-    }
-
-    get variants() {
-        return this.#variants;
-    }
-
-    execute(input, rootVariant) {
-        if (typeof input !== 'string')
-            throw new TypeError('Expected input to be a String');
-
-        if (typeof rootVariant !== 'string')
-            throw new TypeError('Expected rootVariant to be a String');
-
-        if (!this.#variants.has(rootVariant))
-            throw new ReferenceError('Expected rootVariant to be an existing Variant');
-
-        return this.#variants.get(rootVariant).execute(input, null, this);
-    }
-
+    /**
+     * Verify that the given grammar is a valid GrammarInterface
+     * @param {unknown} grammar 
+     * @param {string} varName 
+     * @returns {GrammarInterface}
+     */
     static verifyInterface(grammar, varName = 'grammar') {
+        if (typeof varName !== 'string')
+            throw new TypeError('Expected varName to be a String');
+
         if (Object.prototype.toString.call(grammar) !== '[object Object]')
             throw new TypeError(`Expected ${varName} to be an Object`);
 
-        if (Object.prototype.toString.call(grammar.variants) !== '[object Object]')
-            throw new TypeError(`Expected ${varName}.variants to be an Object`);
-
-        Object.entries(grammar.variants).forEach(([key, value]) => Variant.verifyInterface(value, `${varName}.variants[${key}]`));
+        Object.entries(grammar).forEach(([key, value]) => {
+            Variant.verifyInterface(value, `${varName}.${key}`);
+        });
 
         return grammar;
     }
 
-    toJSON() {
-        return {
-            variants: Array.from(this.#variants.entries()).reduce((acc, [key, value]) => {
-                return { ...acc, [key]: value.toJSON() }
-            }, {})
-        };
+    /**
+     * Create a new Grammar Instance from a GrammarInterface
+     * @param {GrammarInterface} grammar 
+     * @param {string} varName 
+     * @returns {Grammar}
+     */
+    static fromJSON(grammar, varName = 'grammar') {
+        if (typeof varName !== 'string')
+            throw new TypeError('Expected varName to be a String');
+
+        if (Object.prototype.toString.call(grammar) !== '[object Object]')
+            throw new TypeError(`Expected ${varName} to be an Object`);
+
+        return new Grammar(Object.entries(grammar).reduce((result, [key, value]) => {
+            return {
+                ...result,
+                [key]: Variant.fromJSON(value, `${varName}.${key}`)
+            }
+        }, {}));
     }
 
-    static fromJSON(json, path = 'json', safe = true) {
-        if (typeof path !== 'string')
-            throw new TypeError('Expected path to be a string');
+    /**
+     * Create a new Grammar Instance
+     * @param {{ [key: string]: Variant }} [variants = {}]
+     */
+    constructor(variants = {}) {
+        if (Object.prototype.toString.call(variants) !== '[object Object]')
+            throw new TypeError('Expected variants to be a GrammarInterface');
 
-        if (typeof safe !== 'boolean')
-            throw new TypeError('Expected safe to be a boolean');
+        Object.entries(variants).forEach(([key, value]) => {
+            if (!(value instanceof Variant))
+                throw new TypeError(`Expected variants[${key}] to be an instance of Variant`);
+        });
 
-        if (safe)
-            Grammar.verifyInterface(json, path);
+        this.#variants = variants;
+    }
 
-        return new Grammar(
-            Object.entries(json.variants).reduce((acc, [key, value]) => {
-                return acc.set(key, Variant.fromJSON(value, `${path}.variants[${key}]`, false));
-            }, new Map())
-        );
+    /**
+     * Get a Variant
+     * @param {string} name
+     * @returns {Variant | undefined}
+     */
+    getVariant(name) {
+        if (typeof name !== 'string')
+            throw new TypeError('Expected name to be a String');
+
+        return this.#variants[name];
+    }
+
+    /**
+     * Set a Variant
+     * @param {string} name 
+     * @param {Variant} variant 
+     * @returns {Grammar}
+     */
+    setVariant(name, variant) {
+        if (typeof name !== 'string')
+            throw new TypeError('Expected name to be a String');
+
+        if (!(variant instanceof Variant))
+            throw new TypeError('Expected variant to be an instance of Variant');
+
+        if (this.hasVariant(name))
+            throw new ReferenceError(`Variant ${name} already exists`);
+
+        this.#variants[name] = variant;
+        return this;
+    }
+
+    /**
+     * Check if a Variant exists
+     * @param {string} name 
+     * @returns {boolean}
+     */
+    hasVariant(name) {
+        if (typeof name !== 'string')
+            throw new TypeError('Expected name to be a String');
+
+        return this.#variants[name] instanceof Variant;
+    }
+
+    /**
+     * Delete a Variant
+     * @param {string} name 
+     * @returns {boolean}
+     */
+    deleteVariant(name) {
+        if (typeof name !== 'string')
+            throw new TypeError('Expected name to be a String');
+
+        if (!this.hasVariant(name))
+            return false;
+
+        return delete this.#variants[name];
+    }
+
+    /**
+     * Delete all Variants
+     * @returns {void}
+     */
+    clearVariants() {
+        this.#variants = {};
+    }
+
+    /**
+     * Parse the given source using the given rootVariant
+     * @param {string} source 
+     * @param {string} rootVariant 
+     * @returns {Node}
+     */
+    parse(source, rootVariant) {
+        if (typeof source !== 'string')
+            throw new TypeError('Expected source to be a String');
+
+        if (typeof rootVariant !== 'string')
+            throw new TypeError('Expected rootVariant to be a String');
+
+        if (!this.hasVariant(rootVariant))
+            throw new ReferenceError('Expected rootVariant to be an existing Variant');
+
+        return this.#variants[rootVariant].execute(source, null, this);
+    }
+
+    /**
+     * Convert the Grammar to a GrammarInterface
+     * @returns {GrammarInterface}
+     */
+    toJSON() {
+        return Object.entries(this.#variants).reduce((result, [key, value]) => {
+            return { ...result, [key]: value.toJSON() };
+        }, {});
     }
 }
 
-module.exports = { Grammar };
+module.exports = Grammar;
