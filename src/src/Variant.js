@@ -1,24 +1,73 @@
-const { Rule } = require('./Rule');
-const { Grammar } = require('./Parser');
+const Rule = require('./Rule');
+const Grammar = require('./Grammar');
 
-const { Node } = require('../lib/Node');
-const { VariantError } = require('../lib/errors/VariantError');
+const Node = require('../lib/Node');
+const VariantError = require('../lib/errors/VariantError');
+
+/**
+ * @typedef {Rule.RuleInterface[]} VariantInterface
+ */
 
 class Variant {
     #rules;
 
+    /**
+     * Verify that the given variant is a valid VariantInterface
+     * @param {unknown} variant 
+     * @param {string} [varName = 'variant'] 
+     * @returns {VariantInterface}
+     */
+    static verifyInterface(variant, varName = 'variant') {
+        if (!Array.isArray(variant))
+            throw new TypeError(`Expected ${varName} to be an Array`);
+
+        variant.forEach((rule, index) => {
+            Rule.verifyInterface(rule, `${varName}[${index}]`);
+        });
+
+        return variant;
+    }
+
+    /**
+     * Create a new Variant Instance from a VariantInterface
+     * @param {VariantInterface} variant 
+     * @param {string} [varName = 'variant'] 
+     * @returns {Variant}
+     */
+    static fromJSON(variant, varName = 'variant') {
+        if (typeof varName !== 'string')
+            throw new TypeError('Expected path to be a string');
+
+        if (!Array.isArray(variant))
+            throw new TypeError(`Expected ${varName} to be an Array`);
+
+        return new Variant(variant.map((rule, index) => Rule.fromJSON(rule, `${varName}[${index}]`)));
+    }
+
+    /**
+     * Create a new Variant Instance
+     * @param {Rule[]} rules 
+     */
     constructor(rules) {
-        if (!(Array.isArray(rules) && rules.every(rule => rule instanceof Rule)))
-            throw new TypeError('Expected rules to be an Array of Rule Instances');
+        if (!Array.isArray(rules))
+            throw new TypeError('Expected rules to be an Array');
+
+        rules.forEach((rule, index) => {
+            if (!(rule instanceof Rule))
+                throw new TypeError(`Expected rules[${index}] to be an instance of Rule`);
+        });
 
         this.#rules = rules;
     }
 
-    get rules() {
-        return this.#rules;
-    }
-
-    execute(input, precedingNode, grammarContext) {
+    /**
+     * Parse the given input
+     * @param {string} input 
+     * @param {Node | null} precedingNode 
+     * @param {Grammar} grammarContext 
+     * @returns {Node}
+     */
+    parse(input, precedingNode, grammarContext) {
         if (typeof input !== 'string')
             throw new TypeError('Expected input to be a string');
 
@@ -26,7 +75,7 @@ class Variant {
             throw new TypeError('Expected precedingNode to be an instance of Node or null');
 
         if (!(grammarContext instanceof Grammar))
-            throw new TypeError('Expected grammarContext to be an instance of Parser');
+            throw new TypeError('Expected grammarContext to be an instance of Grammar');
 
         for (const rule of this.#rules) {
             try {
@@ -38,36 +87,13 @@ class Variant {
         throw new VariantError('No Rule matched', precedingNode ? precedingNode.range[1] + 1 : 0);
     }
 
-    static verifyInterface(variant, varName = 'variant') {
-        if (Object.prototype.toString.call(variant) !== '[object Object]')
-            throw new TypeError(`Expected ${varName} to be an Object`);
-
-        if (!Array.isArray(variant.rules))
-            throw new TypeError(`Expected ${varName}.rules to be an Array`);
-
-        variant.rules.forEach((rule, index) => Rule.verifyInterface(rule, `${varName}.rule[${index}]`));
-
-        return variant;
-    }
-
+    /**
+     * Convert this Variant to a VariantInterface
+     * @returns {VariantInterface}
+     */
     toJSON() {
-        return {
-            rules: this.#rules.map(rule => rule.toJSON())
-        };
-    }
-
-    static fromJSON(json, path = 'json', safe = true) {
-        if (typeof path !== 'string')
-            throw new TypeError('Expected path to be a string');
-
-        if (typeof safe !== 'boolean')
-            throw new TypeError('Expected safe to be a boolean');
-
-        if (safe)
-            Variant.verifyInterface(json, path);
-
-        return new Variant(json.rules.map((rule, index) => Rule.fromJSON(rule, `${path}.rules[${index}]`, false)));
+        return this.#rules.map(rule => rule.toJSON());
     }
 }
 
-module.exports = { Variant };
+module.exports = Variant;
