@@ -1,15 +1,75 @@
-const { Component } = require('./Component');
-const { Grammar } = require('./Parser');
+const Component = require('./Component');
+const Grammar = require('./Parser');
 
-const { Node } = require('../lib/Node');
-const { AutoThrowError } = require('../lib/errors/AutoThrowError');
+const Node = require('../lib/Node');
+const AutoThrowError = require('../lib/errors/AutoThrowError');
+
+/**
+ * @typedef {{components: Component.ComponentInterface, autoThrow: string | null, autoRecover: Component.ComponentInterface | null}} RuleInterface
+ */
 
 class Rule {
     #components;
     #autoThrow;
     #autoRecover;
 
-    constructor(components, autoThrow = null, autoRecover = null) {
+    /**
+     * Verify that the given rule is a valid RuleInterface
+     * @param {unknown} rule 
+     * @param {string} [varName = 'rule'] 
+     * @returns {RuleInterface}
+     */
+    static verifyInterface(rule, varName = 'rule') {
+        if (Object.prototype.toString.call(rule) !== '[object Object]')
+            throw new TypeError(`Expected ${varName} to be an Object`);
+
+        if (!Array.isArray(rule.components))
+            throw new TypeError(`Expected ${varName}.components to be an Array`);
+
+        rule.components.forEach((component, index) => Component.verifyInterface(component, `${varName}.components[${index}]`));
+
+        if (rule.autoThrow !== null && typeof rule.autoThrow !== 'string')
+            throw new TypeError(`Expected ${varName}.autoThrow to be a String or null`);
+
+        if (rule.autoRecover !== null)
+            Component.verifyInterface(rule.autoRecover, `${varName}.autoRecover`);
+
+        return rule;
+    }
+
+    /**
+     * Create a new Rule Instance from a RuleInterface
+     * @param {RuleInterface} rule 
+     * @param {string} [varName = 'rule'] 
+     * @returns {Rule}
+     */
+    static fromJSON(rule, varName = 'rule') {
+        if (typeof varName !== 'string')
+            throw new TypeError('Expected path to be a String');
+
+        if (Object.prototype.toString.call(rule) !== '[object Object]')
+            throw new TypeError(`Expected ${varName} to be an Object`);
+
+        if (!Array.isArray(rule.components))
+            throw new TypeError(`Expected ${varName}.components to be an Array`);
+
+        if (rule.autoThrow !== null && typeof rule.autoThrow !== 'string')
+            throw new TypeError(`Expected ${varName}.autoThrow to be a String or null`);
+
+        return new Rule(
+            rule.components.map((component, index) => Component.fromJSON(component, `${varName}.components[${index}]`)),
+            rule.autoThrow,
+            rule.autoRecover !== null ? Component.fromJSON(rule.autoRecover, `${varName}.autoRecover`) : null
+        );
+    }
+
+    /**
+     * Create a new Rule Instance
+     * @param {Component[]} [components = []] 
+     * @param {string | null} [autoThrow = null] 
+     * @param {Component | null} [autoRecover = null] 
+     */
+    constructor(components = [], autoThrow = null, autoRecover = null) {
         if (!(Array.isArray(components) && components.every(component => component instanceof Component)))
             throw new TypeError('Expected components to be an Array of Component Instances');
 
@@ -24,19 +84,14 @@ class Rule {
         this.#autoRecover = autoRecover;
     }
 
-    get components() {
-        return this.#components;
-    }
-
-    get autoThrow() {
-        return this.#autoThrow;
-    }
-
-    get autoRecover() {
-        return this.#autoRecover;
-    }
-
-    execute(input, precedingNode, grammarContext) {
+    /**
+     * Parse the given input
+     * @param {string} input 
+     * @param {Node | null} precedingNode 
+     * @param {Grammar} grammarContext 
+     * @returns {Node}
+     */
+    parse(input, precedingNode, grammarContext) {
         if (typeof input !== 'string')
             throw new TypeError('Expected input to be a String');
 
@@ -44,7 +99,7 @@ class Rule {
             throw new TypeError('Expected precedingNode to be an instance of Node or null');
 
         if (!(grammarContext instanceof Grammar))
-            throw new TypeError('Expected grammarContext to be an instance of Parser');
+            throw new TypeError('Expected grammarContext to be an instance of Grammar');
 
         let rest = input;
         let nodes = [];
@@ -118,47 +173,16 @@ class Rule {
         ]);
     }
 
-    static verifyInterface(rule, varName = 'rule') {
-        if (Object.prototype.toString.call(rule) !== '[object Object]')
-            throw new TypeError(`Expected ${varName} to be an Object`);
-
-        if (!Array.isArray(rule.components))
-            throw new TypeError(`Expected ${varName}.components to be an Array`);
-
-        rule.components.forEach((component, index) => Component.verifyInterface(component, `${varName}.components[${index}]`));
-
-        if (rule.autoThrow !== null && typeof rule.autoThrow !== 'string')
-            throw new TypeError(`Expected ${varName}.autoThrow to be a String or null`);
-
-        if (rule.autoRecover !== null)
-            Component.verifyInterface(rule.autoRecover, `${varName}.autoRecover`);
-
-        return rule;
-    }
-
+    /**
+     * Convert the Rule to a RuleInterface
+     * @returns {RuleInterface}
+     */
     toJSON() {
         return {
             components: this.#components.map(component => component.toJSON()),
             autoThrow: this.#autoThrow,
-            autoRecover: this.#autoRecover ? this.#autoRecover.toJSON() : null
+            autoRecover: this.#autoRecover !== null ? this.#autoRecover.toJSON() : null
         };
-    }
-
-    static fromJSON(json, path = 'json', safe = true) {
-        if (typeof path !== 'string')
-            throw new TypeError('Expected path to be a String');
-
-        if (typeof safe !== 'boolean')
-            throw new TypeError('Expected safe to be a Boolean');
-
-        if (safe)
-            Rule.verifyInterface(json, path);
-
-        return new Rule(
-            json.components.map((component, index) => Component.fromJSON(component, `${path}.components[${index}]`, false)),
-            json.autoThrow,
-            json.autoRecover ? Component.fromJSON(json.autoRecover, `${path}.autoRecover`, false) : null
-        );
     }
 }
 
