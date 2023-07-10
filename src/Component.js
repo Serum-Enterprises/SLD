@@ -140,7 +140,7 @@ class Component {
 	 */
 	get matchFunction() {
 		switch (this.#type) {
-			case TYPE.STRING:
+			case 'STRING':
 				return (input, precedingNode, grammarContext) => {
 					if (typeof input !== 'string')
 						throw new TypeError('Expected input to be a String');
@@ -162,7 +162,7 @@ class Component {
 
 					return new Node('MATCH', this.#value, {}, [0, this.#value.length]);
 				};
-			case TYPE.REGEXP:
+			case 'REGEXP':
 				return (input, precedingNode, grammarContext) => {
 					if (typeof input !== 'string')
 						throw new TypeError('Expected input to be a String');
@@ -185,7 +185,7 @@ class Component {
 
 					return new Node('MATCH', this.#value, {}, [0, this.#value.length - 1]);
 				};
-			case TYPE.VARIANT:
+			case 'VARIANT':
 				return (input, precedingNode, grammarContext) => {
 					if (typeof input !== 'string')
 						throw new TypeError('Expected input to be a String');
