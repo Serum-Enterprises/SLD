@@ -61,7 +61,7 @@ class Component {
 	}
 
 	/**
-	 * Create a new Component
+	 * Create a new Component Instance
 	 * @param {'STRING' | 'REGEXP' | 'VARIANT'} type 
 	 * @param {string} value 
 	 * @param {string | null} [name = null] 
@@ -198,13 +198,13 @@ class Component {
 
 					const ruleVariant = grammarContext.variants.get(this.#value);
 
-					return ruleVariant.execute(input, precedingNode, grammarContext);
+					return ruleVariant.parse(input, precedingNode, grammarContext);
 				};
 		}
 	}
 
 	/**
-	 * Convert the Component to a ComponentInterface
+	 * Convert this Component to a ComponentInterface
 	 * @returns {ComponentInterface}
 	 */
 	toJSON() {

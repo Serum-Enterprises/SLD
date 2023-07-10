@@ -85,15 +85,75 @@ class Rule {
     }
 
     /**
-     * Parse the given input
-     * @param {string} input 
+     * Set the AutoThrow of this Rule
+     * @param {string | null} autoThrow 
+     * @returns {Rule}
+     */
+    setAutoThrow(autoThrow) {
+        if (!(typeof autoThrow === 'string' || autoThrow === null))
+            throw new TypeError('Expected autoThrow to be a String or null');
+
+        this.#autoThrow = autoThrow;
+
+        return this;
+    }
+
+    /**
+     * Set the AutoRecover of this Rule
+     * @param {Component | null} autoRecover 
+     * @returns {Rule}
+     */
+    setAutoRecover(autoRecover) {
+        if (!(autoRecover instanceof Rule || autoRecover === null))
+            throw new TypeError('Expected autoRecover to be an instance of Rule or null');
+
+        this.#autoRecover = autoRecover;
+
+        return this;
+    }
+
+    /**
+     * Add a Component to this Rule
+     * @param {Component} component 
+     * @returns {Rule}
+     */
+    addComponent(component) {
+        if (!(component instanceof Component))
+            throw new TypeError('Expected component to be an instance of Component');
+
+        this.#components.push(component);
+
+        return this;
+    }
+
+    /**
+     * Get the Components of this Rule
+     * @returns {Component[]}
+     */
+    getComponents() {
+        return this.#components;
+    }
+
+    /**
+     * Clear the Components of this Rule
+     * @returns {Rule}
+     */
+    clearComponents() {
+        this.#components = [];
+
+        return this;
+    }
+
+    /**
+     * Parse the given source
+     * @param {string} source 
      * @param {Node | null} precedingNode 
      * @param {Grammar} grammarContext 
      * @returns {Node}
      */
-    parse(input, precedingNode, grammarContext) {
-        if (typeof input !== 'string')
-            throw new TypeError('Expected input to be a String');
+    parse(source, precedingNode, grammarContext) {
+        if (typeof source !== 'string')
+            throw new TypeError('Expected source to be a String');
 
         if (!(precedingNode instanceof Node || precedingNode === null))
             throw new TypeError('Expected precedingNode to be an instance of Node or null');
@@ -101,7 +161,7 @@ class Rule {
         if (!(grammarContext instanceof Grammar))
             throw new TypeError('Expected grammarContext to be an instance of Grammar');
 
-        let rest = input;
+        let rest = source;
         let nodes = [];
         let namedNodes = {};
         let currentPrecedingNode = precedingNode;
@@ -157,7 +217,7 @@ class Rule {
         }
         catch (error) {
             if (this.#autoRecover) {
-                const recoverNode = this.#autoRecover.matchFunction(input, precedingNode, grammarContext);
+                const recoverNode = this.#autoRecover.matchFunction(source, precedingNode, grammarContext);
 
                 return new Node('RECOVER', recoverNode.raw, recoverNode.namedNodes, recoverNode.children, recoverNode.range);
             }
@@ -165,7 +225,7 @@ class Rule {
             throw error;
         }
 
-        const raw = input.slice(0, input.length - rest.length);
+        const raw = source.slice(0, source.length - rest.length);
 
         return new Node('MATCH', raw, namedNodes, [
             precedingNode ? precedingNode.range[1] + 1 : 0,
@@ -174,7 +234,7 @@ class Rule {
     }
 
     /**
-     * Convert the Rule to a RuleInterface
+     * Convert this Rule to a RuleInterface
      * @returns {RuleInterface}
      */
     toJSON() {

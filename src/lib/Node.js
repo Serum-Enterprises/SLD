@@ -1,5 +1,5 @@
 /**
- * @typedef {{type: 'MATCH' | 'RECOVER', raw: string, children: {[key: string]: Node | Node[]}, range: [number, number]}} NodeInterface
+ * @typedef {{type: 'MATCH' | 'RECOVER', raw: string, children: {[key: string]: NodeInterface | NodeInterface[]}, range: [number, number]}} NodeInterface
  */
 
 class Node {
@@ -9,7 +9,7 @@ class Node {
     #range;
 
     /**
-     * Verify that node is a valid NodeInterface
+     * Verify that the given node is a valid NodeInterface
      * @param {unknown} node 
      * @param {string} [varName = 'node']
      * @returns {NodeInterface}
@@ -62,7 +62,7 @@ class Node {
     }
 
     /**
-     * Create a Node from a NodeInterface
+     * Create a new Node Instance from a NodeInterface
      * @param {NodeInterface} node 
      * @param {string} [varName = 'node'] 
      * @returns {Node}
@@ -89,7 +89,7 @@ class Node {
     }
 
     /**
-     * Create a new Node
+     * Create a new Node Instance
      * @param {'MATCH' | 'RECOVER'} type 
      * @param {string} raw 
      * @param {{ [key: string]: Node | Node[] }} children 

@@ -46,9 +46,9 @@ class Variant {
 
     /**
      * Create a new Variant Instance
-     * @param {Rule[]} rules 
+     * @param {Rule[]} [rules = []] 
      */
-    constructor(rules) {
+    constructor(rules = []) {
         if (!Array.isArray(rules))
             throw new TypeError('Expected rules to be an Array');
 
@@ -61,15 +61,44 @@ class Variant {
     }
 
     /**
-     * Parse the given input
-     * @param {string} input 
+     * Add a Rule to this Variant
+     * @param {Rule} rule 
+     * @returns {Variant}
+     */
+    addRule(rule) {
+        if (!(rule instanceof Rule))
+            throw new TypeError('Expected rule to be an instance of Rule');
+
+        this.#rules.push(rule);
+
+        return this;
+    }
+
+    /**
+     * Get the Rules of this Variant
+     * @returns {Rule[]}
+     */
+    getRules() {
+        return this.#rules;
+    }
+
+    /**
+     * Clear the Rules of this Variant
+     */
+    clearRules() {
+        this.#rules = [];
+    }
+
+    /**
+     * Parse the give source
+     * @param {string} source 
      * @param {Node | null} precedingNode 
      * @param {Grammar} grammarContext 
      * @returns {Node}
      */
-    parse(input, precedingNode, grammarContext) {
-        if (typeof input !== 'string')
-            throw new TypeError('Expected input to be a string');
+    parse(source, precedingNode, grammarContext) {
+        if (typeof source !== 'string')
+            throw new TypeError('Expected source to be a string');
 
         if (!(precedingNode instanceof Node) && (precedingNode !== null))
             throw new TypeError('Expected precedingNode to be an instance of Node or null');
@@ -79,7 +108,7 @@ class Variant {
 
         for (const rule of this.#rules) {
             try {
-                return rule.execute(input, precedingNode, grammarContext);
+                return rule.parse(source, precedingNode, grammarContext);
             }
             catch (error) { }
         }

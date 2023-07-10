@@ -11,7 +11,7 @@ class Grammar {
     /**
      * Verify that the given grammar is a valid GrammarInterface
      * @param {unknown} grammar 
-     * @param {string} varName 
+     * @param {string} [varName = 'grammar'] 
      * @returns {GrammarInterface}
      */
     static verifyInterface(grammar, varName = 'grammar') {
@@ -31,7 +31,7 @@ class Grammar {
     /**
      * Create a new Grammar Instance from a GrammarInterface
      * @param {GrammarInterface} grammar 
-     * @param {string} varName 
+     * @param {string} [varName = 'grammar'] 
      * @returns {Grammar}
      */
     static fromJSON(grammar, varName = 'grammar') {
@@ -148,11 +148,11 @@ class Grammar {
         if (!this.hasVariant(rootVariant))
             throw new ReferenceError('Expected rootVariant to be an existing Variant');
 
-        return this.#variants[rootVariant].execute(source, null, this);
+        return this.#variants[rootVariant].parse(source, null, this);
     }
 
     /**
-     * Convert the Grammar to a GrammarInterface
+     * Convert this Grammar to a GrammarInterface
      * @returns {GrammarInterface}
      */
     toJSON() {
