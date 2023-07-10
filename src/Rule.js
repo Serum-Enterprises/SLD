@@ -1,5 +1,5 @@
 const Component = require('./Component');
-const Grammar = require('./Parser');
+const Grammar = require('./Grammar');
 
 const Node = require('../lib/Node');
 const AutoThrowError = require('../lib/errors/AutoThrowError');
@@ -61,6 +61,28 @@ class Rule {
             rule.autoThrow,
             rule.autoRecover !== null ? Component.fromJSON(rule.autoRecover, `${varName}.autoRecover`) : null
         );
+    }
+
+    /**
+     * Begin a new Rule
+     * @returns {QuantitySelector}
+     */
+    static begin() {
+        const rule = new Rule();
+
+        return rule.begin();
+    }
+
+    /**
+     * Create a new Rule that always throws
+     * @param {string} message 
+     * @returns {Rule}
+     */
+    static throw(message) {
+        if(typeof message !== 'string')
+            throw new TypeError('Expected message to be a String');
+
+        return new Rule().setAutoThrow(message);
     }
 
     /**
@@ -386,6 +408,8 @@ class ComponentSelector {
         if (name !== null && typeof name !== 'string')
             throw new TypeError('Expected name to be a String or null');
 
+        console.log(Component.toString());
+
         return this.#ruleInstance.addComponent(new Component('REGEXP', regexp.source, name, this.#greedy, this.#optional));
     }
 
@@ -409,4 +433,4 @@ class ComponentSelector {
     }
 }
 
-module.exports = { Rule };
+module.exports = Rule;
