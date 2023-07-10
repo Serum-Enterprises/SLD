@@ -1,8 +1,8 @@
-const Rule = require('./Rule');
-const Grammar = require('./Grammar');
+const { Rule } = require('./Rule');
+const { Grammar } = require('./Grammar');
 
-const Node = require('../lib/Node');
-const VariantError = require('../lib/errors/VariantError');
+const { Node } = require('../lib/Node');
+const { VariantError } = require('../lib/errors/VariantError');
 
 /**
  * @typedef {Rule.RuleInterface[]} VariantInterface
@@ -125,4 +125,4 @@ class Variant {
     }
 }
 
-module.exports = Variant;
+module.exports = { Variant };

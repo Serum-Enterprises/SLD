@@ -1,7 +1,7 @@
-const Grammar = require('./Grammar');
+const { Grammar } = require('./Grammar');
 
-const Node = require('../lib/Node');
-const MisMatchError = require('../lib/errors/MisMatchError');
+const { Node } = require('../lib/Node');
+const { MisMatchError } = require('../lib/errors/MisMatchError');
 
 /**
  * @typedef {{ type: 'STRING' | 'REGEXP' | 'VARIANT', value: string, name: string | null, optional: boolean, greedy: boolean }} ComponentInterface
@@ -218,4 +218,4 @@ class Component {
 	}
 }
 
-module.exports = Component;
+module.exports = { Component };

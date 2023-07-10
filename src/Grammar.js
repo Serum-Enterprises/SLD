@@ -1,5 +1,5 @@
-const Node = require('../lib/Node');
-const Variant = require('./Variant');
+const { Node } = require('../lib/Node');
+const { Variant } = require('./Variant');
 
 /**
  * @typedef {{[key: string]: Variant.VariantInterface}} GrammarInterface
@@ -162,4 +162,4 @@ class Grammar {
     }
 }
 
-module.exports = Grammar;
+module.exports = { Grammar };

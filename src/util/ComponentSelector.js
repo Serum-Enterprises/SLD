@@ -1,6 +1,6 @@
-const Rule = require('../Rule');
-const Variant = require('../Variant');
-const Component = require('../Component');
+const { Rule } = require('../Rule');
+const { Variant } = require('../Variant');
+const { Component } = require('../Component');
 
 class ComponentSelector {
 	/**
@@ -82,11 +82,11 @@ class ComponentSelector {
 		if (variant instanceof Variant)
 			return this.#ruleInstance.addComponent(new Component('VARIANT', variant.toJSON(), name, this.#greedy, this.#optional));
 		else {
-			Verify.variant(variant, 'variant');
+			Variant.verifyInterface(variant, 'variant');
 
 			return this.#ruleInstance.addComponent(new Component('VARIANT', variant, name, this.#greedy, this.#optional));
 		}
 	}
 }
 
-module.exports = ComponentSelector;
+module.exports = { ComponentSelector };

@@ -1,10 +1,10 @@
-const Component = require('./Component');
-const Grammar = require('./Grammar');
+const { Component } = require('./Component');
+const { Grammar } = require('./Grammar');
 
-const Node = require('../lib/Node');
-const AutoThrowError = require('../lib/errors/AutoThrowError');
+const { Node } = require('../lib/Node');
+const { AutoThrowError } = require('../lib/errors/AutoThrowError');
 
-const QuantitySelector = require('./util/QuantitySelector');
+const { QuantitySelector } = require('./util/QuantitySelector');
 
 /**
  * @typedef {{components: Component.ComponentInterface, autoThrow: string | null, autoRecover: Component.ComponentInterface | null}} RuleInterface
@@ -296,7 +296,4 @@ class Rule {
     }
 }
 
-
-
-
-module.exports = Rule;
+module.exports = { Rule };

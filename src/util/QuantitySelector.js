@@ -1,6 +1,5 @@
-const Component = require('../Component');
-const Rule = require('../Rule');
-const ComponentSelector = require('./ComponentSelector');
+const { Rule } = require('../Rule');
+const { ComponentSelector } = require('./ComponentSelector');
 
 class QuantitySelector {
 	/**
@@ -52,4 +51,4 @@ class QuantitySelector {
 	}
 }
 
-module.exports = QuantitySelector;
+module.exports = { QuantitySelector };
