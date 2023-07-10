@@ -4,6 +4,8 @@ const Grammar = require('./Grammar');
 const Node = require('../lib/Node');
 const AutoThrowError = require('../lib/errors/AutoThrowError');
 
+const QuantitySelector = require('./util/QuantitySelector');
+
 /**
  * @typedef {{components: Component.ComponentInterface, autoThrow: string | null, autoRecover: Component.ComponentInterface | null}} RuleInterface
  */
@@ -79,7 +81,7 @@ class Rule {
      * @returns {Rule}
      */
     static throw(message) {
-        if(typeof message !== 'string')
+        if (typeof message !== 'string')
             throw new TypeError('Expected message to be a String');
 
         return new Rule().setAutoThrow(message);
