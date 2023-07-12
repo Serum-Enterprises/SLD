@@ -420,7 +420,7 @@ class Rule {
 
         return new Node('MATCH', raw, namedNodes, [
             precedingNode ? precedingNode.range[1] + 1 : 0,
-            precedingNode ? precedingNode.range[1] + raw.length : raw.length
+            precedingNode ? precedingNode.range[1] + raw.length : (raw.length - 1)
         ]);
     }
 
