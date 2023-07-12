@@ -1,5 +1,1 @@
 node_modules
-build
-demo/*.json
-coverage
-types
