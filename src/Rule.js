@@ -1,18 +1,159 @@
-const { Component } = require('./Component');
-const { Grammar } = require('./Grammar');
+const Component = require('./Component');
+const Grammar = require('./Grammar');
 
-const { Node } = require('../lib/Node');
-const { AutoThrowError } = require('../lib/errors/AutoThrowError');
-
-const { QuantitySelector } = require('./util/QuantitySelector');
+const Node = require('../lib/Node');
+const AutoThrowError = require('../lib/errors/AutoThrowError');
 
 /**
- * @typedef {{components: Component.ComponentInterface, autoThrow: string | null, autoRecover: Component.ComponentInterface | null}} RuleInterface
+ * @typedef {{components: Component.ComponentInterface[], autoThrow: string | null, autoRecover: Component.ComponentInterface | null}} RuleInterface
  */
 
+class ComponentSelector {
+    /**
+     * @type {Rule}
+     */
+    #ruleInstance;
+    /**
+     * @type {boolean}
+     */
+    #greedy;
+    /**
+     * @type {boolean}
+     */
+    #optional;
+
+    /**
+     * Create a new Component Selector
+     * @param {Rule} ruleInstance 
+     * @param {boolean} greedy 
+     * @param {boolean} optional 
+     */
+    constructor(ruleInstance, greedy = false, optional = false) {
+        if (!(ruleInstance instanceof Rule))
+            throw new TypeError('Expected ruleInstance to be a Rule');
+
+        if (typeof greedy !== 'boolean')
+            throw new TypeError('Expected greedy to be a Boolean');
+
+        if (typeof optional !== 'boolean')
+            throw new TypeError('Expected optional to be a Boolean');
+
+        this.#ruleInstance = ruleInstance;
+        this.#greedy = greedy;
+        this.#optional = optional;
+    }
+
+    /**
+     * Select a String Component
+     * @param {string} string
+     * @param {string | null} [name=null]
+     * @returns {Rule}
+     */
+    string(string, name = null) {
+        if (typeof string !== 'string')
+            throw new TypeError('Expected string to be a String');
+
+        if (name !== null && typeof name !== 'string')
+            throw new TypeError('Expected name to be a String or null');
+
+        return this.#ruleInstance.addComponent(new Component('STRING', string, name, this.#greedy, this.#optional));
+    }
+
+    /**
+     * Select a RegExp Component
+     * @param {RegExp} regexp
+     * @param {string | null} [name=null]
+     * @returns {Rule}
+     */
+    regexp(regexp, name = null) {
+        if (!(regexp instanceof RegExp))
+            throw new TypeError('Expected regexp to be a RegExp');
+
+        if (name !== null && typeof name !== 'string')
+            throw new TypeError('Expected name to be a String or null');
+
+        return this.#ruleInstance.addComponent(new Component('REGEXP', regexp.source, name, this.#greedy, this.#optional));
+    }
+
+    /**
+     * Select a Variant Component
+     * @param {string} variant
+     * @param {string | null} [name=null]
+     * @returns {Rule}
+     */
+    variant(variant, name = null) {
+        if (typeof variant !== 'string')
+            throw new TypeError('Expected variant to be a String');
+
+        if (name !== null && typeof name !== 'string')
+            throw new TypeError('Expected name to be a String or null');
+
+        this.#ruleInstance.addComponent(new Component('VARIANT', variant, name, this.#greedy, this.#optional));
+    }
+}
+
+class QuantitySelector {
+    /**
+     * @type {Rule}
+     */
+    #ruleInstance;
+
+    /**
+     * Create a new Quantity Selector
+     * @param {Rule} ruleInstance
+     */
+    constructor(ruleInstance) {
+        if (!(ruleInstance instanceof Rule))
+            throw new TypeError('Expected ruleInstance to be a Rule');
+
+        this.#ruleInstance = ruleInstance;
+    }
+
+    /**
+     * Set the Match Quantity to One
+     * @returns {ComponentSelector}
+     */
+    one() {
+        return new ComponentSelector(this.#ruleInstance, false, false);
+    }
+
+    /**
+     * Set the Match Quantity to Zero or One
+     * @returns {ComponentSelector}
+     */
+    zeroOrOne() {
+        return new ComponentSelector(this.#ruleInstance, false, true);
+    }
+
+    /**
+     * Set the Match Quantity to Zero or More
+     * @returns {ComponentSelector}
+     */
+    zeroOrMore() {
+        return new ComponentSelector(this.#ruleInstance, true, true);
+    }
+
+    /**
+     * Set the Match Quantity to One or More
+     * @returns {ComponentSelector}
+     */
+    oneOrMore() {
+        return new ComponentSelector(this.#ruleInstance, true, false);
+    }
+}
+
 class Rule {
+    /**
+     * @type {Component[]}
+     */
     #components;
+    /**
+     * @type {string | null}
+     */
     #autoThrow;
+    /**
+     * @type {Component | null}
+     */
     #autoRecover;
 
     /**
@@ -296,4 +437,4 @@ class Rule {
     }
 }
 
-module.exports = { Rule };
+module.exports = Rule;
