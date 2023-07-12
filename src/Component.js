@@ -1,17 +1,32 @@
-const { Grammar } = require('./Grammar');
+const Grammar = require('./Grammar');
 
-const { Node } = require('../lib/Node');
-const { MisMatchError } = require('../lib/errors/MisMatchError');
+const Node = require('../lib/Node');
+const MisMatchError = require('../lib/errors/MisMatchError');
 
 /**
  * @typedef {{ type: 'STRING' | 'REGEXP' | 'VARIANT', value: string, name: string | null, optional: boolean, greedy: boolean }} ComponentInterface
  */
 
 class Component {
+	/**
+	 * @type {'STRING' | 'REGEXP' | 'VARIANT'}
+	 */
 	#type;
+	/**
+	 * @type {string}
+	 */
 	#value;
+	/**
+	 * @type {string | null}
+	 */
 	#name;
+	/**
+	 * @type {boolean}
+	 */
 	#optional;
+	/**
+	 * @type {boolean}
+	 */
 	#greedy;
 
 	/**
@@ -160,7 +175,7 @@ class Component {
 							precedingNode.range[1] + this.#value.length
 						]);
 
-					return new Node('MATCH', this.#value, {}, [0, this.#value.length]);
+					return new Node('MATCH', this.#value, {}, [0, this.#value.length - 1]);
 				};
 			case 'REGEXP':
 				return (input, precedingNode, grammarContext) => {
@@ -218,4 +233,4 @@ class Component {
 	}
 }
 
-module.exports = { Component };
+module.exports = Component;
