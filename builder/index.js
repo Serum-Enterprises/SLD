@@ -133,6 +133,7 @@ class Rule {
 	/**
 	 * Create a Throwing Rule
 	 * @param {string} message 
+	 * @returns {Rule}
 	 */
 	static throw(message) {
 		if (typeof message !== 'string')
