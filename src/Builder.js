@@ -124,10 +124,10 @@ class Rule {
 
 	/**
 	 * Begin a new Rule
-	 * @returns {QuantitySelector}
+	 * @returns {ComponentSelector}
 	 */
-	static begin() {
-		return new Rule().begin();
+	static get match() {
+		return new Rule().directlyFollowedBy;
 	}
 
 	/**
@@ -226,7 +226,7 @@ class Rule {
 	 * Start adding a new Component to this Rule Instance
 	 * @returns {QuantitySelector}
 	 */
-	followedBy() {
+	get followedBy() {
 		this.#components.push({ type: 'REGEXP', value: /\s+/.source, name: null, greedy: false, optional: false });
 
 		return new QuantitySelector(this);
@@ -236,8 +236,22 @@ class Rule {
 	 * Start adding a new Component to this Rule Instance
 	 * @returns {QuantitySelector}
 	 */
-	directlyFollowedBy() {
+	get directlyFollowedBy() {
 		return new QuantitySelector(this);
+	}
+
+	/**
+	 * Capture the last Component added to this Rule Instance
+	 * @param {string} name 
+	 */
+	capture(name) {
+		if (typeof name !== 'string')
+			throw new TypeError('Expected name to be a String');
+
+		this.#components.push({
+			...this.#components.pop(),
+			name
+		});
 	}
 
 	/**
@@ -363,10 +377,25 @@ class QuantitySelector {
 	}
 
 	/**
+	 * Select one for the ComponentSelector
+	 * @returns {ComponentSelector}
+	 */
+	get one() {
+		return new ComponentSelector(this.#ruleInstance, false, false);
+	}
+
+	/**
 	 * Select zero or one for the ComponentSelector
 	 * @returns {ComponentSelector}
 	 */
 	zeroOrOne() {
+		return new ComponentSelector(this.#ruleInstance, false, true);
+	}
+
+	/**
+	 * Select zero or one for the ComponentSelector
+	 */
+	get zeroOrOne() {
 		return new ComponentSelector(this.#ruleInstance, false, true);
 	}
 
@@ -379,10 +408,26 @@ class QuantitySelector {
 	}
 
 	/**
+	 * Select zero or more for the ComponentSelector
+	 * @returns {ComponentSelector}
+	 */
+	get zeroOrMore() {
+		return new ComponentSelector(this.#ruleInstance, true, true);
+	}
+
+	/**
 	 * Select one or more for the ComponentSelector
 	 * @returns {ComponentSelector}
 	 */
 	oneOrMore() {
+		return new ComponentSelector(this.#ruleInstance, true, false);
+	}
+
+	/**
+	 * Select one or more for the ComponentSelector
+	 * @returns {ComponentSelector}
+	 */
+	get oneOrMore() {
 		return new ComponentSelector(this.#ruleInstance, true, false);
 	}
 }
