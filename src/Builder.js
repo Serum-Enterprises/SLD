@@ -223,6 +223,23 @@ class Rule {
 	}
 
 	/**
+	 * Capture the last Component added to this Rule Instance
+	 * @param {string} name 
+	 * @returns {Rule}
+	 */
+	capture(name) {
+		if (typeof name !== 'string')
+			throw new TypeError('Expected name to be a String');
+
+		this.#components.push({
+			...this.#components.pop(),
+			name
+		});
+
+		return this;
+	}
+
+	/**
 	 * Start adding a new Component to this Rule Instance
 	 * @returns {QuantitySelector}
 	 */
