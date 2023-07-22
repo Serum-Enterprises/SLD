@@ -27,6 +27,14 @@ class AutoThrowError extends Error {
     get index() {
         return this.#index;
     }
+
+    /**
+     * Convert this Error to a String
+     * @returns {string}
+     */
+    toString() {
+        return `${this.message} at index ${this.#index}`;
+    }
 }
 
 module.exports = AutoThrowError;
