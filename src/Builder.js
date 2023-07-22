@@ -389,24 +389,8 @@ class QuantitySelector {
 	 * Select one for the ComponentSelector
 	 * @returns {ComponentSelector}
 	 */
-	one() {
-		return new ComponentSelector(this.#ruleInstance, false, false);
-	}
-
-	/**
-	 * Select one for the ComponentSelector
-	 * @returns {ComponentSelector}
-	 */
 	get one() {
 		return new ComponentSelector(this.#ruleInstance, false, false);
-	}
-
-	/**
-	 * Select zero or one for the ComponentSelector
-	 * @returns {ComponentSelector}
-	 */
-	zeroOrOne() {
-		return new ComponentSelector(this.#ruleInstance, false, true);
 	}
 
 	/**
@@ -420,24 +404,8 @@ class QuantitySelector {
 	 * Select zero or more for the ComponentSelector
 	 * @returns {ComponentSelector}
 	 */
-	zeroOrMore() {
-		return new ComponentSelector(this.#ruleInstance, true, true);
-	}
-
-	/**
-	 * Select zero or more for the ComponentSelector
-	 * @returns {ComponentSelector}
-	 */
 	get zeroOrMore() {
 		return new ComponentSelector(this.#ruleInstance, true, true);
-	}
-
-	/**
-	 * Select one or more for the ComponentSelector
-	 * @returns {ComponentSelector}
-	 */
-	oneOrMore() {
-		return new ComponentSelector(this.#ruleInstance, true, false);
 	}
 
 	/**
