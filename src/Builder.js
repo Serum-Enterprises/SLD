@@ -320,7 +320,7 @@ class ComponentSelector {
 	}
 
 	/**
-	 * Add a String Component to the Rule Instance
+	 * Select a String Component
 	 * @param {string} string 
 	 * @param {string | null} [name = null] 
 	 * @returns {Rule}
@@ -336,7 +336,7 @@ class ComponentSelector {
 	}
 
 	/**
-	 * Add a RegExp Component to the Rule Instance
+	 * Select a RegExp Component
 	 * @param {RegExp} regexp 
 	 * @param {string | null} [name = null] 
 	 * @returns {Rule}
@@ -352,7 +352,7 @@ class ComponentSelector {
 	}
 
 	/**
-	 * Add a Variant Component to the Rule Instance
+	 * Select a Variant Component
 	 * @param {string} variant 
 	 * @param {string | null} [name = null] 
 	 * @returns {Rule}
@@ -386,7 +386,7 @@ class QuantitySelector {
 	}
 
 	/**
-	 * Select one for the ComponentSelector
+	 * Select a Quantity of One for the following Component Selection
 	 * @returns {ComponentSelector}
 	 */
 	get one() {
@@ -394,14 +394,14 @@ class QuantitySelector {
 	}
 
 	/**
-	 * Select zero or one for the ComponentSelector
+	 * Select a Quantity of Zero or One for the following Component Selection
 	 */
 	get zeroOrOne() {
 		return new ComponentSelector(this.#ruleInstance, false, true);
 	}
 
 	/**
-	 * Select zero or more for the ComponentSelector
+	 * Select a Quantity of Zero or More for the following Component Selection
 	 * @returns {ComponentSelector}
 	 */
 	get zeroOrMore() {
@@ -409,7 +409,7 @@ class QuantitySelector {
 	}
 
 	/**
-	 * Select one or more for the ComponentSelector
+	 * Select a Quantity of One or More for the following Component Selection
 	 * @returns {ComponentSelector}
 	 */
 	get oneOrMore() {
