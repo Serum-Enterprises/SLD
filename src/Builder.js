@@ -256,21 +256,7 @@ class Rule {
 	get directlyFollowedBy() {
 		return new QuantitySelector(this);
 	}
-
-	/**
-	 * Capture the last Component added to this Rule Instance
-	 * @param {string} name 
-	 */
-	capture(name) {
-		if (typeof name !== 'string')
-			throw new TypeError('Expected name to be a String');
-
-		this.#components.push({
-			...this.#components.pop(),
-			name
-		});
-	}
-
+	
 	/**
 	 * Convert this Instance to a RuleInterface
 	 * @returns {RuleInterface}
