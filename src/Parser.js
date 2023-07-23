@@ -1,10 +1,12 @@
 const Node = require('./lib/Node');
+const Debug = require('./lib/Debug');
 
 const MisMatchError = require('./lib/errors/MisMatchError');
 const AutoThrowError = require('./lib/errors/AutoThrowError');
 const VariantError = require('./lib/errors/VariantError');
 
 class Parser {
+    #debug;
     #grammar;
 
     static #verifyComponent(component, varName = 'component') {
@@ -117,6 +119,8 @@ class Parser {
 
                     const variant = this.#grammar[component.value];
 
+                    Debug.create('Parser:parseVariant').log(`Matching Variant ${component.value}`);
+
                     return this.#parseVariant(variant, source, precedingNode);
                 };
         }
@@ -133,6 +137,8 @@ class Parser {
 
         try {
             for (let component of rule.components) {
+                Debug.create('Parser:parseRule').log(`Created matchFunction for Component ${JSON.stringify(component)}`);
+
                 const matchFunction = this.#createMatchFunction(component);
 
                 try {
@@ -170,16 +176,27 @@ class Parser {
                     }
                 }
                 catch (error) {
-                    if (component.optional)
+                    Debug.create('Parser:parseRule').error(`Error while matching Component ${JSON.stringify(component)}`);
+                    Debug.create('Parser:parseRule').error(error.toString());
+
+                    if (component.optional) {
+                        Debug.create('Parser:parseRule').warn(`Component ${JSON.stringify(component)} is optional, continuing`);
+
                         continue;
+                    }
 
                     throw error;
                 }
             }
         }
         catch (error) {
+            Debug.create('Parser:parseRule').error(`Error while parsing Rule`);
+            Debug.create('Parser:parseRule').error(error.toString());
+
             if (rule.autoRecover) {
                 const recoverNode = rule.autoRecover.matchFunction(source, precedingNode, grammarContext);
+
+                Debug.create('Parser:parseRule').warn(`Recovered with Node ${JSON.stringify(recoverNode)}`);
 
                 return new Node('RECOVER', recoverNode.raw, recoverNode.namedNodes, recoverNode.range);
             }
@@ -196,11 +213,15 @@ class Parser {
     }
 
     #parseVariant(variant, source, precedingNode) {
-        for (const rule of variant) {
+        for (let i = 0; i < variant.length; i++) {
             try {
-                return this.#parseRule(rule, source, precedingNode);
+                Debug.create('Parser:parseVariant').log(`Parsing Rule ${i}`);
+
+                return this.#parseRule(variant[i], source, precedingNode);
             }
             catch (error) {
+                Debug.create('Parser:parseVariant').error(error.toString());
+
                 if (!(error instanceof MisMatchError) && !(error instanceof AutoThrowError))
                     throw error;
             }
@@ -220,6 +241,8 @@ class Parser {
             throw new ReferenceError(`Expected rootVariant to be a valid Variant Name`);
 
         const rootVariantRule = this.#grammar[rootVariant];
+
+        Debug.create('Parser:parse').log(`Parsing source with Root Variant ${rootVariant}`);
 
         return this.#parseVariant(rootVariantRule, source, null);
     }
