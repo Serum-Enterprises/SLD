@@ -2,6 +2,10 @@ class Debug {
 	static #lastTime;
 	#namespace;
 
+	static create(namespace) {
+		return new Debug(namespace);
+	}
+
 	constructor(namespace) {
 		if (typeof namespace !== 'string')
 			throw new TypeError('Expected namespace to be a String');
