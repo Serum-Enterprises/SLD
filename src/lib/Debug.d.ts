@@ -5,9 +5,9 @@ export class Debug {
 	#namespace;
 
 	static formatDiff(diff: BigInt): string;
-	static create(namespace: string, stream: boolean = true): Debug;
+	static create(namespace: string, stream?: boolean): Debug;
 
-	constructor(namespace: string, stream: boolean = true, dataID: Symbol = Symbol());
+	constructor(namespace: string, stream?: boolean, dataID?: Symbol);
 
 	extend(namespace: string): Debug;
 
