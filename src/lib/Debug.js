@@ -94,6 +94,8 @@ class Debug {
 			throw new TypeError('Expected message to be a String');
 
 		this.#ingest('log', message);
+
+		return this;
 	}
 
 	warn(message) {
@@ -101,6 +103,8 @@ class Debug {
 			throw new TypeError('Expected message to be a String');
 
 		this.#ingest('warn', message);
+
+		return this;
 	}
 
 	error(message) {
@@ -108,13 +112,17 @@ class Debug {
 			throw new TypeError('Expected message to be a String');
 
 		this.#ingest('error', message);
+
+		return this;
 	}
 
 	print() {
 		if (this.#stream)
-			return console.warn(`[${this.#namespace}] Debug.print() is not supported in stream mode`);
+			console.warn(`[${this.#namespace}] Debug.print() is not supported in stream mode`);
+		else
+			console.table(Debug.#data[this.#dataID].logData);
 
-		console.table(Debug.#data[this.#dataID].logData);
+		return this;
 	}
 }
 
