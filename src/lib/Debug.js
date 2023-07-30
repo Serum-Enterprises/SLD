@@ -1,145 +1,63 @@
-function getTimeDiff(start, end, pretty = true) {
-	if (!(start instanceof BigInt))
-		throw new TypeError('Expected start to be a BigInt');
-
-	if (!(end instanceof BigInt))
-		throw new TypeError('Expected end to be a BigInt');
-
-	if (typeof pretty !== 'boolean')
-		throw new TypeError('Expected pretty to be a Boolean');
-
-	const diff = end - start;
-
-	if (!pretty)
-		return diff;
-
-	if (diff >= 31536000000000000n)
-		return `~${diff / 31536000000000000n} y`;
-
-	if (diff >= 86400000000000n)
-		return `~${diff / 86400000000000n} d`;
-
-	if (diff >= 60000000000n)
-		return `~${diff / 60000000000n} m`;
-
-	if (diff >= 1000000000n)
-		return `~${diff / 1000000000n} s`;
-
-	if (diff >= 1000000n)
-		return `~${diff / 1000000n} ms`;
-
-	if (diff >= 1000n)
-		return `~${diff / 1000n} µs`;
-
-	return ` ${diff} ns`;
-}
-
 class Debug {
-	static create(namespace) {}
-
-	constructor(namespace) {}
-
-	extend(namespace) {}
-
-	log(message) {}
-	warn(message) {}
-	error(message) {}
-}
-
-class DebugStream extends Debug {
-	#namespace;
-	#lastEpoch;
-
-	static create(namespace) {
-		if (typeof namespace !== 'string')
-			throw new TypeError('Expected namespace to be a String');
-
-		return new DebugStream(namespace);
-	}
-
-	constructor(namespace) {
-		if (typeof namespace !== 'string')
-			throw new TypeError('Expected namespace to be a String');
-
-		super();
-
-		this.#namespace = namespace;
-		this.#lastEpoch = process.hrtime.bigint();
-	}
-
-	extend(namespace) {
-		if (typeof namespace !== 'string')
-			throw new TypeError('Expected namespace to be a String');
-
-		return new this.constructor(`${this.#namespace}:${namespace}`);
-	}
-
-	#ingest(type, message) {
-		const currentTime = process.hrtime.bigint();
-
-		switch (type) {
-			case 'LOG':
-				console.log(`[${this.#namespace}] ${message} + ${getTimeDiff(this.#lastEpoch, currentTime)}`);
-				break;
-			case 'WARN':
-				console.warn(`[${this.#namespace}] ${message} + ${getTimeDiff(this.#lastEpoch, currentTime)}`);
-				break;
-			case 'ERROR':
-				console.error(`[${this.#namespace}] ${message} + ${getTimeDiff(this.#lastEpoch, currentTime)}`);
-		}
-
-		this.#lastEpoch = currentTime;
-	}
-
-	log(message) {
-		if (typeof message !== 'string')
-			throw new TypeError('Expected message to be a String');
-
-		this.#ingest('LOG', message);
-	}
-
-	warn(message) {
-		if (typeof message !== 'string')
-			throw new TypeError('Expected message to be a String');
-
-		this.#ingest('WARN', message);
-	}
-
-	error(message) {
-		if (typeof message !== 'string')
-			throw new TypeError('Expected message to be a String');
-
-		this.#ingest('ERROR', message);
-	}
-}
-
-class DebugTable extends Debug {
 	static #data;
 	#dataID;
+	#stream;
 	#namespace;
 
-	static create(namespace) {
-		if (typeof namespace !== 'string')
-			throw new TypeError('Expected namespace to be a String');
+	static formatDiff(diff) {
+		if (typeof diff !== 'bigint')
+			throw new TypeError('Expected diff to be a BigInt');
 
-		return new DebugStream(namespace);
+		if (diff >= 31536000000000000n)
+			return `~${diff / 31536000000000000n} y`;
+
+		if (diff >= 86400000000000n)
+			return `~${diff / 86400000000000n} d`;
+
+		if (diff >= 60000000000n)
+			return `~${diff / 60000000000n} m`;
+
+		if (diff >= 1000000000n)
+			return `~${diff / 1000000000n} s`;
+
+		if (diff >= 1000000n)
+			return `~${diff / 1000000n} ms`;
+
+		if (diff >= 1000n)
+			return `~${diff / 1000n} µs`;
+
+		return ` ${diff} ns`;
 	}
 
-	constructor(namespace, dataID = Symbol()) {
+	static create(namespace, stream = true) {
 		if (typeof namespace !== 'string')
 			throw new TypeError('Expected namespace to be a String');
+
+		if (typeof stream !== 'boolean')
+			throw new TypeError('Expected stream to be a Boolean');
+
+		return new Debug(namespace, stream);
+	}
+
+	constructor(namespace, stream = true, dataID = Symbol()) {
+		if (typeof namespace !== 'string')
+			throw new TypeError('Expected namespace to be a String');
+
+		if (typeof stream !== 'boolean')
+			throw new TypeError('Expected stream to be a Boolean');
 
 		if (typeof dataID !== 'symbol')
 			throw new TypeError('Expected dataID to be a Symbol');
 
 		this.#namespace = namespace;
+		this.#stream = stream;
 		this.#dataID = dataID;
 
-		if (!DebugTable.#data)
-			DebugTable.#data = {};
+		if (!Debug.#data)
+			Debug.#data = {};
 
-		if (!DebugTable.#data[dataID])
-			DebugTable.#data[dataID] = {
+		if (!Debug.#data[dataID])
+			Debug.#data[dataID] = {
 				lastEpoch: process.hrtime.bigint(),
 				lastIndex: 0,
 				logData: {}
@@ -150,50 +68,54 @@ class DebugTable extends Debug {
 		if (typeof namespace !== 'string')
 			throw new TypeError('Expected namespace to be a String');
 
-		return new DebugTable(`${this.#namespace}:${namespace}`, this.#dataID);
+		return new Debug(`${this.#namespace}:${namespace}`, this.#stream, this.#dataID);
 	}
 
 	#ingest(type, message) {
 		const currentTime = process.hrtime.bigint();
+		const diff = currentTime - Debug.#data[this.#dataID].lastEpoch;
+		Debug.#data[this.#dataID].lastEpoch = currentTime;
 
-		DebugTable.#data[this.#dataID].logData[DebugTable.#data[this.#dataID].lastIndex] = {
+		if (this.#stream)
+			return console[type](`[${this.#namespace}] ${message} ${Debug.formatDiff(diff)}`);
+
+		Debug.#data[this.#dataID].logData[Debug.#data[this.#dataID].lastIndex] = {
 			TYPE: type,
 			NAMESPACE: this.#namespace,
 			MESSAGE: message,
-			DIFF: currentTime - DebugTable.#data[this.#dataID].lastEpoch
+			DIFF: Debug.formatDiff(diff),
+			NSDIFF: diff,
 		};
-		DebugTable.#data[this.#dataID].lastIndex++;
-		DebugTable.#data[this.#dataID].lastEpoch = currentTime;
+		Debug.#data[this.#dataID].lastIndex++;
 	}
 
 	log(message) {
 		if (typeof message !== 'string')
 			throw new TypeError('Expected message to be a String');
 
-		this.#ingest('LOG', message);
+		this.#ingest('log', message);
 	}
 
 	warn(message) {
 		if (typeof message !== 'string')
 			throw new TypeError('Expected message to be a String');
 
-		this.#ingest('WARN', message);
+		this.#ingest('warn', message);
 	}
 
 	error(message) {
 		if (typeof message !== 'string')
 			throw new TypeError('Expected message to be a String');
 
-		this.#ingest('ERROR', message);
+		this.#ingest('error', message);
 	}
 
 	print() {
-		console.table(DebugTable.#data[this.#dataID].logData);
+		if (this.#stream)
+			return console.warn(`[${this.#namespace}] Debug.print() is not supported in stream mode`);
+
+		console.table(Debug.#data[this.#dataID].logData);
 	}
 }
 
-module.exports = {
-	Debug,
-	DebugStream,
-	DebugTable
-}
+module.exports = Debug;
