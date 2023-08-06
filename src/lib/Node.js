@@ -31,7 +31,7 @@ class Node {
             throw new TypeError(`Expected ${varName}.raw to be a String`);
 
         if (Object.prototype.toString.call(node.children) !== '[object Object]')
-            throw new TypeError('Expected children to be an Object');
+            throw new TypeError(`Expected ${varName}.children to be an Object`);
 
         Object.entries(node.children).forEach(([name, child]) => {
             if (Array.isArray(child))
@@ -172,7 +172,7 @@ class Node {
     toJSON() {
         return {
             type: this.#type,
-            value: this.#raw,
+            raw: this.#raw,
             children: Object.entries(this.#children).reduce((children, [name, child]) => {
                 if (Array.isArray(child))
                     children[name] = child.map(child => child.toJSON());
