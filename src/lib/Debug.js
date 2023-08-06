@@ -4,6 +4,13 @@ class Debug {
 	#stream;
 	#namespace;
 
+	/**
+	 * Format a BigInt Time Difference according to its size
+	 * @param {bigint} diff 
+	 * @returns {string}
+	 * @static
+	 * @public
+	 */
 	static formatDiff(diff) {
 		if (typeof diff !== 'bigint')
 			throw new TypeError('Expected diff to be a BigInt');
@@ -29,6 +36,14 @@ class Debug {
 		return ` ${diff} ns`;
 	}
 
+	/**
+	 * Create a new Debug Instance
+	 * @param {string} namespace 
+	 * @param {boolean} [stream = true] 
+	 * @returns {Debug}
+	 * @static
+	 * @public
+	 */
 	static create(namespace, stream = true) {
 		if (typeof namespace !== 'string')
 			throw new TypeError('Expected namespace to be a String');
@@ -39,6 +54,13 @@ class Debug {
 		return new Debug(namespace, stream);
 	}
 
+	/**
+	 * Create a new Debug Instance
+	 * @param {string} namespace 
+	 * @param {boolean} [stream = true] 
+	 * @param {Symbol} [dataID = Symbol()]
+	 * @public
+	 */
 	constructor(namespace, stream = true, dataID = Symbol()) {
 		if (typeof namespace !== 'string')
 			throw new TypeError('Expected namespace to be a String');
@@ -64,6 +86,12 @@ class Debug {
 			};
 	}
 
+	/**
+	 * Extend this Debug Instance
+	 * @param {string} namespace 
+	 * @returns {Debug}
+	 * @public
+	 */
 	extend(namespace) {
 		if (typeof namespace !== 'string')
 			throw new TypeError('Expected namespace to be a String');
@@ -71,6 +99,12 @@ class Debug {
 		return new Debug(`${this.#namespace}:${namespace}`, this.#stream, this.#dataID);
 	}
 
+	/**
+	 * Ingest a Message
+	 * @param {'log' | 'warn' | 'error'} type 
+	 * @param {string} message
+	 * @private
+	 */
 	#ingest(type, message) {
 		const currentTime = process.hrtime.bigint();
 		const diff = currentTime - Debug.#data[this.#dataID].lastEpoch;
@@ -89,6 +123,12 @@ class Debug {
 		Debug.#data[this.#dataID].lastIndex++;
 	}
 
+	/**
+	 * Log a Message to the Log Stream
+	 * @param {string} message 
+	 * @returns {Debug}
+	 * @public
+	 */
 	log(message) {
 		if (typeof message !== 'string')
 			throw new TypeError('Expected message to be a String');
@@ -98,6 +138,12 @@ class Debug {
 		return this;
 	}
 
+	/**
+	 * Log a Message to the Warn Stream
+	 * @param {string} message 
+	 * @returns {Debug}
+	 * @public
+	 */
 	warn(message) {
 		if (typeof message !== 'string')
 			throw new TypeError('Expected message to be a String');
@@ -107,6 +153,12 @@ class Debug {
 		return this;
 	}
 
+	/**
+	 * Log a Message to the Error Stream
+	 * @param {string} message 
+	 * @returns {Debug}
+	 * @public
+	 */
 	error(message) {
 		if (typeof message !== 'string')
 			throw new TypeError('Expected message to be a String');
@@ -116,11 +168,18 @@ class Debug {
 		return this;
 	}
 
+	/**
+	 * Print the Data currently stored in this Instance in a Table
+	 * @returns {Debug}
+	 * @public
+	 */
 	print() {
 		if (this.#stream)
 			console.warn(`[${this.#namespace}] Debug.print() is not supported in stream mode`);
-		else
+		else {
 			console.table(Debug.#data[this.#dataID].logData);
+			Debug.#data[this.#dataID].logData = {};
+		}
 
 		return this;
 	}
