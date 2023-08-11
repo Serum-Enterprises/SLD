@@ -20,28 +20,15 @@ class Grammar extends Map {
 	 * @param {{[key: string]: Variant}} [variants = {}] 
 	 */
 	constructor(variants = {}) {
-		if (!Object.prototype.toString.call(variants) === '[object Object]')
+		if (Object.prototype.toString.call(variants) !== '[object Object]')
 			throw new TypeError('Expected variants to be an Object');
 
 		super(Object.entries(variants).map(([key, value]) => {
-			if (typeof key !== 'string')
-				throw new TypeError('Expected key to be a String');
-
 			if (!(value instanceof Variant))
-				throw new TypeError('Expected value to be an instance of Variant');
+				throw new TypeError(`Expected variants.${key} to be an instance of Variant`);
 
 			return [key, value];
 		}));
-	}
-
-	/**
-	 * Convert this Instance to a GrammarInterface
-	 * @returns {GrammarInterface}
-	 */
-	toJSON() {
-		return Array.from(this.entries()).reduce((acc, [key, value]) => {
-			return { ...acc, [key]: value.toJSON() };
-		}, {});
 	}
 
 	/**
@@ -58,6 +45,16 @@ class Grammar extends Map {
 			throw new TypeError('Expected value to be an instance of Variant');
 
 		return super.set(key, value);
+	}
+
+	/**
+	 * Convert this Instance to a GrammarInterface
+	 * @returns {GrammarInterface}
+	 */
+	toJSON() {
+		return Array.from(this.entries()).reduce((acc, [key, value]) => {
+			return { ...acc, [key]: value.toJSON() };
+		}, {});
 	}
 }
 
@@ -79,9 +76,9 @@ class Variant extends Set {
 		if (!Array.isArray(rules))
 			throw new TypeError('Expected rules to be an Array');
 
-		super(rules.map(rule => {
+		super(rules.map((rule, index) => {
 			if (!(rule instanceof Rule))
-				throw new TypeError('Expected rule to be an instance of Rule');
+				throw new TypeError(`Expected rules[${index}] to be an instance of Rule`);
 
 			return rule;
 		}));
@@ -256,7 +253,7 @@ class Rule {
 	get directlyFollowedBy() {
 		return new QuantitySelector(this);
 	}
-	
+
 	/**
 	 * Convert this Instance to a RuleInterface
 	 * @returns {RuleInterface}
