@@ -3,7 +3,10 @@
 	"version": "2.0.0-beta.1",
 	"description": "A Parsing Expression Grammar Interpreter",
 	"main": "./build/src/index.js",
-	"scripts": {},
+	"scripts": {
+		"build": "tsc",
+		"demo": "npm run build && node ./build/demo/demo.js"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Serum-Enterprises/Serum-Language-Designer.git"
@@ -14,5 +17,11 @@
 	"bugs": {
 		"url": "https://github.com/Serum-Enterprises/Serum-Language-Designer/issues"
 	},
-	"homepage": "https://github.com/Serum-Enterprises/Serum-Language-Designer#readme"
+	"homepage": "https://github.com/Serum-Enterprises/Serum-Language-Designer#readme",
+	"devDependencies": {
+		"@types/jest": "^29.5.3",
+		"@types/node": "^20.4.5",
+		"jest": "^29.6.2",
+		"typescript": "^5.1.6"
+	}
 }
