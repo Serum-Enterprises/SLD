@@ -9,7 +9,13 @@ import { RecursionError } from './lib/errors/RecursionError';
 export type VariantInterface = RuleInterface[];
 
 export class Variant {
-	private static _stack: Map<Symbol, Set<number>> = new Map();
+	/**
+	 * The Stack is a Map of Variant Identifiers and Call-Maps
+	 * The Call-Maps are a Map of source String Lengths and call counts
+	 * 
+	 * It is logging what Variant was called with what source String how many times.
+	 */
+	private static _stack: Map<Symbol, Map<number, number>> = new Map();
 	private _id: Symbol;
 	private _rules: Rule[];
 
@@ -29,26 +35,34 @@ export class Variant {
 	}
 
 	public parse(source: string, precedingNode: Node | null, grammarContext: Grammar) {
-		if (!Variant._stack.has(this._id))
-			Variant._stack.set(this._id, new Set());
+		if(!Variant._stack.has(this._id))
+			Variant._stack.set(this._id, new Map());
 
-		if (Variant._stack.get(this._id)!.has(source.length))
-			throw new RecursionError('Recursion detected');
+		if (!Variant._stack.get(this._id)!.has(source.length))
+			Variant._stack.get(this._id)!.set(source.length, 1);
 		else
-			Variant._stack.get(this._id)!.add(source.length);
+			Variant._stack.get(this._id)!.set(source.length, Variant._stack.get(this._id)!.get(source.length)! + 1);
 
-		for (let rule of this._rules) {
+		let i = Variant._stack.get(this._id)!.get(source.length)! - 1;
+
+		for (; i < this._rules.length; i++) {
 			try {
-				const result = rule.parse(source, precedingNode, grammarContext);
+				const result = this._rules[i].parse(source, precedingNode, grammarContext);
+
+				Variant._stack.get(this._id)!.set(source.length, Variant._stack.get(this._id)!.get(source.length)! - 1);
 
 				return result;
 			}
 			catch (error) {
-				if (error instanceof CustomThrowError)
+				if (error instanceof CustomThrowError) {
+					Variant._stack.get(this._id)!.delete(source.length);
 					throw error;
+				}
 
-				if (!(error instanceof MisMatchError) && !(error instanceof CustomThrowError))
+				if (!(error instanceof MisMatchError)) {
+					Variant._stack.get(this._id)!.delete(source.length);
 					throw error;
+				}
 			}
 		}
 
