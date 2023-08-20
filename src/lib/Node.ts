@@ -1,4 +1,4 @@
-interface NodeInterface {
+export interface NodeInterface {
 	type: 'MATCH' | 'RECOVER';
 	raw: string;
 	children: { [key: string]: NodeInterface | NodeInterface[] };
@@ -12,9 +12,6 @@ export class Node {
 	private _range: [number, number];
 
 	static verifyInterface(node: any, varName: string = 'node'): node is NodeInterface {
-		if (typeof varName !== 'string')
-			throw new TypeError('Expected varName to be a String');
-
 		if (Object.prototype.toString.call(node) !== '[object Object]')
 			throw new TypeError(`Expected ${varName} to be an Object`);
 
@@ -74,7 +71,7 @@ export class Node {
 			node.range
 		);
 	}
-	
+
 	constructor(type: 'MATCH' | 'RECOVER', raw: string, children: { [key: string]: Node | Node[] }, range: [number, number]) {
 		this._type = type;
 		this._raw = raw;
