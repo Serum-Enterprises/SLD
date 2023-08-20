@@ -1,10 +1,9 @@
-const Node = require('../../src/lib/Node.js');
+import { Node, NodeInterface } from '../../src/lib/Node';
 
 describe('Testing Node', () => {
 	test('Testing static verifyInterface', () => {
-		expect(() => Node.verifyInterface(undefined, 0)).toThrow(new TypeError('Expected varName to be a String'));
-		expect(() => Node.verifyInterface()).toThrow(new TypeError('Expected node to be an Object'));
-		expect(() => Node.verifyInterface({})).toThrow(new TypeError('Expected node.type to be a String'));
+		expect(() => Node.verifyInterface(undefined)).toThrow(new TypeError('Expected node to be an Object'));
+		expect(() => Node.verifyInterface({ type: undefined })).toThrow(new TypeError('Expected node.type to be a String'));
 		expect(() => Node.verifyInterface({ type: 'TEST' })).toThrow(new RangeError(`Expected node.type to be either "MATCH" or "RECOVER"`))
 		expect(() => Node.verifyInterface({ type: 'MATCH' })).toThrow(new TypeError('Expected node.raw to be a String'));
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw' })).toThrow(new TypeError('Expected node.children to be an Object'));
@@ -12,7 +11,7 @@ describe('Testing Node', () => {
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: { 'first': null } })).toThrow(new TypeError(`Expected node.children.first to be a Node Interface or an Array of Node Interfaces`))
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: {}, range: [] })).toThrow(new RangeError('Expected node.range to be an Array of length 2'));
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: {}, range: [0.5, 0.5] })).toThrow(new TypeError('Expected node.range[0] to be an Integer'));
-		expect(() => Node.verifyInterface({type: 'MATCH', raw: 'raw', children: {}, range: [-1, -1]})).toThrow(new RangeError(`Expected node.range[0] to be greater than or equal to 0`))
+		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: {}, range: [-1, -1] })).toThrow(new RangeError(`Expected node.range[0] to be greater than or equal to 0`))
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: {}, range: [0, 0.5] })).toThrow(new TypeError('Expected node.range[1] to be an Integer'));
 
 		const validNodeInterface = {
@@ -59,7 +58,7 @@ describe('Testing Node', () => {
 	});
 
 	test('Testing static fromJSON', () => {
-		const validNodeInterface = {
+		const validNodeInterface: NodeInterface = {
 			type: 'MATCH',
 			raw: '1+2+xyz',
 			children: {
@@ -99,22 +98,10 @@ describe('Testing Node', () => {
 			range: [0, 6]
 		};
 
-		expect(() => Node.fromJSON(validNodeInterface, 0)).toThrow(new TypeError('Expected varName to be a String'));
 		expect(Node.fromJSON(validNodeInterface)).toBeInstanceOf(Node);
 	});
 
 	test('Testing constructor', () => {
-		expect(() => new Node()).toThrow(new TypeError('Expected type to be a String'));
-		expect(() => new Node('TEST')).toThrow(new RangeError('Expected type to be either "MATCH" or "RECOVER"'));
-		expect(() => new Node('MATCH')).toThrow(new TypeError('Expected raw to be a String'));
-		expect(() => new Node('MATCH', 'raw')).toThrow(new TypeError('Expected children to be an Object'));
-		expect(() => new Node('MATCH', 'raw', {})).toThrow(new TypeError('Expected range to be an Array'));
-		expect(() => new Node('MATCH', 'raw', {first: null})).toThrow(new TypeError(`Expected children.first to be an instance of Node or an Array of Node Instances`));
-		expect(() => new Node('MATCH', 'raw', {}, [])).toThrow(new RangeError('Expected range to be an Array of length 2'));
-		expect(() => new Node('MATCH', 'raw', {}, [0.5, 0.5])).toThrow(new TypeError('Expected range[0] to be an Integer'));
-		expect(() => new Node('MATCH', 'raw', {}, [-1, 0.5])).toThrow(new RangeError(`Expected range[0] to be greater than or equal to 0`));
-		expect(() => new Node('MATCH', 'raw', {}, [0, 0.5])).toThrow(new TypeError('Expected range[1] to be an Integer'));
-
 		expect(new Node('MATCH', 'raw', {}, [0, 1])).toBeInstanceOf(Node);
 	});
 
@@ -135,7 +122,7 @@ describe('Testing Node', () => {
 	});
 
 	test('Testing Node.toJSON()', () => {
-		const validNodeInterface = {
+		const validNodeInterface: NodeInterface = {
 			type: 'MATCH',
 			raw: '1+2+xyz',
 			children: {
