@@ -23,7 +23,7 @@ export class Variant {
 		return new Variant(json.map(rule => Rule.fromJSON(rule)));
 	}
 
-	public constructor(rules: Rule[]) {
+	public constructor(rules: Rule[] = []) {
 		this._id = Symbol();
 		this._rules = rules;
 	}
@@ -35,7 +35,7 @@ export class Variant {
 	}
 
 	public parse(source: string, precedingNode: Node | null, grammarContext: Grammar) {
-		if(!Variant._stack.has(this._id))
+		if (!Variant._stack.has(this._id))
 			Variant._stack.set(this._id, new Map());
 
 		if (!Variant._stack.get(this._id)!.has(source.length))
