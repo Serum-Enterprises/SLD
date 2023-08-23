@@ -6,7 +6,7 @@ export interface ParserInterface {
 }
 
 export class Grammar {
-	private _variants: Map<string, Variant>;
+	public variants: Map<string, Variant>;
 
 	public static fromJSON(json: ParserInterface): Grammar {
 		return new Grammar(
@@ -18,36 +18,18 @@ export class Grammar {
 	}
 
 	public constructor(variants: { [key: string]: Variant } = {}) {
-		this._variants = new Map(Object.entries(variants));
-	}
-
-	public getVariant(name: string): Variant | null {
-		return this._variants.get(name) || null;
-	}
-
-	public setVariant(name: string, variant: Variant): Grammar {
-		this._variants.set(name, variant);
-
-		return this;
-	}
-
-	public hasVariant(name: string): boolean {
-		return this._variants.has(name);
-	}
-
-	public deleteVariant(name: string): boolean {
-		return this._variants.delete(name);
+		this.variants = new Map(Object.entries(variants));
 	}
 
 	public parse(source: string, rootVariant: string): Node {
-		if(!this._variants.has(rootVariant))
+		if(!this.variants.has(rootVariant))
 			throw new ReferenceError(`Expected rootVariant to be an existing Variant`);
 
-		return this._variants.get(rootVariant)!.parse(source, null, this);
+		return this.variants.get(rootVariant)!.parse(source, null, this);
 	}
 
 	public toJSON(): ParserInterface {
-		return Array.from(this._variants.entries())
+		return Array.from(this.variants.entries())
 			.reduce((result, [key, value]) => {
 				return { ...result, [key]: value.toJSON() };
 			}, {});
