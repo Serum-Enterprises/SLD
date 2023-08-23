@@ -17,7 +17,7 @@ export class Variant {
 	 */
 	private static _stack: Map<Symbol, Map<number, number>> = new Map();
 	private _id: Symbol;
-	private _rules: Rule[];
+	public rules: Rule[];
 
 	public static fromJSON(json: VariantInterface): Variant {
 		return new Variant(json.map(rule => Rule.fromJSON(rule)));
@@ -25,11 +25,11 @@ export class Variant {
 
 	public constructor(rules: Rule[] = []) {
 		this._id = Symbol();
-		this._rules = rules;
+		this.rules = rules;
 	}
 
 	public addRule(rule: Rule): Variant {
-		this._rules.push(rule);
+		this.rules.push(rule);
 
 		return this;
 	}
@@ -45,9 +45,9 @@ export class Variant {
 
 		let i = Variant._stack.get(this._id)!.get(source.length)! - 1;
 
-		for (; i < this._rules.length; i++) {
+		for (; i < this.rules.length; i++) {
 			try {
-				const result = this._rules[i].parse(source, precedingNode, grammarContext);
+				const result = this.rules[i].parse(source, precedingNode, grammarContext);
 
 				Variant._stack.get(this._id)!.set(source.length, Variant._stack.get(this._id)!.get(source.length)! - 1);
 
@@ -70,7 +70,7 @@ export class Variant {
 	}
 
 	public toJSON(): VariantInterface {
-		return this._rules.map(rule => rule.toJSON());
+		return this.rules.map(rule => rule.toJSON());
 	}
 }
 
