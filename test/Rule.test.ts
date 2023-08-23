@@ -26,22 +26,6 @@ describe("Testing Rule", () => {
 		expect(new Rule([component], 'testThrowMessage', null)).toBeInstanceOf(Rule);
 	});
 
-	test('Testing addComponent', () => {
-		const component = new Component('STRING', 'testValue', 'testName', true, false);
-
-		expect(new Rule().addComponent(component)).toBeInstanceOf(Rule);
-	});
-
-	test('Testing setThrowMessage', () => {
-		expect(new Rule().setThrowMessage('testThrowMessage')).toBeInstanceOf(Rule);
-	});
-
-	test('Testing setRecoverComponent', () => {
-		const component = new Component('STRING', 'testValue', 'testName', true, false);
-
-		expect(new Rule().setRecoverComponent(component)).toBeInstanceOf(Rule);
-	});
-
 	test('Testing toJSON', () => {
 		const component = new Component('STRING', 'testValue', 'testName', true, false);
 

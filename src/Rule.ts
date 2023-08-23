@@ -10,9 +10,9 @@ export interface RuleInterface {
 }
 
 export class Rule {
-	protected _components: Component[];
-	protected _throwMessage: string | null;
-	protected _recoverComponent: Component | null;
+	public components: Component[];
+	public throwMessage: string | null;
+	public recoverComponent: Component | null;
 
 	public static fromJSON(json: RuleInterface): Rule {
 		return new Rule(
@@ -23,27 +23,9 @@ export class Rule {
 	}
 
 	public constructor(components: Component[] = [], throwMessage: string | null = null, recoverComponent: Component | null = null) {
-		this._components = components;
-		this._throwMessage = throwMessage;
-		this._recoverComponent = recoverComponent;
-	}
-
-	public addComponent(component: Component): Rule {
-		this._components.push(component);
-
-		return this;
-	}
-
-	public setThrowMessage(message: string): Rule {
-		this._throwMessage = message;
-
-		return this;
-	}
-
-	public setRecoverComponent(component: Component): Rule {
-		this._recoverComponent = component;
-
-		return this;
+		this.components = components;
+		this.throwMessage = throwMessage;
+		this.recoverComponent = recoverComponent;
 	}
 
 	public parse(source: string, precedingNode: Node | null, grammarContext: Grammar) {
@@ -52,11 +34,11 @@ export class Rule {
 		let namedNodes: { [key: string]: Node | Node[] } = {};
 		let currentPrecedingNode: Node | null = precedingNode;
 
-		if (this._throwMessage)
-			throw new CustomThrowError(this._throwMessage, precedingNode ? precedingNode.range[1] + 1 : 0);
+		if (this.throwMessage)
+			throw new CustomThrowError(this.throwMessage, precedingNode ? precedingNode.range[1] + 1 : 0);
 
 		try {
-			for (let component of this._components) {
+			for (let component of this.components) {
 				const matchFunction = component.matchFunction;
 
 				try {
@@ -103,8 +85,8 @@ export class Rule {
 			}
 		}
 		catch (error) {
-			if (this._recoverComponent) {
-				const recoverNode = this._recoverComponent.matchFunction(source, precedingNode, grammarContext);
+			if (this.recoverComponent) {
+				const recoverNode = this.recoverComponent.matchFunction(source, precedingNode, grammarContext);
 
 				return new Node('RECOVER', recoverNode.raw, recoverNode.children, recoverNode.range);
 			}
@@ -122,9 +104,9 @@ export class Rule {
 
 	public toJSON(): RuleInterface {
 		return {
-			components: this._components.map(component => component.toJSON()),
-			throwMessage: this._throwMessage,
-			recoverComponent: this._recoverComponent ? this._recoverComponent.toJSON() : null
+			components: this.components.map(component => component.toJSON()),
+			throwMessage: this.throwMessage,
+			recoverComponent: this.recoverComponent ? this.recoverComponent.toJSON() : null
 		};
 	}
 }
@@ -146,30 +128,30 @@ export class RuleBuilder extends Rule {
 	}
 
 	public recover(type: 'STRING' | 'REGEXP' | 'VARIANT', value: string): RuleBuilder {
-		this._components.push(new Component(type, value, null, false, false));
+		this.components.push(new Component(type, value, null, false, false));
 
 		return this;
 	}
 
 	public throw(message: string): RuleBuilder {
-		this._throwMessage = message;
+		this.throwMessage = message;
 
 		return this;
 	}
 
 	public capture(name: string): RuleBuilder {
-		if (this._components.length === 0)
+		if (this.components.length === 0)
 			return this;
 
-		const lastComponent = this._components.pop()!;
+		const lastComponent = this.components.pop()!;
 
-		this._components.push(new Component(lastComponent.type, lastComponent.value, name, lastComponent.greedy, lastComponent.optional));
+		this.components.push(new Component(lastComponent.type, lastComponent.value, name, lastComponent.greedy, lastComponent.optional));
 
 		return this;
 	}
 
 	public get followedBy(): QuantitySelector {
-		this._components.push(new Component('REGEXP', /\s+/.source, null, false, false));
+		this.components.push(new Component('REGEXP', /\s+/.source, null, false, false));
 
 		return new QuantitySelector(this);
 	}
@@ -191,19 +173,19 @@ class ComponentSelector {
 	}
 
 	public string(string: string, name: string | null = null): RuleBuilder {
-		this._ruleInstance.addComponent(new Component('STRING', string, name, this._greedy, this._optional));
+		this._ruleInstance.components.push(new Component('STRING', string, name, this._greedy, this._optional));
 
 		return this._ruleInstance;
 	}
 
 	public regexp(regexp: RegExp, name: string | null = null): RuleBuilder {
-		this._ruleInstance.addComponent(new Component('REGEXP', regexp.source, name, this._greedy, this._optional));
+		this._ruleInstance.components.push(new Component('REGEXP', regexp.source, name, this._greedy, this._optional));
 
 		return this._ruleInstance;
 	}
 
 	public variant(variant: string, name: string | null = null): RuleBuilder {
-		this._ruleInstance.addComponent(new Component('VARIANT', variant, name, this._greedy, this._optional));
+		this._ruleInstance.components.push(new Component('VARIANT', variant, name, this._greedy, this._optional));
 
 		return this._ruleInstance;
 	}
