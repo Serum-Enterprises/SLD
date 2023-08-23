@@ -60,10 +60,10 @@ export class Component {
 				};
 			case 'VARIANT':
 				return (source: string, precedingNode: Node | null, grammarContext: Grammar) => {
-					if (!grammarContext.hasVariant(this.value))
+					if (!grammarContext.variants.has(this.value))
 						throw new ReferenceError(`Expected ${this.value} to be an existing Variant`);
 
-					const variant = grammarContext.getVariant(this.value)!;
+					const variant = grammarContext.variants.get(this.value)!;
 
 					return variant.parse(source, precedingNode, grammarContext);
 				};
