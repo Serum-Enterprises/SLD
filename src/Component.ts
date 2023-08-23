@@ -11,64 +11,44 @@ export interface ComponentInterface {
 }
 
 export class Component {
-	private _type: 'STRING' | 'REGEXP' | 'VARIANT';
-	private _value: string;
-	private _name: string | null;
-	private _greedy: boolean;
-	private _optional: boolean;
+	public type: 'STRING' | 'REGEXP' | 'VARIANT';
+	public value: string;
+	public name: string | null;
+	public greedy: boolean;
+	public optional: boolean;
 
 	public static fromJSON(json: ComponentInterface): Component {
 		return new Component(json.type, json.value, json.name, json.greedy, json.optional);
 	}
 
 	public constructor(type: 'STRING' | 'REGEXP' | 'VARIANT', value: string, name: string | null = null, greedy: boolean = false, optional: boolean = false) {
-		this._type = type;
-		this._value = value;
-		this._name = name;
-		this._greedy = greedy;
-		this._optional = optional;
-	}
-
-	public get type(): 'STRING' | 'REGEXP' | 'VARIANT' {
-		return this._type;
-	}
-
-	public get value(): string {
-		return this._value;
-	}
-
-	public get name(): string | null {
-		return this._name;
-	}
-
-	public get greedy(): boolean {
-		return this._greedy;
-	}
-
-	public get optional(): boolean {
-		return this._optional;
+		this.type = type;
+		this.value = value;
+		this.name = name;
+		this.greedy = greedy;
+		this.optional = optional;
 	}
 
 	public get matchFunction(): (source: string, precedingNode: Node | null, grammarContext: Grammar) => Node {
-		switch (this._type) {
+		switch (this.type) {
 			case 'STRING':
 				return (source: string, precedingNode: Node | null) => {
-					if (!source.startsWith(this._value))
-						throw new MisMatchError(`Expected ${this._value}`, precedingNode ? precedingNode.range[1] + 1 : 0);
+					if (!source.startsWith(this.value))
+						throw new MisMatchError(`Expected ${this.value}`, precedingNode ? precedingNode.range[1] + 1 : 0);
 
 					if (precedingNode)
-						return new Node('MATCH', this._value, {}, [
+						return new Node('MATCH', this.value, {}, [
 							precedingNode.range[1] + 1,
-							precedingNode.range[1] + this._value.length
+							precedingNode.range[1] + this.value.length
 						]);
 
-					return new Node('MATCH', this._value, {}, [0, this._value.length - 1]);
+					return new Node('MATCH', this.value, {}, [0, this.value.length - 1]);
 				};
 			case 'REGEXP':
 				return (source: string, precedingNode: Node | null) => {
-					const match = source.match(new RegExp(this._value));
+					const match = source.match(new RegExp(this.value));
 					if (!match)
-						throw new MisMatchError(`Expected /${this._value}/`, precedingNode ? precedingNode.range[1] + 1 : 0);
+						throw new MisMatchError(`Expected /${this.value}/`, precedingNode ? precedingNode.range[1] + 1 : 0);
 
 					if (precedingNode)
 						return new Node('MATCH', match[0], {}, [
@@ -80,10 +60,10 @@ export class Component {
 				};
 			case 'VARIANT':
 				return (source: string, precedingNode: Node | null, grammarContext: Grammar) => {
-					if (!grammarContext.hasVariant(this._value))
-						throw new ReferenceError(`Expected ${this._value} to be an existing Variant`);
+					if (!grammarContext.hasVariant(this.value))
+						throw new ReferenceError(`Expected ${this.value} to be an existing Variant`);
 
-					const variant = grammarContext.getVariant(this._value)!;
+					const variant = grammarContext.getVariant(this.value)!;
 
 					return variant.parse(source, precedingNode, grammarContext);
 				};
@@ -93,11 +73,11 @@ export class Component {
 
 	public toJSON(): ComponentInterface {
 		return {
-			type: this._type,
-			value: this._value,
-			name: this._name,
-			greedy: this._greedy,
-			optional: this._optional
+			type: this.type,
+			value: this.value,
+			name: this.name,
+			greedy: this.greedy,
+			optional: this.optional
 		};
 	}
 }

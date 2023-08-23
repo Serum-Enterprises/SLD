@@ -17,26 +17,6 @@ describe("Testing Component", () => {
 		expect(new Component('STRING', 'testValue', 'testName', true, false)).toBeInstanceOf(Component);
 	});
 
-	test('Testing get type', () => {
-		expect(new Component('STRING', 'testValue', 'testName', true, false).type).toBe('STRING');
-	});
-
-	test('Testing get value', () => {
-		expect(new Component('STRING', 'testValue', 'testName', true, false).value).toBe('testValue');
-	});
-
-	test('Testing get name', () => {
-		expect(new Component('STRING', 'testValue', 'testName', true, false).name).toBe('testName');
-	});
-
-	test('Testing get greedy', () => {
-		expect(new Component('STRING', 'testValue', 'testName', true, false).greedy).toBe(true);
-	});
-
-	test('Testing get optional', () => {
-		expect(new Component('STRING', 'testValue', 'testName', true, false).optional).toBe(false);
-	});
-
 	test('Testing get matchFunction', () => {
 		expect(new Component('STRING', 'testValue', 'testName', true, false).matchFunction).toBeInstanceOf(Function);
 	});
