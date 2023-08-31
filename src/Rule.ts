@@ -30,7 +30,6 @@ export class Rule {
 
 	public parse(source: string, precedingNode: Node | null, grammarContext: Grammar) {
 		let rest: string = source;
-		let nodes: Node[] = [];
 		let namedNodes: { [key: string]: Node | Node[] } = {};
 		let currentPrecedingNode: Node | null = precedingNode;
 
@@ -47,7 +46,6 @@ export class Rule {
 					if (component.name !== null)
 						namedNodes[component.name] = result;
 
-					nodes.push(result);
 					rest = rest.slice(result.raw.length);
 					currentPrecedingNode = result;
 
@@ -65,7 +63,6 @@ export class Rule {
 										(namedNodes[component.name] as Node[]).push(result);
 								}
 
-								nodes.push(result);
 								rest = rest.slice(result.raw.length);
 								currentPrecedingNode = result;
 							}
