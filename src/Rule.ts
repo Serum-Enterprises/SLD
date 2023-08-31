@@ -54,6 +54,7 @@ export class Rule {
 							try {
 								result = matchFunction(rest, currentPrecedingNode, grammarContext);
 
+								// TODO: Optimize
 								if (component.name) {
 									if (!Array.isArray(namedNodes[component.name]))
 										namedNodes[component.name] = [(namedNodes[component.name] as Node), result];
