@@ -50,9 +50,7 @@ export class Rule {
 					currentPrecedingNode = result;
 
 					if (component.greedy) {
-						let didThrow: boolean = false;
-
-						while (!didThrow) {
+						while (true) {
 							try {
 								result = matchFunction(rest, currentPrecedingNode, grammarContext);
 
@@ -67,7 +65,7 @@ export class Rule {
 								currentPrecedingNode = result;
 							}
 							catch (error) {
-								didThrow = true;
+								break;
 							}
 						}
 					}
