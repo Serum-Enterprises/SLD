@@ -21,9 +21,22 @@ export class Grammar {
 		this.variants = new Map(Object.entries(variants));
 	}
 
+	private verifyVariants() {
+		Array.from(this.variants.entries()).forEach(([, value], _, entries) => {
+			value.rules.forEach((rule) => {
+				rule.components.forEach(component => {
+					if (component.type === 'VARIANT' && !entries.find(([key]) => key === component.value))
+						throw new ReferenceError(`Variant ${component.value} not found`);
+				})
+			})
+		});
+	}
+
 	public parse(source: string, rootVariant: string): Node {
-		if(!this.variants.has(rootVariant))
+		if (!this.variants.has(rootVariant))
 			throw new ReferenceError(`Expected rootVariant to be an existing Variant`);
+
+		this.verifyVariants();
 
 		return this.variants.get(rootVariant)!.parse(source, null, this);
 	}
