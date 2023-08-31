@@ -72,9 +72,8 @@ export class Rule {
 					}
 				}
 				catch (error) {
-					if (component.optional) {
+					if (component.optional)
 						continue;
-					}
 
 					throw error;
 				}
