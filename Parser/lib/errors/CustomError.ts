@@ -1,4 +1,4 @@
-export class CustomThrowError extends Error {
+export class CustomError extends Error {
     private _index: number;
 
     public constructor(message: string, index: number) {
