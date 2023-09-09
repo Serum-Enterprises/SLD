@@ -114,9 +114,19 @@ export class Rule {
 		}
 		catch (error) {
 			if (this._recoverComponent) {
-				const recoverNode = this.matchFunction(this._recoverComponent)(source, precedingNode, grammarContext);
+				let slicedSource = source;
 
-				return new Node('RECOVER', recoverNode.raw, recoverNode.children, recoverNode.range);
+				while (slicedSource.length > 0) {
+					console.log(`Trying to recover ${source} with ${this._recoverComponent.value}`);
+					try {
+						const recoverNode = this.matchFunction(this._recoverComponent)(slicedSource, precedingNode, grammarContext);
+
+						return new Node('RECOVER', recoverNode.raw, recoverNode.children, recoverNode.range);
+					}
+					catch(error) {
+						slicedSource = slicedSource.slice(1);
+					}
+				}
 			}
 
 			throw error;
