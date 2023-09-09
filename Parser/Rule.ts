@@ -116,12 +116,12 @@ export class Rule {
 			if (this._recoverComponent) {
 				let slicedSource = source;
 
-				while (slicedSource.length > 0) {
+				for(let i = 0; slicedSource.length > 0; i++) {
 					console.log(`Trying to recover ${source} with ${this._recoverComponent.value}`);
 					try {
 						const recoverNode = this.matchFunction(this._recoverComponent)(slicedSource, precedingNode, grammarContext);
 
-						return new Node('RECOVER', recoverNode.raw, recoverNode.children, recoverNode.range);
+						return new Node('RECOVER', recoverNode.raw, recoverNode.children, [recoverNode.range[0] + i, recoverNode.range[1] + i]);
 					}
 					catch(error) {
 						slicedSource = slicedSource.slice(1);
