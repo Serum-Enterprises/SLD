@@ -9,3 +9,7 @@ export {
 	Variant, VariantInterface,
 	Grammar, GrammarInterface
 };
+
+export default { 
+	Component, Rule, Variant, Grammar
+};
