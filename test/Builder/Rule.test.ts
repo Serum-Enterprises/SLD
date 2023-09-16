@@ -18,15 +18,19 @@ describe("Testing Component", () => {
 		expect(Rule.match.one.string('Hello')).toBeInstanceOf(Rule);
 		expect(Rule.match.one.regexp(/\s+/)).toBeInstanceOf(Rule);
 		expect(Rule.match.one.variant('Hello')).toBeInstanceOf(Rule);
+		expect(Rule.match.one.whitespace()).toBeInstanceOf(Rule);
 		expect(Rule.match.oneOrMore.string('Hello')).toBeInstanceOf(Rule);
 		expect(Rule.match.oneOrMore.regexp(/\s+/)).toBeInstanceOf(Rule);
 		expect(Rule.match.oneOrMore.variant('Hello')).toBeInstanceOf(Rule);
+		expect(Rule.match.oneOrMore.whitespace()).toBeInstanceOf(Rule);
 		expect(Rule.match.zeroOrOne.string('Hello')).toBeInstanceOf(Rule);
 		expect(Rule.match.zeroOrOne.regexp(/\s+/)).toBeInstanceOf(Rule);
 		expect(Rule.match.zeroOrOne.variant('Hello')).toBeInstanceOf(Rule);
+		expect(Rule.match.zeroOrOne.whitespace()).toBeInstanceOf(Rule);
 		expect(Rule.match.zeroOrMore.string('Hello')).toBeInstanceOf(Rule);
 		expect(Rule.match.zeroOrMore.regexp(/\s+/)).toBeInstanceOf(Rule);
 		expect(Rule.match.zeroOrMore.variant('Hello')).toBeInstanceOf(Rule);
+		expect(Rule.match.zeroOrMore.whitespace()).toBeInstanceOf(Rule);
 	});
 	test('Testing addComponent', () => {
 		expect(Rule.match.one.string('Hello')
@@ -66,7 +70,7 @@ describe("Testing Component", () => {
 					},
 					{
 						type: "REGEXP",
-						value: "\\s+",
+						value: "\\s*",
 						name: null,
 						greedy: false,
 						optional: false

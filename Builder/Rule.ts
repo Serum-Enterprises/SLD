@@ -55,7 +55,7 @@ export class Rule {
 	}
 
 	public get followedBy(): QuantitySelector {
-		this._components.push(Component.create('REGEXP', /\s+/.source, null, false, false));
+		this._components.push(Component.create('REGEXP', /\s*/.source, null, false, false));
 
 		return new QuantitySelector(this);
 	}
@@ -98,6 +98,12 @@ class ComponentSelector {
 
 	public variant(variant: string, name: string | null = null): Rule {
 		this._ruleInstance.addComponent(Component.create('VARIANT', variant, name, this._greedy, this._optional));
+
+		return this._ruleInstance;
+	}
+
+	public whitespace(name: string | null = null): Rule {
+		this._ruleInstance.addComponent(Component.create('REGEXP', /\s/.source, name, this._greedy, this._optional));
 
 		return this._ruleInstance;
 	}
