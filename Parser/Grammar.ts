@@ -1,6 +1,7 @@
 import { GrammarInterface } from "../Builder";
 import { Variant } from "./Variant";
 import { Node } from "./lib/Node";
+import { MisMatchError } from "./lib/errors/MisMatchError";
 
 export class Grammar {
 	private _variants: Map<string, Variant>;
@@ -33,10 +34,15 @@ export class Grammar {
 		this._variants = variants;
 	}
 
-	public parse(source: string, rootVariant: string, precedingNode: Node | null = null): Node {
+	public parse(source: string, rootVariant: string, failOnRest: boolean = true, precedingNode: Node | null = null): Node {
 		if (!this._variants.has(rootVariant))
 			throw new ReferenceError(`Expected rootVariant to be an existing Variant`);
 
-		return this._variants.get(rootVariant)!.parse(source, precedingNode, this);
+		const result = this._variants.get(rootVariant)!.parse(source, precedingNode, this);
+
+		if (failOnRest && result.raw !== source)
+			throw new MisMatchError('Expected End of File', result.range[1] + 1);
+
+		return result;
 	}
 }

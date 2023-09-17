@@ -42,7 +42,7 @@ export class Rule {
 				};
 			case 'REGEXP':
 				return (source: string, precedingNode: Node | null) => {
-					const match = source.match(new RegExp(component.value));
+					const match = source.match(new RegExp(component.value.startsWith('^') ? component.value : `^${component.value}`));
 					if (!match)
 						throw new MisMatchError(`Expected /${component.value}/`, precedingNode ? precedingNode.range[1] + 1 : 0);
 
@@ -56,7 +56,7 @@ export class Rule {
 				};
 			case 'VARIANT':
 				return (source: string, precedingNode: Node | null, grammarContext: Grammar) => {
-					return grammarContext.parse(source, component.value, precedingNode);
+					return grammarContext.parse(source, component.value, false, precedingNode);
 				};
 		}
 	}
