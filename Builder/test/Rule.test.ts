@@ -1,5 +1,5 @@
-import { Component } from '../../Builder/Component';
-import { Rule } from '../../Builder/Rule';
+import { Component } from '../src/Component';
+import { Rule } from '../src/Rule';
 
 describe("Testing Component", () => {
 	test('Testing static throw', () => {
@@ -51,7 +51,7 @@ describe("Testing Component", () => {
 		expect(Rule.throw('Test Message').capture('Test')).toBeInstanceOf(Rule);
 		expect(Rule.match.one.string('Hello')
 			.capture('testName')).toBeInstanceOf(Rule);
-	})
+	});
 
 	test('Testing followedBy', () => {
 		expect(
@@ -66,21 +66,22 @@ describe("Testing Component", () => {
 						value: 'Hello',
 						name: null,
 						greedy: false,
-						optional: false
-					},
-					{
-						type: "REGEXP",
-						value: "\\s*",
-						name: null,
-						greedy: false,
-						optional: false
+						optional: false,
+						prefix: null
 					},
 					{
 						type: 'STRING',
 						value: '!',
 						name: null,
 						greedy: false,
-						optional: false
+						optional: false,
+						prefix: {
+							type: "REGEXP",
+							value: "\\s*",
+							name: null,
+							greedy: false,
+							optional: false,
+						}
 					}
 				],
 				throwMessage: null,
@@ -101,14 +102,16 @@ describe("Testing Component", () => {
 						value: 'Hello',
 						name: null,
 						greedy: false,
-						optional: false
+						optional: false,
+						prefix: null
 					},
 					{
 						type: 'STRING',
 						value: '!',
 						name: null,
 						greedy: false,
-						optional: false
+						optional: false,
+						prefix: null
 					}
 				],
 				throwMessage: null,
@@ -128,7 +131,8 @@ describe("Testing Component", () => {
 						value: 'Hello',
 						name: null,
 						greedy: false,
-						optional: false
+						optional: false,
+						prefix: null
 					}
 				],
 				throwMessage: null,
@@ -148,7 +152,8 @@ describe("Testing Component", () => {
 						value: 'Hello',
 						name: null,
 						greedy: false,
-						optional: false
+						optional: false,
+						prefix: null
 					}
 				],
 				throwMessage: 'Test Message',
@@ -157,7 +162,8 @@ describe("Testing Component", () => {
 					value: '!',
 					name: null,
 					greedy: false,
-					optional: false
+					optional: false,
+					prefix: null
 				}
 			});
 	});

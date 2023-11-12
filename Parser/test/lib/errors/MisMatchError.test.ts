@@ -1,4 +1,4 @@
-import { MisMatchError } from '../../../../Parser/lib/errors/MisMatchError'
+import { MisMatchError } from '../../../lib/errors/MisMatchError'
 
 describe('Testing CustomThrowError', () => {
 	test('Testing Constructor', () => {

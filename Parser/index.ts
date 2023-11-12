@@ -1,6 +1,6 @@
-import { Rule } from './Rule';
-import { Variant } from './Variant';
-import { Grammar } from './Grammar';
+import { Rule } from './src/Rule';
+import { Variant } from './src/Variant';
+import { Grammar } from './src/Grammar';
 
 export {
 	Rule, Variant, Grammar

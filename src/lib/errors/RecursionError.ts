@@ -1,1 +1,0 @@
-export class RecursionError extends Error {}

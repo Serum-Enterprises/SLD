@@ -1,7 +1,7 @@
-import { GrammarInterface } from "../Builder";
+import { GrammarInterface } from "../../Builder";
 import { Variant } from "./Variant";
-import { Node } from "./lib/Node";
-import { MisMatchError } from "./lib/errors/MisMatchError";
+import { Node } from "../lib/Node";
+import { MisMatchError } from "../lib/errors/MisMatchError";
 
 export class Grammar {
 	private _variants: Map<string, Variant>;

@@ -1,14 +1,14 @@
 export interface NodeInterface {
 	type: 'MATCH' | 'RECOVER';
 	raw: string;
-	children: { [key: string]: NodeInterface | NodeInterface[] };
+	children: { [key: string]: NodeInterface[] };
 	range: [number, number];
 }
 
 export class Node {
 	private _type: 'MATCH' | 'RECOVER';
 	private _raw: string;
-	private _children: { [key: string]: Node | Node[] };
+	private _children: { [key: string]: Node[] };
 	private _range: [number, number];
 
 	static verifyInterface(node: any, varName: string = 'node'): node is NodeInterface {
@@ -32,10 +32,8 @@ export class Node {
 				child.forEach((child, index) => {
 					Node.verifyInterface(child, `${varName}.children.${name}[${index}]`);
 				});
-			else if (Object.prototype.toString.call(child) === '[object Object]')
-				Node.verifyInterface(child, `${varName}.children.${name}`);
 			else
-				throw new TypeError(`Expected ${varName}.children.${name} to be a Node Interface or an Array of Node Interfaces`);
+				throw new TypeError(`Expected ${varName}.children.${name} to be an Array of Node Interfaces`);
 		});
 
 		if (!Array.isArray(node.range))
@@ -60,19 +58,14 @@ export class Node {
 			node.type,
 			node.raw,
 			Object.entries(node.children)
-				.reduce((children: { [key: string]: Node | Node[] }, [name, child]: [string, NodeInterface | NodeInterface[]]) => {
-					if (Array.isArray(child))
-						children[name] = child.map(child => Node.fromJSON(child, `${varName}.children.${name}`));
-					else
-						children[name] = Node.fromJSON(child, `${varName}.children.${name}`);
-
-					return children;
+				.reduce((children: { [key: string]: Node[] }, [name, child]: [string, NodeInterface[]]) => {
+					return { ...children, [name]: child.map(child => Node.fromJSON(child, `${varName}.children.${name}`)) };
 				}, {}),
 			node.range
 		);
 	}
 
-	constructor(type: 'MATCH' | 'RECOVER', raw: string, children: { [key: string]: Node | Node[] }, range: [number, number]) {
+	constructor(type: 'MATCH' | 'RECOVER', raw: string, children: { [key: string]: Node[] }, range: [number, number]) {
 		this._type = type;
 		this._raw = raw;
 		this._children = children;
@@ -100,13 +93,8 @@ export class Node {
 			type: this._type,
 			raw: this._raw,
 			children: Object.entries(this._children)
-				.reduce((children: { [key: string]: NodeInterface | NodeInterface[] }, [name, child]: [string, Node | Node[]]) => {
-					if (Array.isArray(child))
-						children[name] = child.map(child => child.toJSON());
-					else
-						children[name] = child.toJSON();
-
-					return children;
+				.reduce((children: { [key: string]: NodeInterface[] }, [name, child]: [string, Node[]]) => {
+					return { ...children, [name]: child.map(child => child.toJSON()) };
 				}, {}),
 			range: this._range
 		};

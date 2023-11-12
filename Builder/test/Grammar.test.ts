@@ -29,7 +29,8 @@ describe("Testing Grammar", () => {
 								value: 'Hello',
 								name: null,
 								greedy: false,
-								optional: false
+								optional: false,
+								prefix: null
 							}
 						],
 						throwMessage: null,

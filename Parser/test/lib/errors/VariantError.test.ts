@@ -1,4 +1,4 @@
-import { VariantError } from '../../../../Parser/lib/errors/VariantError'
+import { VariantError } from '../../../lib/errors/VariantError'
 
 describe('Testing CustomThrowError', () => {
 	test('Testing Constructor', () => {

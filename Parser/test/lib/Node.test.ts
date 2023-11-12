@@ -1,4 +1,4 @@
-import { Node, NodeInterface } from '../../../Parser/lib/Node';
+import { Node, NodeInterface } from '../../lib/Node';
 
 describe('Testing Node', () => {
 	test('Testing static verifyInterface', () => {

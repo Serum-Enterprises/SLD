@@ -1,11 +1,11 @@
-import { VariantInterface } from '../Builder';
+import { VariantInterface } from '../../Builder';
 import type { Grammar } from './Grammar';
 import { Rule } from './Rule';
 
-import { Node } from './lib/Node';
-import { CustomError } from './lib/errors/CustomError';
-import { MisMatchError } from './lib/errors/MisMatchError';
-import { VariantError } from './lib/errors/VariantError';
+import { Node } from '../lib/Node';
+import { CustomError } from '../lib/errors/CustomError';
+import { MisMatchError } from '../lib/errors/MisMatchError';
+import { VariantError } from '../lib/errors/VariantError';
 
 export class Variant {
 	private _rules: Rule[];

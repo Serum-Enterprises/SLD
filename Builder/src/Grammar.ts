@@ -1,4 +1,4 @@
-import { Variant, VariantInterface } from "./Variant";
+import { Variant, VariantInterface } from './Variant';
 
 export interface GrammarInterface {
 	[key: string]: VariantInterface;

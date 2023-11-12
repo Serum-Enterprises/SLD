@@ -23,7 +23,8 @@ describe("Testing Variant", () => {
 							value: 'Hello',
 							name: null,
 							greedy: false,
-							optional: false
+							optional: false,
+							prefix: null
 						}
 					],
 					throwMessage: null,

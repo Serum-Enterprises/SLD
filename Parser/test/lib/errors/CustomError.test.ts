@@ -1,4 +1,4 @@
-import { CustomError } from '../../../../Parser/lib/errors/CustomError'
+import { CustomError } from '../../../lib/errors/CustomError'
 
 describe('Testing CustomError', () => {
 	test('Testing Constructor', () => {
