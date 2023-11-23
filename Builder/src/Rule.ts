@@ -1,16 +1,16 @@
-import { ComponentInterface, PrefixComponentInterface, RecoverComponentInterface } from "./Component";
-import { Component, PrefixComponent, RecoverComponent } from "./Component";
+import { BaseComponentInterface, ComponentSetInterface } from "./Component";
+import { BaseComponent, ComponentSet } from "./Component";
 
 export interface RuleInterface {
-	components: ComponentInterface[];
+	components: ComponentSetInterface[];
 	throwMessage: string | null;
-	recoverComponent: RecoverComponentInterface | null;
+	recoverComponent: BaseComponentInterface | null;
 }
 
 export class Rule {
-	private _components: Component[];
+	private _components: ComponentSet[];
 	private _throwMessage: string | null;
-	private _recoverComponent: RecoverComponent | null;
+	private _recoverComponent: BaseComponent | null;
 
 	public static get match(): QuantitySelector {
 		return new Rule().directlyFollowedBy;
@@ -20,20 +20,20 @@ export class Rule {
 		return new Rule().throw(message);
 	}
 
-	public constructor(components: Component[] = [], throwMessage: string | null = null, recoverComponent: RecoverComponent | null = null) {
+	public constructor(components: ComponentSet[] = [], throwMessage: string | null = null, recoverComponent: BaseComponent | null = null) {
 		this._components = components;
 		this._throwMessage = throwMessage;
 		this._recoverComponent = recoverComponent;
 	}
 
-	public addComponent(component: Component): Rule {
-		this._components.push(component);
+	public addComponentSet(componentSet: ComponentSet): Rule {
+		this._components.push(componentSet);
 
 		return this;
 	}
 
 	public recover(type: 'STRING' | 'REGEXP', value: string): Rule {
-		this._recoverComponent = RecoverComponent.create(type, value);
+		this._recoverComponent = BaseComponent.create(type, value);
 
 		return this;
 	}
@@ -44,30 +44,9 @@ export class Rule {
 		return this;
 	}
 
-	public prefix(prefix: PrefixComponent): Rule {
-		if (this._components.length === 0)
-			return this;
-
-		const lastComponent = this._components.pop()!;
-
-		this._components.push(Component.create(lastComponent.type, lastComponent.value, lastComponent.name, lastComponent.greedy, lastComponent.optional, prefix));
-
-		return this;
-	}
-
-	public capture(name: string): Rule {
-		if (this._components.length === 0)
-			return this;
-
-		const lastComponent = this._components.pop()!;
-
-		this._components.push(Component.create(lastComponent.type, lastComponent.value, name, lastComponent.greedy, lastComponent.optional, lastComponent.prefix));
-
-		return this;
-	}
-
 	public get followedBy(): QuantitySelector {
-		return new QuantitySelector(this, PrefixComponent.create('REGEXP', /\s*/.source, false));
+		const wsComponent = BaseComponent.create('REGEXP', /^\s+/.source);
+		return new QuantitySelector(this, [wsComponent]);
 	}
 
 	public get directlyFollowedBy(): QuantitySelector {
@@ -85,63 +64,75 @@ export class Rule {
 
 class QuantitySelector {
 	private _ruleInstance: Rule;
-	private _prefix: PrefixComponent | null;
+	private _componentList: BaseComponent[] | null;
 
-	public constructor(ruleInstance: Rule, prefix: PrefixComponent | null = null) {
+	public constructor(ruleInstance: Rule, componentList: BaseComponent[] | null = null) {
 		this._ruleInstance = ruleInstance;
-		this._prefix = prefix;
+		this._componentList = componentList;
 	}
 
 	public get one(): ComponentSelector {
-		return new ComponentSelector(this._ruleInstance, this._prefix, false, false);
+		return new ComponentSelector(this._ruleInstance, this._componentList, false, false);
 	}
 
 	public get zeroOrOne(): ComponentSelector {
-		return new ComponentSelector(this._ruleInstance, this._prefix, false, true);
+		return new ComponentSelector(this._ruleInstance, this._componentList, false, true);
 	}
 
 	public get zeroOrMore(): ComponentSelector {
-		return new ComponentSelector(this._ruleInstance, this._prefix, true, true);
+		return new ComponentSelector(this._ruleInstance, this._componentList, true, true);
 	}
 
 	public get oneOrMore(): ComponentSelector {
-		return new ComponentSelector(this._ruleInstance, this._prefix, true, false);
+		return new ComponentSelector(this._ruleInstance, this._componentList, true, false);
 	}
 }
 
 class ComponentSelector {
 	private _ruleInstance: Rule;
-	private _prefix: PrefixComponent | null;
+	private _componentList: BaseComponent[] | null;
 	private _greedy: boolean;
 	private _optional: boolean;
 
-	public constructor(ruleInstance: Rule, prefix: PrefixComponent | null, greedy: boolean = false, optional: boolean = false) {
+	public constructor(ruleInstance: Rule, componentList: BaseComponent[] | null = null, greedy: boolean = false, optional: boolean = false) {
 		this._ruleInstance = ruleInstance;
-		this._prefix = prefix;
+		this._componentList = componentList;
 		this._greedy = greedy;
 		this._optional = optional;
 	}
 
 	public string(string: string, name: string | null = null): Rule {
-		this._ruleInstance.addComponent(Component.create('STRING', string, name, this._greedy, this._optional, this._prefix));
+		this._ruleInstance.addComponentSet(ComponentSet.create([
+			...this._componentList === null ? [] : this._componentList,
+			BaseComponent.create('STRING', string, name)
+		], this._greedy, this._optional));
 
 		return this._ruleInstance;
 	}
 
 	public regexp(regexp: RegExp, name: string | null = null): Rule {
-		this._ruleInstance.addComponent(Component.create('REGEXP', regexp.source, name, this._greedy, this._optional, this._prefix));
+		this._ruleInstance.addComponentSet(ComponentSet.create([
+			...this._componentList === null ? [] : this._componentList,
+			BaseComponent.create('REGEXP', regexp.source.startsWith('^') ? regexp.source : `^${regexp.source}`, name)
+		], this._greedy, this._optional));
 
 		return this._ruleInstance;
 	}
 
 	public variant(variant: string, name: string | null = null): Rule {
-		this._ruleInstance.addComponent(Component.create('VARIANT', variant, name, this._greedy, this._optional, this._prefix));
+		this._ruleInstance.addComponentSet(ComponentSet.create([
+			...this._componentList === null ? [] : this._componentList,
+			BaseComponent.create('VARIANT', variant, name)
+		], this._greedy, this._optional));
 
 		return this._ruleInstance;
 	}
 
 	public whitespace(name: string | null = null): Rule {
-		this._ruleInstance.addComponent(Component.create('REGEXP', /\s/.source, name, this._greedy, this._optional, this._prefix));
+		this._ruleInstance.addComponentSet(ComponentSet.create([
+			...this._componentList === null ? [] : this._componentList,
+			BaseComponent.create('REGEXP', /^\s/.source, name)
+		], this._greedy, this._optional));
 
 		return this._ruleInstance;
 	}
