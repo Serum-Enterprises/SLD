@@ -1,4 +1,5 @@
-import { Node, NodeInterface } from '../../lib/Node';
+import { NodeInterface } from '../../../Interfaces';
+import { Node } from '../../lib/Node';
 
 describe('Testing Node', () => {
 	test('Testing static verifyInterface', () => {
@@ -8,7 +9,7 @@ describe('Testing Node', () => {
 		expect(() => Node.verifyInterface({ type: 'MATCH' })).toThrow(new TypeError('Expected node.raw to be a String'));
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw' })).toThrow(new TypeError('Expected node.children to be an Object'));
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: {} })).toThrow(new TypeError('Expected node.range to be an Array'));
-		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: { 'first': null } })).toThrow(new TypeError(`Expected node.children.first to be a Node Interface or an Array of Node Interfaces`))
+		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: { 'first': null } })).toThrow(new TypeError(`Expected node.children.first to be an Array of Node Interfaces`))
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: {}, range: [] })).toThrow(new RangeError('Expected node.range to be an Array of length 2'));
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: {}, range: [0.5, 0.5] })).toThrow(new TypeError('Expected node.range[0] to be an Integer'));
 		expect(() => Node.verifyInterface({ type: 'MATCH', raw: 'raw', children: {}, range: [-1, -1] })).toThrow(new RangeError(`Expected node.range[0] to be greater than or equal to 0`))
@@ -18,18 +19,18 @@ describe('Testing Node', () => {
 			type: 'MATCH',
 			raw: '1+2+xyz',
 			children: {
-				first: {
+				first: [{
 					type: 'MATCH',
 					raw: '1',
 					children: {},
 					range: [0, 0]
-				},
-				second: {
+				}],
+				second: [{
 					type: 'MATCH',
 					raw: '2',
 					children: {},
 					range: [2, 2]
-				},
+				}],
 				text: [
 					{
 						type: 'MATCH',
@@ -62,18 +63,18 @@ describe('Testing Node', () => {
 			type: 'MATCH',
 			raw: '1+2+xyz',
 			children: {
-				first: {
+				first: [{
 					type: 'MATCH',
 					raw: '1',
 					children: {},
 					range: [0, 0]
-				},
-				second: {
+				}],
+				second: [{
 					type: 'MATCH',
 					raw: '2',
 					children: {},
 					range: [2, 2]
-				},
+				}],
 				text: [
 					{
 						type: 'MATCH',
@@ -126,18 +127,18 @@ describe('Testing Node', () => {
 			type: 'MATCH',
 			raw: '1+2+xyz',
 			children: {
-				first: {
+				first: [{
 					type: 'MATCH',
 					raw: '1',
 					children: {},
 					range: [0, 0]
-				},
-				second: {
+				}],
+				second: [{
 					type: 'MATCH',
 					raw: '2',
 					children: {},
 					range: [2, 2]
-				},
+				}],
 				text: [
 					{
 						type: 'MATCH',

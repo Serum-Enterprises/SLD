@@ -1,4 +1,4 @@
-import { Grammar } from '../../Parser/Grammar';
+import { Grammar } from '../src/Grammar';
 
 describe('Testing Grammar', () => {
 	test('Testing Grammar.fromJSON', () => {
@@ -7,9 +7,13 @@ describe('Testing Grammar', () => {
 				{
 					components: [
 						{
-							type: 'STRING',
-							value: 'Hello World',
-							name: 'text',
+							components: [
+								{
+									type: 'STRING',
+									value: 'Hello World',
+									name: 'text'
+								}
+							],
 							greedy: false,
 							optional: false
 						}
@@ -20,9 +24,13 @@ describe('Testing Grammar', () => {
 				{
 					components: [
 						{
-							type: 'STRING',
-							value: 'Hallo Welt',
-							name: 'text',
+							components: [
+								{
+									type: 'STRING',
+									value: 'Hallo Welt',
+									name: 'text'
+								}
+							],
 							greedy: false,
 							optional: false
 						}
