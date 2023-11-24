@@ -1,4 +1,4 @@
-import { GrammarInterface } from "../../Builder";
+import { GrammarInterface } from "../../Interfaces";
 import { Variant } from "./Variant";
 import { Node } from "../lib/Node";
 import { MisMatchError } from "../lib/errors/MisMatchError";
@@ -12,9 +12,11 @@ export class Grammar {
 		// Verify all Variants in the Grammar exist
 		grammarEntries.forEach(([, variant]) => {
 			variant.forEach(rule => {
-				rule.components.forEach(component => {
-					if (component.type === 'VARIANT' && !grammarEntries.find(([name]) => name === component.value))
-						throw new ReferenceError(`Expected Variant ${component.value} to exist`);
+				rule.components.forEach(componentSet => {
+					componentSet.components.forEach(component => {
+						if (component.type === 'VARIANT' && !grammarEntries.find(([name]) => name === component.value))
+							throw new ReferenceError(`Expected Variant ${component.value} to exist`);
+					});
 				});
 			});
 		});

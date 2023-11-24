@@ -1,9 +1,8 @@
-import { VariantInterface } from '../../Builder';
+import { VariantInterface } from '../../Interfaces';
 import type { Grammar } from './Grammar';
 import { Rule } from './Rule';
 
 import { Node } from '../lib/Node';
-import { CustomError } from '../lib/errors/CustomError';
 import { MisMatchError } from '../lib/errors/MisMatchError';
 import { VariantError } from '../lib/errors/VariantError';
 
@@ -18,21 +17,12 @@ export class Variant {
 		this._rules = rules;
 	}
 
-	/**
-	 * Begin Parsing Rules.
-	 * If a Rule fails due to a MisMatchError, try the next Rule.
-	 * If a Rule fails due to a CustomError, throw the CustomError.
-	 * If no Rule matches, throw a VariantError, indicating that there was no valid Path through this Variant.
-	 */
 	public parse(source: string, precedingNode: Node | null, grammarContext: Grammar) {
 		for (let i = 0; i < this._rules.length; i++) {
 			try {
 				return this._rules[i].parse(source, precedingNode, grammarContext);
 			}
 			catch (error) {
-				if (error instanceof CustomError)
-					throw error;
-
 				if (!(error instanceof MisMatchError))
 					throw error;
 			}

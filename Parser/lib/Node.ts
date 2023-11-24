@@ -1,9 +1,4 @@
-export interface NodeInterface {
-	type: 'MATCH' | 'RECOVER';
-	raw: string;
-	children: { [key: string]: NodeInterface[] };
-	range: [number, number];
-}
+import { NodeInterface } from "../../Interfaces";
 
 export class Node {
 	private _type: 'MATCH' | 'RECOVER';

@@ -1,4 +1,4 @@
-import { ComponentInterface, PrefixComponentInterface, RecoverComponentInterface, RuleInterface } from '../../Builder';
+import { BaseComponentInterface, ComponentSetInterface, RuleInterface } from '../../Interfaces';
 import { Grammar } from './Grammar';
 
 import { Node } from '../lib/Node';
@@ -7,13 +7,12 @@ import { CustomError } from '../lib/errors/CustomError';
 import { MisMatchError } from '../lib/errors/MisMatchError';
 
 type recoverMatchFunction = (source: string, precedingNode: Node | null) => Node | null;
-type prefixMatchFunction = (source: string, precedingNode: Node | null) => Node | null;
 type matchFunction = (source: string, precedingNode: Node | null, grammarContext: Grammar) => Node;
 
 export class Rule {
-	private _components: ComponentInterface[];
+	private _components: ComponentSetInterface[];
 	private _throwMessage: string | null;
-	private _recoverComponent: RecoverComponentInterface | null;
+	private _recoverComponent: BaseComponentInterface | null;
 
 	public static fromJSON(json: RuleInterface): Rule {
 		return new Rule(
@@ -23,13 +22,13 @@ export class Rule {
 		);
 	}
 
-	private constructor(components: ComponentInterface[], throwMessage: string | null, recoverComponent: RecoverComponentInterface | null) {
+	private constructor(components: ComponentSetInterface[], throwMessage: string | null, recoverComponent: BaseComponentInterface | null) {
 		this._components = components;
 		this._throwMessage = throwMessage;
 		this._recoverComponent = recoverComponent;
 	}
 
-	private getRecoverMatchFunction(component: RecoverComponentInterface): recoverMatchFunction {
+	private _getRecoverMatchFunction(component: BaseComponentInterface): recoverMatchFunction {
 		switch (component.type) {
 			case 'STRING':
 				return (source: string, precedingNode: Node | null): Node | null => {
@@ -71,43 +70,12 @@ export class Rule {
 
 					return null;
 				}
+			default:
+				throw new RangeError(`Expected component.type to be either "STRING" or "REGEXP"`);
 		}
 	}
 
-	private getPrefixMatchFunction(component: PrefixComponentInterface): prefixMatchFunction {
-		switch (component.type) {
-			case 'STRING':
-				return (source: string, precedingNode: Node | null) => {
-					if (!source.startsWith(component.value))
-						return null;
-
-					if (precedingNode)
-						return new Node('MATCH', component.value, {}, [
-							precedingNode.range[1] + 1,
-							precedingNode.range[1] + component.value.length
-						]);
-
-					return new Node('MATCH', component.value, {}, [0, component.value.length - 1]);
-				};
-			case 'REGEXP':
-				return (source: string, precedingNode: Node | null) => {
-					const match = source.match(new RegExp(component.value.startsWith('^') ? component.value : `^${component.value}`));
-
-					if (!match)
-						return null;
-
-					if (precedingNode)
-						return new Node('MATCH', match[0], {}, [
-							precedingNode.range[1] + 1,
-							precedingNode.range[1] + match[0].length
-						]);
-
-					return new Node('MATCH', match[0], {}, [0, match[0].length - 1]);
-				};
-		}
-	}
-
-	private getMatchFunction(component: ComponentInterface): matchFunction {
+	private _getMatchFunction(component: BaseComponentInterface): matchFunction {
 		switch (component.type) {
 			case 'STRING':
 				return (source: string, precedingNode: Node | null) => {
@@ -144,23 +112,31 @@ export class Rule {
 		}
 	}
 
-	public parseComponent(component: ComponentInterface, source: string, precedingNode: Node | null, grammarContext: Grammar): [Node | null, Node] {
-		let result: Node;
-		let prefixResult: Node | null = null;
+	private _parseComponentSet(componentSet: ComponentSetInterface, source: string, precedingNode: Node | null, grammarContext: Grammar): [string, { [key: string]: Node[] }, Node | null] {
+		let rest: string = source;
+		const namedNodes: { [key: string]: Node[] } = {};
+		let currentPrecedingNode: Node | null = precedingNode;
 
-		if (component.prefix)
-			prefixResult = this.getPrefixMatchFunction(component.prefix)(source, precedingNode);
+		// Match every Component in the ComponentSet
+		for (let component of componentSet.components) {
+			const result = this._getMatchFunction(component)(rest, currentPrecedingNode, grammarContext);
 
-		if (prefixResult) {
-			result = this.getMatchFunction(component)(source.slice(prefixResult.raw.length), prefixResult, grammarContext);
+			// If the Component is named, add it to the namedNodes Object
+			if (component.name) {
+				if (!Array.isArray(namedNodes[component.name]))
+					namedNodes[component.name] = [];
+
+				namedNodes[component.name].push(result);
+			}
+
+			rest = rest.slice(result.raw.length);
+			currentPrecedingNode = result;
 		}
-		else
-			result = this.getMatchFunction(component)(source, precedingNode, grammarContext);
 
-		return [prefixResult, result];
+		return [rest, namedNodes, currentPrecedingNode];
 	}
 
-	public parse(source: string, precedingNode: Node | null, grammarContext: Grammar) {
+	public parse(source: string, precedingNode: Node | null, grammarContext: Grammar): Node {
 		let rest: string = source;
 		const namedNodes: { [key: string]: Node[] } = {};
 		let currentPrecedingNode: Node | null = precedingNode;
@@ -169,30 +145,41 @@ export class Rule {
 		if (this._throwMessage)
 			throw new CustomError(this._throwMessage, precedingNode ? precedingNode.range[1] + 1 : 0);
 
+		// Attempt to parse all ComponentSets
 		try {
-			// Try to match all Components
-			for (let component of this._components) {
+			for (let componentSet of this._components) {
 				try {
-					const [prefixResult, result] = this.parseComponent(component, rest, currentPrecedingNode, grammarContext);
+					const result = this._parseComponentSet(componentSet, rest, currentPrecedingNode, grammarContext);
 
-					if (prefixResult && component.prefix?.include && component.name !== null)
-						namedNodes[component.name] = [prefixResult, result];
-					else if (component.name !== null)
-						namedNodes[component.name] = [result];
+					// Update the global rest, namedNodes and currentPrecedingNode
+					rest = result[0];
+					new Set([...Object.keys(namedNodes), ...Object.keys(result[1])]).forEach(key => {
+						if (Array.isArray(result[1][key])) {
+							if (!Array.isArray(namedNodes[key]))
+								namedNodes[key] = [];
 
-					rest = rest.slice(prefixResult ? prefixResult.raw.length + result.raw.length : result.raw.length);
-					currentPrecedingNode = result;
+							namedNodes[key].push(...result[1][key]);
+						}
+					});
+					currentPrecedingNode = result[2];
 
-					if (component.greedy) {
-						for (let i = 0; true; i++) {
+					// If the ComponentSet is greedy, try to match until it throws an Error
+					if (componentSet.greedy) {
+						while (true) {
 							try {
-								const [prefixResult, result] = this.parseComponent(component, rest, currentPrecedingNode, grammarContext);
+								const result = this._parseComponentSet(componentSet, rest, currentPrecedingNode, grammarContext);
 
-								if (prefixResult && component.prefix?.include && component.name !== null)
-									namedNodes[component.name].push(prefixResult, result);
+								// Update the global rest, namedNodes and currentPrecedingNode
+								rest = result[0];
+								new Set([...Object.keys(namedNodes), ...Object.keys(result[1])]).forEach(key => {
+									if (Array.isArray(result[1][key])) {
+										if (!Array.isArray(namedNodes[key]))
+											namedNodes[key] = [];
 
-								rest = rest.slice(prefixResult ? prefixResult.raw.length + result.raw.length : result.raw.length);
-								currentPrecedingNode = result;
+										namedNodes[key].push(...result[1][key]);
+									}
+								});
+								currentPrecedingNode = result[2];
 							}
 							catch (error) {
 								break;
@@ -201,22 +188,28 @@ export class Rule {
 					}
 				}
 				catch (error) {
-					if (component.optional)
+					// If the optional Flag is set, continue to the next ComponentSet
+					if (componentSet.optional)
 						continue;
 
+					// If the optional Flag is not set, propagate the Error to the caller.
 					throw error;
 				}
 			}
 		}
 		catch (error) {
+			// If there was an Error and a Recover Component was set, attempt to recover
 			if (this._recoverComponent) {
-				const recoverNode = this.getRecoverMatchFunction(this._recoverComponent)(source, precedingNode);
+				try {
+					const result = this._getRecoverMatchFunction(this._recoverComponent)(source, precedingNode);
 
-				if (recoverNode)
-					return recoverNode;
+					// If the Recover Component was found, return the Node
+					if (result) {
+						return result;
+					}
+				}
+				catch (error) { }
 			}
-
-			throw error;
 		}
 
 		const raw: string = source.slice(0, source.length - rest.length);
