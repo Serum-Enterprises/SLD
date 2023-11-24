@@ -1,5 +1,5 @@
-import { Variant } from '../../Builder/Variant';
-import { Rule } from '../../Builder/Rule';
+import { Variant } from '../src/Variant';
+import { Rule } from '../src/Rule';
 
 describe("Testing Variant", () => {
 	test('Testing static create', () => {
@@ -19,12 +19,15 @@ describe("Testing Variant", () => {
 				{
 					components: [
 						{
-							type: 'STRING',
-							value: 'Hello',
-							name: null,
+							components: [
+								{
+									type: 'STRING',
+									value: 'Hello',
+									name: null
+								}
+							],
 							greedy: false,
-							optional: false,
-							prefix: null
+							optional: false
 						}
 					],
 					throwMessage: null,

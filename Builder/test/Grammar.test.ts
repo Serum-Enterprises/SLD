@@ -1,6 +1,6 @@
-import { Grammar } from '../../Builder/Grammar';
-import { Variant } from '../../Builder/Variant';
-import { Rule } from '../../Builder/Rule';
+import { Grammar } from '../src/Grammar';
+import { Variant } from '../src/Variant';
+import { Rule } from '../src/Rule';
 
 describe("Testing Grammar", () => {
 	test('Testing static create', () => {
@@ -25,12 +25,15 @@ describe("Testing Grammar", () => {
 					{
 						components: [
 							{
-								type: 'STRING',
-								value: 'Hello',
-								name: null,
+								components: [
+									{
+										type: 'STRING',
+										value: 'Hello',
+										name: null
+									}
+								],
 								greedy: false,
-								optional: false,
-								prefix: null
+								optional: false
 							}
 						],
 						throwMessage: null,

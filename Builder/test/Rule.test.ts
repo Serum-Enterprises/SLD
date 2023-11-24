@@ -1,4 +1,4 @@
-import { Component } from '../src/Component';
+import { ComponentSet, BaseComponent } from '../src/Component';
 import { Rule } from '../src/Rule';
 
 describe("Testing Component", () => {
@@ -8,7 +8,7 @@ describe("Testing Component", () => {
 
 	test('Testing constructor', () => {
 		expect(new Rule([
-			Component.create('STRING', 'Hello', null, false, false)
+			ComponentSet.create([BaseComponent.create('STRING', 'Hello')], false, false)
 		])).toBeInstanceOf(Rule);
 	});
 
@@ -34,7 +34,7 @@ describe("Testing Component", () => {
 	});
 	test('Testing addComponent', () => {
 		expect(Rule.match.one.string('Hello')
-			.addComponent(Component.create('STRING', 'testValue', 'testName', true, false))).toBeInstanceOf(Rule);
+			.addComponentSet(ComponentSet.create([BaseComponent.create('STRING', 'testValue', 'testName')], true, true))).toBeInstanceOf(Rule);
 	});
 
 	test('Testing recover', () => {
@@ -48,9 +48,8 @@ describe("Testing Component", () => {
 	});
 
 	test('Testing capture', () => {
-		expect(Rule.throw('Test Message').capture('Test')).toBeInstanceOf(Rule);
-		expect(Rule.match.one.string('Hello')
-			.capture('testName')).toBeInstanceOf(Rule);
+		expect(Rule.throw('Test Message')).toBeInstanceOf(Rule);
+		expect(Rule.match.one.string('Hello', 'testName')).toBeInstanceOf(Rule);
 	});
 
 	test('Testing followedBy', () => {
@@ -62,26 +61,31 @@ describe("Testing Component", () => {
 			.toStrictEqual({
 				components: [
 					{
-						type: 'STRING',
-						value: 'Hello',
-						name: null,
+						components: [
+							{
+								type: 'STRING',
+								value: 'Hello',
+								name: null
+							}
+						],
 						greedy: false,
-						optional: false,
-						prefix: null
+						optional: false
 					},
 					{
-						type: 'STRING',
-						value: '!',
-						name: null,
+						components: [
+							{
+								type: 'REGEXP',
+								value: '^\\s+',
+								name: null
+							},
+							{
+								type: 'STRING',
+								value: '!',
+								name: null
+							}
+						],
 						greedy: false,
-						optional: false,
-						prefix: {
-							type: "REGEXP",
-							value: "\\s*",
-							name: null,
-							greedy: false,
-							optional: false,
-						}
+						optional: false
 					}
 				],
 				throwMessage: null,
@@ -98,20 +102,27 @@ describe("Testing Component", () => {
 			.toStrictEqual({
 				components: [
 					{
-						type: 'STRING',
-						value: 'Hello',
-						name: null,
+						components: [
+							{
+								type: 'STRING',
+								value: 'Hello',
+								name: null
+							}
+						],
+
 						greedy: false,
-						optional: false,
-						prefix: null
+						optional: false
 					},
 					{
-						type: 'STRING',
-						value: '!',
-						name: null,
+						components: [
+							{
+								type: 'STRING',
+								value: '!',
+								name: null
+							}
+						],
 						greedy: false,
-						optional: false,
-						prefix: null
+						optional: false
 					}
 				],
 				throwMessage: null,
@@ -127,12 +138,15 @@ describe("Testing Component", () => {
 			.toStrictEqual({
 				components: [
 					{
-						type: 'STRING',
-						value: 'Hello',
-						name: null,
+						components: [
+							{
+								type: 'STRING',
+								value: 'Hello',
+								name: null,
+							}
+						],
 						greedy: false,
 						optional: false,
-						prefix: null
 					}
 				],
 				throwMessage: null,
@@ -148,22 +162,22 @@ describe("Testing Component", () => {
 			.toStrictEqual({
 				components: [
 					{
-						type: 'STRING',
-						value: 'Hello',
-						name: null,
+						components: [
+							{
+								type: 'STRING',
+								value: 'Hello',
+								name: null,
+							}
+						],
 						greedy: false,
 						optional: false,
-						prefix: null
 					}
 				],
 				throwMessage: 'Test Message',
 				recoverComponent: {
 					type: 'STRING',
 					value: '!',
-					name: null,
-					greedy: false,
-					optional: false,
-					prefix: null
+					name: null
 				}
 			});
 	});
