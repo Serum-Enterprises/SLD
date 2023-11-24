@@ -1,8 +1,5 @@
-import { Variant, VariantInterface } from './Variant';
-
-export interface GrammarInterface {
-	[key: string]: VariantInterface;
-}
+import { GrammarInterface } from '../../Interfaces/Grammar';
+import { Variant } from './Variant';
 
 export class Grammar {
 	private _variants: Map<string, Variant>;

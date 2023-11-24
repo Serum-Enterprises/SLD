@@ -1,11 +1,5 @@
-import { BaseComponentInterface, ComponentSetInterface } from "./Component";
+import { RuleInterface } from "../../Interfaces";
 import { BaseComponent, ComponentSet } from "./Component";
-
-export interface RuleInterface {
-	components: ComponentSetInterface[];
-	throwMessage: string | null;
-	recoverComponent: BaseComponentInterface | null;
-}
 
 export class Rule {
 	private _components: ComponentSet[];

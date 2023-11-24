@@ -1,6 +1,5 @@
-import { Rule, RuleInterface } from './Rule';
-
-export type VariantInterface = RuleInterface[];
+import { VariantInterface } from '../../Interfaces';
+import { Rule } from './Rule';
 
 export class Variant {
 	private _rules: Rule[];

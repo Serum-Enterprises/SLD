@@ -1,14 +1,4 @@
-export interface BaseComponentInterface {
-	type: 'STRING' | 'REGEXP' | 'VARIANT';
-	value: string;
-	name: string | null;
-}
-
-export interface ComponentSetInterface {
-	components: BaseComponentInterface[];
-	greedy: boolean;
-	optional: boolean;
-}
+import { BaseComponentInterface, ComponentSetInterface } from '../../Interfaces';
 
 export class BaseComponent {
 	private _type: 'STRING' | 'REGEXP' | 'VARIANT';
