@@ -1,8 +1,8 @@
 {
 	"name": "@serum-enterprises/serum-language-designer",
-	"version": "2.0.0-beta.3",
+	"version": "2.0.0-beta.4",
 	"description": "A modern Grammar Builder and Parser",
-	"main": "./build/src/index.js",
+	"main": "./build/index.js",
 	"types": "./types/index.d.ts",
 	"scripts": {
 		"postinstall": "npm run build",
