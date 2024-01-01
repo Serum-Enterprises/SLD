@@ -1,6 +1,11 @@
 class CustomError extends Error {
 	#index;
 
+	/**
+	 * Create a new CustomError Instance
+	 * @param {string} message 
+	 * @param {number} index 
+	 */
 	constructor(message, index) {
 		if (typeof message !== 'string')
 			throw new TypeError('Expected message to be a String');
@@ -15,12 +20,19 @@ class CustomError extends Error {
 		this.#index = index;
 	}
 
+	/**
+	 * Get the index
+	 */
 	get index() {
 		return this.#index;
 	}
 
+	/**
+	 * Get the string representation of the CustomError
+	 * @returns {string}
+	 */
 	toString() {
-		return `${this.name}: ${this.message}`;
+		return `[CustomError] ${this.message} at index ${this.#index}`;
 	}
 }
 

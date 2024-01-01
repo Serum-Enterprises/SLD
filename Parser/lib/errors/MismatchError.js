@@ -1,6 +1,11 @@
 class MisMatchError extends Error {
 	#index;
 
+	/**
+	 * Create a new MisMatchError Instance
+	 * @param {string} message 
+	 * @param {number} index 
+	 */
 	constructor(message, index) {
 		if (typeof message !== 'string')
 			throw new TypeError('Expected message to be a String');
@@ -15,12 +20,19 @@ class MisMatchError extends Error {
 		this.#index = index;
 	}
 
+	/**
+	 * Get the index
+	 */
 	get index() {
 		return this.#index;
 	}
 
+	/**
+	 * Get the string representation of the MisMatchError
+	 * @returns {string}
+	 */
 	toString() {
-		return `${this.name} at index ${this.message}`;
+		return `[MisMatchError] ${this.message} at index ${this.#index}`;
 	}
 }
 
