@@ -9,7 +9,7 @@ class SymbolSet {
 		if (typeof name !== 'string')
 			throw new TypeError('Expected name to be a String');
 
-		if (!Object.prototype.toString.call(data) === '[object Object]')
+		if (Object.prototype.toString.call(data) !== '[object Object]')
 			throw new TypeError(`Expected ${name} to be an Object`);
 
 		if (!Array.isArray(data.symbols))
