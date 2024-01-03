@@ -46,7 +46,7 @@ class Rule {
 			throw new TypeError('Expected throwMessage to be a String or null');
 
 		if (recoverComponent !== null && !(recoverComponent instanceof BaseSymbol))
-			throw new TypeError('Expected recoverComponent to be an instance of BaseSymbol');
+			throw new TypeError('Expected recoverComponent to be an instance of BaseSymbol or null');
 
 		this.#symbolSets = symbolSets;
 		this.#throwMessage = throwMessage;
