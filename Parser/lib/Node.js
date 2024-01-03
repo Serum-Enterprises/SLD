@@ -29,13 +29,13 @@ class Node {
 		if (Object.prototype.toString.call(data.children) !== '[object Object]')
 			throw new TypeError(`Expected ${varName}.children to be an Object`);
 
-		const children = Object.entries(data.children).reduce(result, ([name, child]) => {
+		const children = Object.entries(data.children).reduce((result, [name, child]) => {
 			if (!Array.isArray(child))
 				throw new TypeError(`Expected ${varName}.children.${name} to be an Array`);
 
 			return {
 				...result,
-				[name]: child.map((child, index) => Node.fomJSON(child, `${varName}.children.${name}[${index}]`))
+				[name]: child.map((child, index) => Node.fromJSON(child, `${varName}.children.${name}[${index}]`))
 			};
 		}, {});
 
