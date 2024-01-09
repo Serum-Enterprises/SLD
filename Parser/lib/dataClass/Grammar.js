@@ -3,6 +3,12 @@ const { Rule } = require('./Rule.js');
 class Grammar {
 	#rules;
 
+	/**
+	 * Create a new Grammar Instance from JSON Data
+	 * @param {unknown} data 
+	 * @param {string} [name = "data"] 
+	 * @returns {Grammar}
+	 */
 	static fromJSON(data, name = 'data') {
 		if (typeof name !== 'string')
 			throw new TypeError('Expected name to be a String');
@@ -25,6 +31,10 @@ class Grammar {
 		return new Grammar(rules);
 	}
 
+	/**
+	 * Create a new Grammar Instance
+	 * @param {{[key: string]: Rule[]}} rules
+	 */
 	constructor(rules) {
 		if (Object.prototype.toString.call(rules) !== '[object Object]')
 			throw new TypeError('Expected rules to be an Object');
@@ -42,10 +52,17 @@ class Grammar {
 		this.#rules = rules;
 	}
 
+	/**
+	 * Get the rules of this Grammar
+	 */
 	get rules() {
 		return this.#rules;
 	}
 
+	/**
+	 * Convert this Grammar Instance to JSON Data
+	 * @returns {unknown}
+	 */
 	toJSON() {
 		return Object.entries(this.#rules).reduce((rules, [name, variant]) => {
 			return { ...rules, [name]: variant.map(rule => rule.toJSON()) };

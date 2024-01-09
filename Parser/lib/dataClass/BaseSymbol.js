@@ -3,6 +3,12 @@ class BaseSymbol {
 	#value;
 	#name;
 
+	/**
+	 * Create a new BaseSymbol Instance from JSON Data
+	 * @param {unknown} data 
+	 * @param {string} [name = "data"] 
+	 * @returns {BaseSymbol}
+	 */
 	static fromJSON(data, name = 'data') {
 		if (typeof name !== 'string')
 			throw new TypeError('Expected name to be a String');
@@ -25,6 +31,12 @@ class BaseSymbol {
 		return new BaseSymbol(data.type, data.value, data.name);
 	}
 
+	/**
+	 * Create a new BaseSymbol Instance
+	 * @param {"STRING" | "REGEXP" | "VARIANT"} type 
+	 * @param {string} value 
+	 * @param {string | null} [name = null] 
+	 */
 	constructor(type, value, name = null) {
 		if (typeof type !== 'string')
 			throw new TypeError('Expected type to be a String');
@@ -43,18 +55,34 @@ class BaseSymbol {
 		this.#name = name;
 	}
 	
+	/**
+	 * Get the type of this BaseSymbol
+	 * @returns {"STRING" | "REGEXP" | "VARIANT"}
+	 */
 	get type() {
 		return this.#type;
 	}
 
+	/**
+	 * Get the value of this BaseSymbol
+	 * @returns {string}
+	 */
 	get value() {
 		return this.#value;
 	}
 	
+	/**
+	 * Get the name of this BaseSymbol
+	 * @returns {string | null}
+	 */
 	get name() {
 		return this.#name;
 	}
 	
+	/**
+	 * Convert this BaseSymbol Instance to JSON Data
+	 * @returns {unknown}
+	 */
 	toJSON() {
 		return {
 			type: this.#type,

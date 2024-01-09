@@ -5,6 +5,12 @@ class SymbolSet {
 	#optional;
 	#greedy;
 
+	/**
+	 * Create a new SymbolSet Instance from JSON Data
+	 * @param {unknown} data 
+	 * @param {string | null} [name = "data"] 
+	 * @returns {SymbolSet}
+	 */
 	static fromJSON(data, name = 'data') {
 		if (typeof name !== 'string')
 			throw new TypeError('Expected name to be a String');
@@ -28,6 +34,12 @@ class SymbolSet {
 		return new SymbolSet(symbols, data.optional, data.greedy);
 	}
 
+	/**
+	 * Create a new SymbolSet Instance
+	 * @param {BaseSymbol[]} symbols 
+	 * @param {boolean} [optional = false] 
+	 * @param {boolean} [greedy = false] 
+	 */
 	constructor(symbols, optional = false, greedy = false) {
 		if (!Array.isArray(symbols))
 			throw new TypeError('Expected symbols to be an Array');
@@ -46,18 +58,34 @@ class SymbolSet {
 		this.#greedy = greedy;
 	}
 	
+	/**
+	 * Get the symbols of this SymbolSet
+	 * @returns {BaseSymbol[]}
+	 */
 	get symbols() {
 		return this.#symbols;
 	}
 
+	/**
+	 * Get the optional flag of this SymbolSet
+	 * @returns {boolean}
+	 */
 	get optional() {
 		return this.#optional;
 	}
 
+	/**
+	 * Get the greedy flag of this SymbolSet
+	 * @returns {boolean}
+	 */
 	get greedy() {
 		return this.#greedy;
 	}
 
+	/**
+	 * Convert this SymbolSet Instance to JSON Data
+	 * @returns {unknown}
+	 */
 	toJSON() {
 		return {
 			symbols: this.#symbols.map(symbol => symbol.toJSON()),

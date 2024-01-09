@@ -6,6 +6,12 @@ class Rule {
 	#throwMessage;
 	#recoverComponent;
 
+	/**
+	 * Create a new Rule Instance from JSON Data
+	 * @param {unknown} data 
+	 * @param {string | null} [name = "data"] 
+	 * @returns {Rule}
+	 */
 	static fromJSON(data, name = 'data') {
 		if (typeof name !== 'string')
 			throw new TypeError('Expected name to be a String');
@@ -35,6 +41,12 @@ class Rule {
 		return new Rule(symbolSets, data.throwMessage, recoverComponent);
 	}
 
+	/**
+	 * Create a new Rule Instance
+	 * @param {SymbolSet[]} symbolSets 
+	 * @param {string | null} [throwMessage = null] 
+	 * @param {BaseSymbol | null} [recoverComponent = null] 
+	 */
 	constructor(symbolSets, throwMessage = null, recoverComponent = null) {
 		if (!Array.isArray(symbolSets))
 			throw new TypeError('Expected symbolSets to be an Array');
@@ -53,18 +65,34 @@ class Rule {
 		this.#recoverComponent = recoverComponent;
 	}
 
+	/**
+	 * Get the symbolSets of this Rule
+	 * @returns {SymbolSet[]}
+	 */
 	get symbolSets() {
 		return this.#symbolSets;
 	}
 
+	/**
+	 * Get the throwMessage of this Rule
+	 * @returns {string | null}
+	 */
 	get throwMessage() {
 		return this.#throwMessage;
 	}
 
+	/**
+	 * Get the recoverComponent of this Rule
+	 * @returns {BaseSymbol | null}
+	 */
 	get recoverComponent() {
 		return this.#recoverComponent;
 	}
 
+	/**
+	 * Convert this Rule Instance to JSON Data
+	 * @returns {unknown}
+	 */
 	toJSON() {
 		return {
 			symbolSets: this.#symbolSets.map(symbolSet => symbolSet.toJSON()),
