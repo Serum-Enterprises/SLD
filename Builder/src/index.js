@@ -1,12 +1,4 @@
-const DC = {
-	BaseSymbol: require('../../lib/BaseSymbol'),
-	SymbolSet: require('../../lib/SymbolSet'),
-	Rule: require('../../lib/Rule'),
-	Grammar: require('../../lib/Grammar')
-}
+const { Rule, QuantitySelector, SymbolSelector } = require('./Rule');
+const { Grammar } = require('./Grammar');
 
-
-
-
-
-module.exports = { Rule, RuleSet, Grammar, QuantitySelector, SymbolSelector };
+module.exports = { Rule, Grammar, QuantitySelector, SymbolSelector };
