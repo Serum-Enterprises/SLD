@@ -104,6 +104,30 @@ class QuantitySelector {
 	}
 
 	/**
+	 * Get the Rule of this QuantitySelector
+	 * @returns {Rule}
+	 */
+	get rule() {
+		return this.#rule;
+	}
+
+	/**
+	 * Get the whitespacePrefix Flag of this QuantitySelector
+	 * @returns {boolean}
+	 */
+	get whitespacePrefix() {
+		return this.#whiteSpacePrefix;
+	}
+
+	/**
+	 * Get the recoverSymbol Flag of this QuantitySelector
+	 * @returns {boolean}
+	 */
+	get recoverSymbol() {
+		return this.#recoverSymbol;
+	}
+
+	/**
 	 * Set the quantity of this Rule to exactly one
 	 * @returns {SymbolSelector}
 	 */
@@ -185,6 +209,47 @@ class SymbolSelector {
 		this.#greedy = greedy;
 		this.#recoverSymbol = recoverSymbol;
 	}
+
+	/**
+	 * Get the Rule of this SymbolSelector
+	 * @returns {Rule}
+	 */
+	get rule() {
+		return this.#rule;
+	}
+
+	/**
+	 * Get the whitespacePrefix Flag of this SymbolSelector
+	 * @returns {boolean}
+	 */
+	get whitespacePrefix() {
+		return this.#whiteSpacePrefix;
+	}
+
+	/**
+	 * Get the optional Flag of this SymbolSelector
+	 * @returns {boolean}
+	 */
+	get optional() {
+		return this.#optional;
+	}
+
+	/**
+	 * Get the greedy Flag of this SymbolSelector
+	 * @returns {boolean}
+	 */
+	get greedy() {
+		return this.#greedy;
+	}
+
+	/**
+	 * Get the recoverSymbol Flag of this SymbolSelector
+	 * @returns {boolean}
+	 */
+	get recoverSymbol() {
+		return this.#recoverSymbol;
+	}
+
 	/**
 	 * Select a String Symbol
 	 * @param {string} value 
