@@ -1,5 +1,5 @@
-const GrammarDC = require('../../lib/Grammar');
-const RuleDC = require('../../lib/Rule');
+const { Grammar: GrammarDC } = require('../../../lib/src/Grammar');
+const { Rule: RuleDC } = require('../../../lib/src/Rule');
 
 class Grammar extends GrammarDC {
 	/**
@@ -30,7 +30,7 @@ class Grammar extends GrammarDC {
 			});
 		});
 
-		this.rules = ruleSets;
+		super(ruleSets);
 	}
 }
 
