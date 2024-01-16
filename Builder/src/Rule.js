@@ -1,5 +1,7 @@
 // Import Rule DataClass
-const RuleDC = require('../../lib/Rule');
+const { Rule: RuleDC } = require('../../../lib/Rule');
+const { BaseSymbol: BaseSymbolDC } = require('../../../lib/BaseSymbol');
+const { SymbolSet: SymbolSetDC } = require('../../../lib/SymbolSet');
 
 class Rule extends RuleDC {
 	/**
@@ -197,25 +199,15 @@ class SymbolSelector {
 			throw new TypeError('Expected name to be a String or null');
 
 		if (this.#recoverSymbol)
-			this.#rule.recoverSymbol = new DC.BaseSymbol('STRING', value, name);
+			this.#rule.recoverSymbol = new BaseSymbolDC('STRING', value, name);
 		else {
-			if (this.#whiteSpacePrefix) {
-				this.#rule.symbolSets = [
-					...this.#rule.symbolSets,
-					new DC.SymbolSet([
-						new DC.BaseSymbol('REGEXP', '\s*'),
-						new DC.BaseSymbol('STRING', value, name)
-					], this.#optional, this.#greedy)
-				];
-			}
-			else {
-				this.#rule.symbolSets = [
-					...this.#rule.symbolSets,
-					new DC.SymbolSet([
-						new DC.BaseSymbol('STRING', value, name)
-					], this.#optional, this.#greedy)
-				];
-			}
+			this.#rule.symbolSets = [
+				...this.#rule.symbolSets,
+				new SymbolSetDC([
+					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\s*')] : [],
+					new BaseSymbolDC('STRING', value, name)
+				], this.#optional, this.#greedy)
+			];
 		}
 
 		return this.#rule;
@@ -235,25 +227,15 @@ class SymbolSelector {
 			throw new TypeError('Expected name to be a String or null');
 
 		if (this.#recoverSymbol)
-			this.#rule.recoverSymbol = new DC.BaseSymbol('REGEXP', value, name);
+			this.#rule.recoverSymbol = new BaseSymbolDC('REGEXP', value, name);
 		else {
-			if (this.#whiteSpacePrefix) {
-				this.#rule.symbolSets = [
-					...this.#rule.symbolSets,
-					new DC.SymbolSet([
-						new DC.BaseSymbol('REGEXP', '\s*'),
-						new DC.BaseSymbol('REGEXP', value, name)
-					], this.#optional, this.#greedy)
-				];
-			}
-			else {
-				this.#rule.symbolSets = [
-					...this.#rule.symbolSets,
-					new DC.SymbolSet([
-						new DC.BaseSymbol('REGEXP', value, name)
-					], this.#optional, this.#greedy)
-				];
-			}
+			this.#rule.symbolSets = [
+				...this.#rule.symbolSets,
+				new SymbolSetDC([
+					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\s*')] : [],
+					new BaseSymbolDC('REGEXP', value, name)
+				], this.#optional, this.#greedy)
+			];
 		}
 
 		return this.#rule;
@@ -272,25 +254,15 @@ class SymbolSelector {
 			throw new TypeError('Expected name to be a String or null');
 
 		if (this.#recoverSymbol)
-			this.#rule.recoverSymbol = new DC.BaseSymbol('VARIANT', value, name);
+			this.#rule.recoverSymbol = new BaseSymbolDC('VARIANT', value, name);
 		else {
-			if (this.#whiteSpacePrefix) {
-				this.#rule.symbolSets = [
-					...this.#rule.symbolSets,
-					new DC.SymbolSet([
-						new DC.BaseSymbol('REGEXP', '\s*'),
-						new DC.BaseSymbol('VARIANT', value, name)
-					], this.#optional, this.#greedy)
-				];
-			}
-			else {
-				this.#rule.symbolSets = [
-					...this.#rule.symbolSets,
-					new DC.SymbolSet([
-						new DC.BaseSymbol('VARIANT', value, name)
-					], this.#optional, this.#greedy)
-				];
-			}
+			this.#rule.symbolSets = [
+				...this.#rule.symbolSets,
+				new SymbolSetDC([
+					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\s*')] : [],
+					new BaseSymbolDC('VARIANT', value, name)
+				], this.#optional, this.#greedy)
+			];
 		}
 
 		return this.#rule;
