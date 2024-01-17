@@ -1,7 +1,6 @@
-// Import Rule DataClass
-const { Rule: RuleDC } = require('../../../lib/Rule');
-const { BaseSymbol: BaseSymbolDC } = require('../../../lib/BaseSymbol');
-const { SymbolSet: SymbolSetDC } = require('../../../lib/SymbolSet');
+const { Rule: RuleDC } = require('../../lib/src/Rule');
+const { BaseSymbol: BaseSymbolDC } = require('../../lib/src/BaseSymbol');
+const { SymbolSet: SymbolSetDC } = require('../../lib/src/SymbolSet');
 
 class Rule extends RuleDC {
 	/**
@@ -269,7 +268,7 @@ class SymbolSelector {
 			this.#rule.symbolSets = [
 				...this.#rule.symbolSets,
 				new SymbolSetDC([
-					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\s*')] : [],
+					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\\s*')] : [],
 					new BaseSymbolDC('STRING', value, name)
 				], this.#optional, this.#greedy)
 			];
@@ -297,7 +296,7 @@ class SymbolSelector {
 			this.#rule.symbolSets = [
 				...this.#rule.symbolSets,
 				new SymbolSetDC([
-					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\s*')] : [],
+					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\\s*')] : [],
 					new BaseSymbolDC('REGEXP', value, name)
 				], this.#optional, this.#greedy)
 			];
@@ -324,7 +323,7 @@ class SymbolSelector {
 			this.#rule.symbolSets = [
 				...this.#rule.symbolSets,
 				new SymbolSetDC([
-					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\s*')] : [],
+					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\\s*')] : [],
 					new BaseSymbolDC('VARIANT', value, name)
 				], this.#optional, this.#greedy)
 			];
