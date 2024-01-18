@@ -1,10 +1,10 @@
 const { Grammar: GrammarDC } = require('../../lib/src/Grammar');
-const { Rule: RuleDC } = require('../../lib/src/Rule');
+const { RuleSet: RuleSetDC } = require('../../lib/src/RuleSet');
 
 class Grammar extends GrammarDC {
 	/**
 	 * Create a new Grammar Instance
-	 * @param {{[key: string]: RuleDC[]}} ruleSets 
+	 * @param {{[key: string]: RuleSetDC}} ruleSets 
 	 * @returns {Grammar}
 	 */
 	static create(ruleSets = {}) {
