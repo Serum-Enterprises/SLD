@@ -65,6 +65,21 @@ class Rule extends RuleDC {
 	directlyFollowedBy() {
 		return new QuantitySelector(this);
 	}
+
+	/**
+	 * Set a Transformer Function for this Rule
+	 * @param {Function} transformer 
+	 * @returns {Rule}
+	 */
+	transform(transformer) {
+		if (typeof transformer !== 'function')
+			throw new TypeError('Expected transformer to be a Function');
+
+		this.transformer = transformer;
+
+		return this;
+
+	}
 }
 
 class QuantitySelector {

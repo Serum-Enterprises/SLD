@@ -10,6 +10,20 @@ class RuleSet extends RuleSetDC {
 	static create(rules = []) {
 		return new RuleSet(rules);
 	}
+
+	/**
+	 * Set a Transformer function for this RuleSet
+	 * @param {Function} transformer 
+	 * @returns {RuleSet}
+	 */
+	transform(transformer) {
+		if (typeof transformer !== 'function')
+			throw new TypeError('Expected transformer to be a Function');
+
+		this.transformer = transformer;
+
+		return this;
+	}
 }
 
 module.exports = { RuleSet };

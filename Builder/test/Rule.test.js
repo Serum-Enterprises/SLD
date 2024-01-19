@@ -41,6 +41,13 @@ describe('Testing Rule', () => {
 		expect(new Rule().directlyFollowedBy().whitespacePrefix).toBe(false);
 		expect(new Rule().directlyFollowedBy().recoverSymbol).toBe(false);
 	});
+
+	test('Testing transform', () => {
+		expect(() => new Rule().transform(123)).toThrow(new TypeError('Expected transformer to be a Function'));
+
+		expect(new Rule().transform(() => { })).toBeInstanceOf(Rule);
+		expect(new Rule().transform(() => { }).transformer).toBeInstanceOf(Function);
+	})
 });
 
 describe('Testing QuantitySelector', () => {
