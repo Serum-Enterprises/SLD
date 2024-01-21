@@ -1,4 +1,4 @@
-const { Node } = require('../../lib/Node');
+const { Node } = require('../src/Node');
 
 describe('Testing Node', () => {
 	const jsonData = {

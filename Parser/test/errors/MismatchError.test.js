@@ -1,4 +1,4 @@
-const { MisMatchError } = require('../../../lib/errors/MisMatchError');
+const { MisMatchError } = require('../../src/errors/MisMatchError');
 
 describe('Testing MisMatchError', () => {
 	test('Testing constructor', () => {

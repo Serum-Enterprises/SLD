@@ -1,4 +1,4 @@
-const { CustomError } = require('../../../lib/errors/CustomError');
+const { CustomError } = require('../../src/errors/CustomError');
 
 describe('Testing CustomError', () => {
 	test('Testing constructor', () => {

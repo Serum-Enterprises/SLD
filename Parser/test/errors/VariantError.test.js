@@ -1,4 +1,4 @@
-const { VariantError } = require('../../../lib/errors/VariantError');
+const { VariantError } = require('../../src/errors/VariantError');
 
 describe('Testing VariantError', () => {
 	test('Testing constructor', () => {
