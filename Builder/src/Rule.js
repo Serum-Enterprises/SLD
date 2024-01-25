@@ -318,12 +318,12 @@ class SymbolSelector {
 		return this.#rule;
 	}
 	/**
-	 * Select a Variant Symbol
+	 * Select a RuleSet Symbol
 	 * @param {string} value 
 	 * @param {string | null} name 
 	 * @returns {Rule}
 	 */
-	variant(value, name = null) {
+	ruleset(value, name = null) {
 		if (typeof value !== 'string')
 			throw new TypeError('Expected value to be a String');
 
@@ -331,13 +331,13 @@ class SymbolSelector {
 			throw new TypeError('Expected name to be a String or null');
 
 		if (this.#recoverSymbol)
-			this.#rule.recoverSymbol = new BaseSymbolDC('VARIANT', value, name);
+			this.#rule.recoverSymbol = new BaseSymbolDC('RULESET', value, name);
 		else {
 			this.#rule.symbolSets = [
 				...this.#rule.symbolSets,
 				new SymbolSetDC([
 					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\\s*')] : [],
-					new BaseSymbolDC('VARIANT', value, name)
+					new BaseSymbolDC('RULESET', value, name)
 				], this.#optional, this.#greedy)
 			];
 		}

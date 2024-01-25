@@ -245,29 +245,29 @@ describe('Testing SymbolSelector', () => {
 		expect(symbolSet.symbolSets[0].symbols[0].name).toBe(null);
 	});
 
-	test('Testing variant', () => {
-		expect(() => new SymbolSelector(new Rule()).variant(123)).toThrow(new TypeError('Expected value to be a String'));
-		expect(() => new SymbolSelector(new Rule()).variant('Hello', 123)).toThrow(new TypeError('Expected name to be a String or null'));
+	test('Testing ruleset', () => {
+		expect(() => new SymbolSelector(new Rule()).ruleset(123)).toThrow(new TypeError('Expected value to be a String'));
+		expect(() => new SymbolSelector(new Rule()).ruleset('Hello', 123)).toThrow(new TypeError('Expected name to be a String or null'));
 
-		const recoverSymbol = new SymbolSelector(new Rule(), false, false, false, true).variant('Hello');
+		const recoverSymbol = new SymbolSelector(new Rule(), false, false, false, true).ruleset('Hello');
 
-		expect(recoverSymbol.recoverSymbol.type).toBe('VARIANT');
+		expect(recoverSymbol.recoverSymbol.type).toBe('RULESET');
 		expect(recoverSymbol.recoverSymbol.value).toBe('Hello');
 		expect(recoverSymbol.recoverSymbol.name).toBe(null);
 
-		const symbolSetWithWS = new SymbolSelector(new Rule(), true).variant('Hello');
+		const symbolSetWithWS = new SymbolSelector(new Rule(), true).ruleset('Hello');
 
 		expect(symbolSetWithWS.symbolSets[0].symbols[0].type).toBe('REGEXP');
 		expect(symbolSetWithWS.symbolSets[0].symbols[0].value).toBe('\\s*');
 		expect(symbolSetWithWS.symbolSets[0].symbols[0].name).toBe(null);
 
-		expect(symbolSetWithWS.symbolSets[0].symbols[1].type).toBe('VARIANT');
+		expect(symbolSetWithWS.symbolSets[0].symbols[1].type).toBe('RULESET');
 		expect(symbolSetWithWS.symbolSets[0].symbols[1].value).toBe('Hello');
 		expect(symbolSetWithWS.symbolSets[0].symbols[1].name).toBe(null);
 
-		const symbolSet = new SymbolSelector(new Rule(), false).variant('Hello');
+		const symbolSet = new SymbolSelector(new Rule(), false).ruleset('Hello');
 
-		expect(symbolSet.symbolSets[0].symbols[0].type).toBe('VARIANT');
+		expect(symbolSet.symbolSets[0].symbols[0].type).toBe('RULESET');
 		expect(symbolSet.symbolSets[0].symbols[0].value).toBe('Hello');
 		expect(symbolSet.symbolSets[0].symbols[0].name).toBe(null);
 	});
