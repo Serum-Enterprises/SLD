@@ -144,6 +144,44 @@ class Node {
 	}
 
 	/**
+	 * Create a new Node following the current Node
+	 * @param {"MATCH" | "RECOVER"} type 
+	 * @param {string} raw 
+	 * @param {{[key: string]: Node[]}} children 
+	 * @returns {Node}
+	 */
+	createFollower(type, raw, children) {
+		if (typeof type !== 'string')
+			throw new TypeError('Expected type to be a String');
+
+		if (!['MATCH', 'RECOVER'].includes(type.toUpperCase()))
+			throw new RangeError('Expected type to be either "MATCH" or "RECOVER"');
+
+		if (typeof raw !== 'string')
+			throw new TypeError('Expected raw to be a String');
+
+		if (Object.prototype.toString.call(children) !== '[object Object]')
+			throw new TypeError('Expected children to be an Object');
+
+		Object.entries(children).forEach(([name, child]) => {
+			if (!Array.isArray(child))
+				throw new TypeError(`Expected children.${name} to be an Array`);
+
+			child.forEach((child, index) => {
+				if (!(child instanceof Node))
+					throw new TypeError(`Expected children.${name}[${index}] to be an instance of Node`);
+			});
+		});
+
+		return new Node(
+			type,
+			raw,
+			children,
+			[this.#range[1] + 1, this.#range[1] + raw.length]
+		);
+	}
+
+	/**
 	 * Convert the Node to JSON
 	 * @returns {string}
 	 */

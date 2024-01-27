@@ -77,6 +77,22 @@ describe('Testing Node', () => {
 		expect(new Node('MATCH', 'raw', {}, [0, 1]).range).toEqual([0, 1]);
 	});
 
+	test('Testing createFollower', () => {
+		const precedingNode = new Node('MATCH', 'Hello', {}, [0, 4]);
+
+		expect(() => precedingNode.createFollower()).toThrow(new TypeError('Expected type to be a String'));
+		expect(() => precedingNode.createFollower('TEST')).toThrow(new RangeError(`Expected type to be either "MATCH" or "RECOVER"`));
+		expect(() => precedingNode.createFollower('MATCH')).toThrow(new TypeError('Expected raw to be a String'));
+		expect(() => precedingNode.createFollower('MATCH', 'World')).toThrow(new TypeError('Expected children to be an Object'));
+		expect(() => precedingNode.createFollower('MATCH', 'World', { a: null })).toThrow(new TypeError(`Expected children.a to be an Array`));
+		expect(() => precedingNode.createFollower('MATCH', 'World', { a: ['Hello World'] })).toThrow(new TypeError(`Expected children.a[0] to be an instance of Node`));
+
+		expect(precedingNode.createFollower('MATCH', 'World', { a: [precedingNode] })).toBeInstanceOf(Node);
+		expect(precedingNode.createFollower('MATCH', 'World', {})).toBeInstanceOf(Node);
+		expect(precedingNode.createFollower('MATCH', 'World', {}).toJSON())
+			.toStrictEqual({ type: 'MATCH', raw: 'World', children: {}, range: [5, 9] });
+	});
+
 	test('Testing Node.toJSON()', () => {
 		const node = Node.fromJSON(jsonData);
 
