@@ -1,4 +1,4 @@
-const { Grammar: GrammarDC, RuleSet: RuleSetDC } = require('../../lib');
+const { Grammar: GrammarDC, RuleSet: RuleSetDC } = require('../../Core');
 
 class Grammar extends GrammarDC {
 	/**

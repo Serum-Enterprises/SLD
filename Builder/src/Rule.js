@@ -1,4 +1,4 @@
-const { Rule: RuleDC, BaseSymbol: BaseSymbolDC, SymbolSet: SymbolSetDC } = require('../../lib');
+const { Rule: RuleDC, BaseSymbol: BaseSymbolDC, SymbolSet: SymbolSetDC } = require('../../Core');
 
 class Rule extends RuleDC {
 	/**

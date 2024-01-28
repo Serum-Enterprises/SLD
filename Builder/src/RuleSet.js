@@ -1,4 +1,4 @@
-const { RuleSet: RuleSetDC, Rule: RuleDC } = require('../../lib');
+const { RuleSet: RuleSetDC, Rule: RuleDC } = require('../../Core');
 
 class RuleSet extends RuleSetDC {
 	/**
