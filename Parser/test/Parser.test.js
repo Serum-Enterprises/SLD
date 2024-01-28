@@ -268,6 +268,34 @@ describe('Testing Parser', () => {
 				},
 				range: [6, 10]
 			});
+
+		// Test Transformers
+		expect(new Parser(new Grammar()).parseRule(new Rule([
+			new SymbolSet([
+				new BaseSymbol('STRING', 'Hello', 'first'),
+				new BaseSymbol('REGEXP', '^\\s*')
+			]),
+			new SymbolSet([
+				new BaseSymbol('STRING', 'cool', 'middle'),
+				new BaseSymbol('REGEXP', '^\\s*')
+			], true),
+			new SymbolSet([
+				new BaseSymbol('STRING', 'World', 'last')
+			])
+		], null, null, (node) => {
+			return new Node({
+				type: 'MATCH',
+				raw: node.children.first[0].raw + node.children.last[0].raw,
+				children: {},
+				range: [node.children.first[0].range[0], node.children.last[0].range[1]]
+			});
+		}), 'Hello World', null).toJSON())
+			.toStrictEqual({
+				type: 'MATCH',
+				raw: 'HelloWorld',
+				children: {},
+				range: [0, 10]
+			});
 	});
 
 	test('Testing parseRuleSet', () => {
@@ -323,7 +351,7 @@ describe('Testing Parser', () => {
 		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet([
 			new Rule([], 'Expected a Greeting'),
 		]), 'Hello', null))
-			.toThrow(new CustomError('Expected a Greeting', 0));
+			.toThrow(new VariantError('No Rule matched', 0));
 
 		// Test getting a VariantError if no Rule matched
 		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet([

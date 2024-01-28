@@ -3,7 +3,6 @@ const { Grammar, RuleSet, Rule, SymbolSet, BaseSymbol } = require('../../lib');
 const { Node } = require('./Node.js');
 const { MisMatchError } = require('./errors/MisMatchError.js');
 const { CustomError } = require('./errors/CustomError.js');
-const { VariantError } = require('./errors/VariantError.js');
 
 class Parser {
 	/**
@@ -266,11 +265,19 @@ class Parser {
 
 		// Construct the Node and return it
 		const raw = source.slice(0, source.length - rest.length);
+		let result = precedingNode ?
+			precedingNode.createFollower('MATCH', raw, namedNodes) :
+			new Node('MATCH', raw, namedNodes, [0, raw.length - 1]);
 
-		if (precedingNode)
-			return precedingNode.createFollower('MATCH', raw, namedNodes);
+		// Transform the given Node if a transformer was set
+		if (rule.transformer) {
+			result = rule.transformer(result);
 
-		return new Node('MATCH', raw, namedNodes, [0, raw.length - 1])
+			if (!(result instanceof Node))
+				throw new TypeError('Expected transformer to return an instance of Node');
+		}
+
+		return result;
 	}
 
 	/**
@@ -290,19 +297,27 @@ class Parser {
 		if (!(precedingNode instanceof Node) && precedingNode !== null)
 			throw new TypeError('Expected precedingNode to be an instance of Node or null');
 
+		let result = null;
+
 		for (let i = 0; i < ruleSet.rules.length; i++) {
 			try {
-				return this.parseRule(ruleSet.rules[i], source, precedingNode);
+				result = this.parseRule(ruleSet.rules[i], source, precedingNode);
 			}
-			catch (error) {
-				if (!(error instanceof MisMatchError))
-					throw error;
-			}
+			catch (error) { }
 		}
 
-		// TODO: Add Transformer Function support
+		if (!result)
+			throw new RangeError('No Rule matched', precedingNode ? precedingNode.range[1] + 1 : 0);
 
-		throw new VariantError('No Rule matched', precedingNode ? precedingNode.range[1] + 1 : 0);
+		// Transform the given Node if a transformer was set
+		if (ruleSet.transformer) {
+			result = ruleSet.transformer(result);
+
+			if (!(result instanceof Node))
+				throw new TypeError('Expected transformer to return an instance of Node');
+		}
+
+		return result;
 	}
 
 	/**
