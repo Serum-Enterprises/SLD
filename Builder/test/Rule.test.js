@@ -219,14 +219,22 @@ describe('Testing SymbolSelector', () => {
 	});
 
 	test('Testing regexp', () => {
-		expect(() => new SymbolSelector(new Rule()).regexp(123)).toThrow(new TypeError('Expected value to be a String'));
+		expect(() => new SymbolSelector(new Rule()).regexp(123)).toThrow(new TypeError('Expected value to be a String or an instance of RegExp'));
 		expect(() => new SymbolSelector(new Rule()).regexp('\\s+', 123)).toThrow(new TypeError('Expected name to be a String or null'));
 
+		// Test it as a recoverSymbol with a String
 		const recoverSymbol = new SymbolSelector(new Rule(), false, false, false, true).regexp('[0-9]');
 
 		expect(recoverSymbol.recoverSymbol.type).toBe('REGEXP');
 		expect(recoverSymbol.recoverSymbol.value).toBe('[0-9]');
 		expect(recoverSymbol.recoverSymbol.name).toBe(null);
+
+		// Test it as a recoverSymbol with a RegExp
+		const recoverSymbolRegExp = new SymbolSelector(new Rule(), false, false, false, true).regexp(/[0-9]/);
+
+		expect(recoverSymbolRegExp.recoverSymbol.type).toBe('REGEXP');
+		expect(recoverSymbolRegExp.recoverSymbol.value).toBe('[0-9]');
+		expect(recoverSymbolRegExp.recoverSymbol.name).toBe(null);
 
 		const symbolSetWithWS = new SymbolSelector(new Rule(), true).regexp('[0-9]');
 
@@ -238,11 +246,19 @@ describe('Testing SymbolSelector', () => {
 		expect(symbolSetWithWS.symbolSets[0].symbols[1].value).toBe('[0-9]');
 		expect(symbolSetWithWS.symbolSets[0].symbols[1].name).toBe(null);
 
+		// Test it regularly with a String
 		const symbolSet = new SymbolSelector(new Rule(), false).regexp('[0-9]');
 
 		expect(symbolSet.symbolSets[0].symbols[0].type).toBe('REGEXP');
 		expect(symbolSet.symbolSets[0].symbols[0].value).toBe('[0-9]');
 		expect(symbolSet.symbolSets[0].symbols[0].name).toBe(null);
+
+		// Test it regularly with a RegExp
+		const symbolSetRegExp = new SymbolSelector(new Rule(), false).regexp(/[0-9]/);
+
+		expect(symbolSetRegExp.symbolSets[0].symbols[0].type).toBe('REGEXP');
+		expect(symbolSetRegExp.symbolSets[0].symbols[0].value).toBe('[0-9]');
+		expect(symbolSetRegExp.symbolSets[0].symbols[0].name).toBe(null);
 	});
 
 	test('Testing ruleset', () => {

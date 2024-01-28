@@ -292,25 +292,25 @@ class SymbolSelector {
 
 	/**
 	 * Select a RegExp Symbol
-	 * @param {string} value 
+	 * @param {string | RegExp} value 
 	 * @param {string | null} name 
 	 * @returns {Rule}
 	 */
 	regexp(value, name = null) {
-		if (typeof value !== 'string')
-			throw new TypeError('Expected value to be a String');
+		if (typeof value !== 'string' && !(value instanceof RegExp))
+			throw new TypeError('Expected value to be a String or an instance of RegExp');
 
 		if (typeof name !== 'string' && name !== null)
 			throw new TypeError('Expected name to be a String or null');
 
 		if (this.#recoverSymbol)
-			this.#rule.recoverSymbol = new BaseSymbolDC('REGEXP', value, name);
+			this.#rule.recoverSymbol = new BaseSymbolDC('REGEXP', (value instanceof RegExp) ? value.source : value, name);
 		else {
 			this.#rule.symbolSets = [
 				...this.#rule.symbolSets,
 				new SymbolSetDC([
 					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\\s*')] : [],
-					new BaseSymbolDC('REGEXP', value, name)
+					new BaseSymbolDC('REGEXP', (value instanceof RegExp) ? value.source : value, name)
 				], this.#optional, this.#greedy)
 			];
 		}
