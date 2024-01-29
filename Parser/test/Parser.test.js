@@ -1,8 +1,7 @@
-const { Grammar, RuleSet, Rule, SymbolSet, BaseSymbol } = require('../../lib');
+const { Grammar, RuleSet, Rule, SymbolSet, BaseSymbol, Node } = require('../../Core');
 const { MisMatchError } = require('../src/errors/MisMatchError');
 const { VariantError } = require('../src/errors/VariantError');
 const { CustomError } = require('../src/errors/CustomError');
-const { Node } = require('../src/Node');
 
 const { Parser } = require('../src/Parser');
 
