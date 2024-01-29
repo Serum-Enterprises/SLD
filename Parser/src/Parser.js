@@ -310,6 +310,7 @@ class Parser {
 		for (let i = 0; i < ruleSet.rules.length; i++) {
 			try {
 				result = this.parseRule(ruleSet.rules[i], source, precedingNode);
+				break;
 			}
 			catch (error) { }
 		}
