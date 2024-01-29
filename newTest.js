@@ -3,7 +3,7 @@ const { Parser, Node } = require('./Parser');
 
 const grammar = Grammar.create({
 	sum: RuleSet.create([
-		Rule.match().one().regexp('[0-9]+', 'lvalue')
+		Rule.match().one().regexp(/[0-9]+/, 'lvalue')
 			.followedBy().one().string('+')
 			.followedBy().one().ruleset('sum', 'rvalue')
 			.transform((node) => {
@@ -11,10 +11,10 @@ const grammar = Grammar.create({
 					'MATCH',
 					(parseInt(node.children.lvalue[0].raw) + parseInt(node.children.rvalue[0].raw)).toString(),
 					{},
-					[node.children.lvalue[0], node.children.rvalue[1]]
+					[node.children.lvalue[0].range[0], node.children.rvalue[0].range[1]]
 				);
 			}),
-		Rule.match().one().regexp('[0-9]+', 'value'),
+		Rule.match().one().regexp(/[0-9]+/, 'value'),
 		Rule.throw('Expected an Integer')
 	])
 });
