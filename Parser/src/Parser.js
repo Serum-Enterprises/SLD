@@ -1,7 +1,8 @@
 const { Grammar, RuleSet, Rule, SymbolSet, BaseSymbol, Node } = require('../../Core');
 
-const { MisMatchError } = require('./errors/MisMatchError.js');
-const { CustomError } = require('./errors/CustomError.js');
+const { MisMatchError } = require('./errors/MisMatchError');
+const { CustomError } = require('./errors/CustomError');
+const { RuleSetError } = require('./errors/RuleSetError');
 
 class Parser {
 	/**
@@ -135,12 +136,20 @@ class Parser {
 				return new Node('MATCH', match[0], {}, [0, match[0].length - 1]);
 			}
 			case 'RULESET': {
-				const result = this.parseRuleSet(this.#grammar.ruleSets[baseSymbol.value], source, precedingNode);
+				try {
+					const result = this.parseRuleSet(this.#grammar.ruleSets[baseSymbol.value], source, precedingNode);
 
-				if (precedingNode)
-					return precedingNode.createFollower('MATCH', result.raw, result.children)
+					if (precedingNode)
+						return precedingNode.createFollower('MATCH', result.raw, result.children)
 
-				return new Node('MATCH', result.raw, result.children, [0, result.raw.length - 1]);
+					return new Node('MATCH', result.raw, result.children, [0, result.raw.length - 1]);
+				}
+				catch (error) {
+					if (error instanceof RuleSetError)
+						throw new MisMatchError(`Expected RuleSet "${baseSymbol.value}"`, precedingNode ? precedingNode.range[1] + 1 : 0);
+
+					throw error;
+				}
 			}
 		}
 	}
@@ -306,7 +315,7 @@ class Parser {
 		}
 
 		if (!result)
-			throw new RangeError('No Rule matched', precedingNode ? precedingNode.range[1] + 1 : 0);
+			throw new RuleSetError();
 
 		// Transform the given Node if a transformer was set
 		if (ruleSet.transformer) {
@@ -343,12 +352,20 @@ class Parser {
 		if (!(this.#grammar.ruleSets[rootRuleSet] instanceof RuleSet))
 			throw new ReferenceError(`Expected rootRuleSet to be an existing RuleSet`);
 
-		const result = this.parseRuleSet(this.#grammar.ruleSets[rootRuleSet], source, precedingNode);
+		try {
+			const result = this.parseRuleSet(this.#grammar.ruleSets[rootRuleSet], source, precedingNode);
 
-		if (failOnRest && result.raw !== source)
-			throw new MisMatchError('Expected End of File', result.range[1] + 1);
+			if (failOnRest && result.raw !== source)
+				throw new MisMatchError('Expected End of File', result.range[1] + 1);
 
-		return result;
+			return result;
+		}
+		catch (error) {
+			if (error instanceof RuleSetError)
+				throw new MisMatchError(`Expected RuleSet "${rootRuleSet}"`, precedingNode ? precedingNode.range[1] + 1 : 0);
+
+			throw error;
+		}
 	}
 }
 
