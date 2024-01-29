@@ -1,4 +1,4 @@
-const { RuleSet: RuleSetDC, Rule: RuleDC } = require('../../Core');
+const { RuleSet: RuleSetDC, Rule: RuleDC, Node } = require('../../Core');
 
 class RuleSet extends RuleSetDC {
 	/**
@@ -12,7 +12,7 @@ class RuleSet extends RuleSetDC {
 
 	/**
 	 * Set a Transformer function for this RuleSet
-	 * @param {Function} transformer 
+	 * @param {(node: Node) => Node} transformer 
 	 * @returns {RuleSet}
 	 */
 	transform(transformer) {
