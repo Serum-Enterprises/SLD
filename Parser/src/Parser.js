@@ -3,6 +3,7 @@ const { Grammar, RuleSet, Rule, SymbolSet, BaseSymbol, Node } = require('../../C
 const { MisMatchError } = require('./errors/MisMatchError');
 const { CustomError } = require('./errors/CustomError');
 const { RuleSetError } = require('./errors/RuleSetError');
+const { EmptyStringError } = require('./errors/EmptyStringError');
 
 class Parser {
 	/**
@@ -80,14 +81,15 @@ class Parser {
 				result = this.parseBaseSymbol(baseSymbol, rest, precedingNode);
 			}
 			catch (error) {
+				if(error instanceof EmptyStringError)
+					return null;
+
 				rest = rest.slice(1);
 			}
 		}
 
-		if (!result) {
-
+		if (!result)
 			return null;
-		}
 
 		const raw = source.slice(0, source.length - rest.length + result.raw.length);
 
@@ -129,6 +131,9 @@ class Parser {
 
 				if (!match)
 					throw new MisMatchError(`Expected /^${baseSymbol.value}/`, precedingNode ? precedingNode.range[1] + 1 : 0);
+
+				if (match[0].length === 0)
+					throw new EmptyStringError();
 
 				if (precedingNode)
 					return precedingNode.createFollower('MATCH', match[0], {});
@@ -177,7 +182,18 @@ class Parser {
 
 		// Match every Symbol in the SymbolSet
 		for (let baseSymbol of symbolSet.symbols) {
-			const result = this.parseBaseSymbol(baseSymbol, rest, currentPrecedingNode);
+			let result = null;
+
+			try {
+				result = this.parseBaseSymbol(baseSymbol, rest, currentPrecedingNode);
+			}
+			catch (error) {
+				// If the RegExp matched an empty String, do nothing and ignore the current Match
+				if (error instanceof EmptyStringError)
+					continue;
+				else
+					throw error;
+			}
 
 			// If the Symbol is named, add it to the namedNodes Object
 			if (baseSymbol.name) {
