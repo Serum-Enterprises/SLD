@@ -62,6 +62,40 @@ class Node {
 	}
 
 	/**
+	 * Merge an Array of NodeMaps into a single NodeMap
+	 * @param {{[key: string]: Node[]}[]} nodeMaps
+	 * @returns {{[key: string]: Node[]}}
+	 */
+	static mergeNodeMaps(nodeMaps) {
+		if (!Array.isArray(nodeMaps))
+			throw new TypeError('Expected nodeMaps to be an Array');
+
+		const result = {};
+
+		nodeMaps.forEach((nodeMap, nodeMapIndex) => {
+			if (Object.prototype.toString.call(nodeMap) !== '[object Object]')
+				throw new TypeError(`Expected nodeMaps[${nodeMapIndex}] to be an Object`);
+
+			Object.entries(nodeMap).forEach(([key, value]) => {
+				if (!Array.isArray(result[key]))
+					result[key] = [];
+
+				if (!Array.isArray(value))
+					throw new TypeError(`Expected nodeMaps[${nodeMapIndex}].${key} to be an Array`);
+
+				value.forEach((node, nodeIndex) => {
+					if (!(node instanceof Node))
+						throw new TypeError(`Expected nodeMaps[${nodeMapIndex}].${key}[${nodeIndex}] to be an instance of Node`);
+
+					result[key].push(node);
+				});
+			});
+		});
+
+		return result;
+	}
+
+	/**
 	 * Create a new Node Instance
 	 * @param {"MATCH" | "RECOVER"} type 
 	 * @param {string} raw 
