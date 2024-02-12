@@ -6,31 +6,6 @@ const { CustomError } = require('../src/errors/CustomError');
 const { Parser } = require('../src/Parser');
 
 describe('Testing Parser', () => {
-	test('Testing static mergeNodeMaps', () => {
-		expect(() => Parser.mergeNodeMaps())
-			.toThrow(new TypeError('Expected nodeMaps to be an Array'));
-
-		expect(() => Parser.mergeNodeMaps([null]))
-			.toThrow(new TypeError('Expected nodeMaps[0] to be an Object'));
-
-		expect(() => Parser.mergeNodeMaps([{ a: 1 }]))
-			.toThrow(new TypeError('Expected nodeMaps[0].a to be an Array'));
-
-		expect(() => Parser.mergeNodeMaps([{ a: [1] }]))
-			.toThrow(new TypeError('Expected nodeMaps[0].a[0] to be an instance of Node'));
-
-		expect(Parser.mergeNodeMaps([{
-			a: [new Node('MATCH', 'Hello', {}, [0, 5])],
-			b: [new Node('MATCH', 'World', {}, [6, 11])]
-		}, {
-			b: [new Node('MATCH', 'My', {}, [12, 14])],
-		}]))
-			.toStrictEqual({
-				a: [new Node('MATCH', 'Hello', {}, [0, 5])],
-				b: [new Node('MATCH', 'World', {}, [6, 11]), new Node('MATCH', 'My', {}, [12, 14])]
-			});
-	});
-
 	test('Testing findBaseSymbol', () => {
 		const parser = new Parser(new Grammar());
 

@@ -12,40 +12,6 @@ class Parser {
 	#grammar;
 
 	/**
-	 * Merge an Array of NodeMaps into a single NodeMap
-	 * @param {{[key: string]: Node[]}[]} nodeMaps
-	 * @returns {{[key: string]: Node[]}}
-	 */
-	static mergeNodeMaps(nodeMaps) {
-		if (!Array.isArray(nodeMaps))
-			throw new TypeError('Expected nodeMaps to be an Array');
-
-		const result = {};
-
-		nodeMaps.forEach((nodeMap, nodeMapIndex) => {
-			if (Object.prototype.toString.call(nodeMap) !== '[object Object]')
-				throw new TypeError(`Expected nodeMaps[${nodeMapIndex}] to be an Object`);
-
-			Object.entries(nodeMap).forEach(([key, value]) => {
-				if (!Array.isArray(result[key]))
-					result[key] = [];
-
-				if (!Array.isArray(value))
-					throw new TypeError(`Expected nodeMaps[${nodeMapIndex}].${key} to be an Array`);
-
-				value.forEach((node, nodeIndex) => {
-					if (!(node instanceof Node))
-						throw new TypeError(`Expected nodeMaps[${nodeMapIndex}].${key}[${nodeIndex}] to be an instance of Node`);
-
-					result[key].push(node);
-				});
-			});
-		});
-
-		return result;
-	}
-
-	/**
 	 * Create a new Parser Instance
 	 * @param {Grammar} grammar
 	 */
@@ -246,7 +212,7 @@ class Parser {
 					const result = this.parseSymbolSet(symbolSet, rest, currentPrecedingNode);
 
 					// Update Rest, namedNodes and currentPrecedingNode
-					({ rest, namedNodes, currentPrecedingNode } = { ...result, namedNodes: Parser.mergeNodeMaps([namedNodes, result.namedNodes]) });
+					({ rest, namedNodes, currentPrecedingNode } = { ...result, namedNodes: Node.mergeNodeMaps([namedNodes, result.namedNodes]) });
 
 					// If the SymbolSet is greedy, try to match until it throws an Error
 					if (symbolSet.greedy) {
@@ -255,7 +221,7 @@ class Parser {
 								const result = this.parseSymbolSet(symbolSet, rest, currentPrecedingNode);
 
 								// Update Rest, namedNodes and currentPrecedingNode
-								({ rest, namedNodes, currentPrecedingNode } = { ...result, namedNodes: Parser.mergeNodeMaps([namedNodes, result.namedNodes]) })
+								({ rest, namedNodes, currentPrecedingNode } = { ...result, namedNodes: Node.mergeNodeMaps([namedNodes, result.namedNodes]) })
 							}
 							catch (error) {
 								break;
