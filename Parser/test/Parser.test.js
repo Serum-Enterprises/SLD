@@ -8,7 +8,9 @@ const { Parser } = require('../src/Parser');
 describe('Testing Parser', () => {
 	test('Testing findBaseSymbol', () => {
 		const parser = new Parser(new Grammar());
+		const baseSymbol = new BaseSymbol('STRING', ';');
 
+		// Type Guards
 		expect(() => parser.findBaseSymbol())
 			.toThrow(new TypeError('Expected baseSymbol to be an instance of BaseSymbol'));
 		expect(() => parser.findBaseSymbol(new BaseSymbol('STRING', 'Hello World')))
@@ -16,22 +18,29 @@ describe('Testing Parser', () => {
 		expect(() => parser.findBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World'))
 			.toThrow(new TypeError('Expected precedingNode to be an instance of Node or null'));
 
-		expect(parser.findBaseSymbol(new BaseSymbol('STRING', ';'), 'Hallo Welt', null))
+		// Non-existent Recovery String
+		expect(parser.findBaseSymbol(baseSymbol, 'Hallo Welt', null))
+			.toBe(null);
+		// Empty RegExp Match
+		expect(parser.findBaseSymbol(new BaseSymbol('REGEXP', ';*'), 'Hallo Welt', null))
 			.toBe(null);
 
-		expect(parser.findBaseSymbol(new BaseSymbol('STRING', ';'), 'Hello World;', null))
+		// Recovery as last Character
+		expect(parser.findBaseSymbol(baseSymbol, 'Hello World;', null))
 			.toBeInstanceOf(Node);
-		expect(parser.findBaseSymbol(new BaseSymbol('STRING', ';'), 'Hello World;', null).toJSON())
+		expect(parser.findBaseSymbol(baseSymbol, 'Hello World;', null).toJSON())
 			.toStrictEqual({ type: 'RECOVER', raw: 'Hello World;', children: {}, range: [0, 11] });
 
-		expect(parser.findBaseSymbol(new BaseSymbol('STRING', ';'), ';Hello World', null))
+		// Recovery as first Character
+		expect(parser.findBaseSymbol(baseSymbol, ';Hello World', null))
 			.toBeInstanceOf(Node);
-		expect(parser.findBaseSymbol(new BaseSymbol('STRING', ';'), ';Hello World', null).toJSON())
+		expect(parser.findBaseSymbol(baseSymbol, ';Hello World', null).toJSON())
 			.toStrictEqual({ type: 'RECOVER', raw: ';', children: {}, range: [0, 0] });
 
-		expect(parser.findBaseSymbol(new BaseSymbol('STRING', ';'), 'World; My', new Node('MATCH', 'Hello ', {}, [0, 5])))
+		// Recovery in middle with precedingNode set
+		expect(parser.findBaseSymbol(baseSymbol, 'World; My', new Node('MATCH', 'Hello ', {}, [0, 5])))
 			.toBeInstanceOf(Node);
-		expect(parser.findBaseSymbol(new BaseSymbol('STRING', ';'), 'World; My', new Node('MATCH', 'Hello ', {}, [0, 5])).toJSON())
+		expect(parser.findBaseSymbol(baseSymbol, 'World; My', new Node('MATCH', 'Hello ', {}, [0, 5])).toJSON())
 			.toStrictEqual({ type: 'RECOVER', raw: 'World;', children: {}, range: [6, 11] });
 	});
 
