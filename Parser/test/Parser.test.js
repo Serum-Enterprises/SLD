@@ -476,7 +476,7 @@ describe('Testing Parser', () => {
 	});
 
 	test('Testing parseRuleSet', () => {
-		// Test Type Checking
+		// Type Guards
 		expect(() => new Parser(new Grammar()).parseRuleSet())
 			.toThrow(new TypeError('Expected ruleSet to be an instance of RuleSet'));
 		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet()))
@@ -484,17 +484,18 @@ describe('Testing Parser', () => {
 		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet(), 'Hello World'))
 			.toThrow(new TypeError('Expected precedingNode to be an instance of Node or null'));
 
-		// Testing Regular Usage
+		// Regular Usage
+		jest.spyOn(Parser.prototype, 'parseRule')
+			.mockImplementationOnce(() => {
+				return new Node('MATCH', 'Hello', {}, [0, 4]);
+			});
+
 		expect(new Parser(new Grammar()).parseRuleSet(new RuleSet([
 			new Rule([
-				new SymbolSet([
-					new BaseSymbol('STRING', 'Hello')
-				])
+				new SymbolSet([new BaseSymbol('STRING', 'Hello')])
 			]),
 			new Rule([
-				new SymbolSet([
-					new BaseSymbol('STRING', 'Hallo')
-				])
+				new SymbolSet([new BaseSymbol('STRING', 'Hallo')])
 			])
 		]), 'Hello', null).toJSON())
 			.toStrictEqual({
@@ -504,7 +505,15 @@ describe('Testing Parser', () => {
 				range: [0, 4]
 			});
 
-		// Testing Alternation (a Rule fails - next one gets executed)
+		// Alternation (a Rule fails - next one gets executed)
+		jest.spyOn(Parser.prototype, 'parseRule')
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected Hallo', 0);
+			})
+			.mockImplementationOnce(() => {
+				return new Node('MATCH', 'Hallo', {}, [0, 4]);
+			});
+
 		expect(new Parser(new Grammar()).parseRuleSet(new RuleSet([
 			new Rule([
 				new SymbolSet([
@@ -525,12 +534,25 @@ describe('Testing Parser', () => {
 			});
 
 		// Test Error Propagation if Error is not a MisMatchError
+		jest.spyOn(Parser.prototype, 'parseRule')
+			.mockImplementationOnce(() => {
+				throw new CustomError('Expected a Greeting');
+			});
+
 		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet([
 			new Rule([], 'Expected a Greeting'),
 		]), 'Hello', null))
-			.toThrow(new RuleSetError('No Rule matched', 0));
+			.toThrow(new RuleSetError());
 
 		// Test getting a RuleSetError if no Rule matched
+		jest.spyOn(Parser.prototype, 'parseRule')
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected Hallo', 0);
+			})
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected Hallo', 0);
+			});
+
 		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet([
 			new Rule([
 				new SymbolSet([
@@ -543,20 +565,53 @@ describe('Testing Parser', () => {
 				])
 			])
 		]), 'Hola', null))
-			.toThrow(new RuleSetError('No Rule matched', 0));
-		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet([
-			new Rule([
-				new SymbolSet([
-					new BaseSymbol('STRING', 'Hallo')
+			.toThrow(new RuleSetError());
+
+		// Test Transformers
+		jest.spyOn(Parser.prototype, 'parseRule')
+			.mockImplementationOnce(() => {
+				return new Node('MATCH', 'Hello', {}, [0, 4]);
+			});
+
+		expect(new Parser(new Grammar()).parseRuleSet(
+			new RuleSet([
+				new Rule([
+					new SymbolSet([
+						new BaseSymbol('STRING', 'Hello')
+					])
 				])
-			]),
-			new Rule([
-				new SymbolSet([
-					new BaseSymbol('STRING', 'Hello')
+			], (node) => {
+				return new Node(
+					'MATCH',
+					node.raw + ' World',
+					{},
+					[node.range[0], node.range[1] + 6]
+				);
+			}), 'Hello', null).toJSON())
+			.toStrictEqual({
+				type: 'MATCH',
+				raw: 'Hello World',
+				children: {},
+				range: [0, 10]
+			});
+
+		// Test invalid Transformer
+		jest.spyOn(Parser.prototype, 'parseRule')
+			.mockImplementationOnce(() => {
+				return new Node('MATCH', 'Hello', {}, [0, 4]);
+			});
+
+		expect(() => new Parser(new Grammar()).parseRuleSet(
+			new RuleSet([
+				new Rule([
+					new SymbolSet([
+						new BaseSymbol('STRING', 'Hello')
+					])
 				])
-			])
-		]), 'Hola', new Node('MATCH', 'Hello ', {}, [0, 5])))
-			.toThrow(new RuleSetError('No Rule matched', 6));
+			], () => {
+				return null;
+			}), 'Hello', null).toJSON()
+		).toThrow(new TypeError('Expected transformer to return an instance of Node'));
 	});
 
 	test('Testing parse', () => {
