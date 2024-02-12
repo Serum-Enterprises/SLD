@@ -128,15 +128,15 @@ describe('Testing Parser', () => {
 		});
 
 		// Match with RuleSet
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', null))
+		expect(parser.parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', null))
 			.toBeInstanceOf(Node);
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', null).toJSON())
+		expect(parser.parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', null).toJSON())
 			.toStrictEqual({ type: 'MATCH', raw: 'Hello World', children: {}, range: [0, 10] });
 
 		// Match with RuleSet and precedingNode
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])))
+		expect(parser.parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])))
 			.toBeInstanceOf(Node);
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])).toJSON())
+		expect(parser.parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])).toJSON())
 			.toStrictEqual({ type: 'MATCH', raw: 'Hello World', children: {}, range: [1, 11] });
 
 		// Restore mock
@@ -144,7 +144,7 @@ describe('Testing Parser', () => {
 	});
 
 	test('Testing parseSymbolSet', () => {
-		// Test Type Checking
+		// Type Guards
 		expect(() => new Parser(new Grammar()).parseSymbolSet())
 			.toThrow(new TypeError('Expected symbolSet to be an instance of SymbolSet'));
 		expect(() => new Parser(new Grammar()).parseSymbolSet(new SymbolSet()))
