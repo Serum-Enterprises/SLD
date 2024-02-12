@@ -2,6 +2,7 @@ const { Grammar, RuleSet, Rule, SymbolSet, BaseSymbol, Node } = require('../../C
 const { MisMatchError } = require('../src/errors/MisMatchError');
 const { RuleSetError } = require('../src/errors/RuleSetError');
 const { CustomError } = require('../src/errors/CustomError');
+const { EmptyStringError } = require('../src/errors/EmptyStringError');
 
 const { Parser } = require('../src/Parser');
 
@@ -51,50 +52,88 @@ describe('Testing Parser', () => {
 	});
 
 	test('Testing parseBaseSymbol', () => {
-		expect(() => new Parser(new Grammar()).parseBaseSymbol())
+		const parser = new Parser(new Grammar());
+
+		// Type Guards
+		expect(() => parser.parseBaseSymbol())
 			.toThrow(new TypeError('Expected baseSymbol to be an instance of BaseSymbol'));
-		expect(() => new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('STRING', 'Hello World')))
+		expect(() => parser.parseBaseSymbol(new BaseSymbol('STRING', 'Hello World')))
 			.toThrow(new TypeError('Expected source to be a String'));
-		expect(() => new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World'))
+		expect(() => parser.parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World'))
 			.toThrow(new TypeError('Expected precedingNode to be an instance of Node or null'));
 
-
-		expect(() => new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hallo Welt', null))
+		// Mismatch with String
+		expect(() => parser.parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hallo Welt', null))
 			.toThrow(new MisMatchError('Expected Hello World', 0));
 
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World', null))
+		// Match with String
+		expect(parser.parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World', null))
 			.toBeInstanceOf(Node);
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World', null).toJSON())
+		expect(parser.parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World', null).toJSON())
 			.toStrictEqual({ type: 'MATCH', raw: 'Hello World', children: {}, range: [0, 10] });
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])))
+
+		// Match with String and precedingNode
+		expect(parser.parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])))
 			.toBeInstanceOf(Node);
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])).toJSON())
+		expect(parser.parseBaseSymbol(new BaseSymbol('STRING', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])).toJSON())
 			.toStrictEqual({ type: 'MATCH', raw: 'Hello World', children: {}, range: [1, 11] });
 
-
-		expect(() => new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('REGEXP', 'Hello World'), 'Hallo Welt', null))
+		// Mismatch with RegExp (and EmptyStringError)
+		expect(() => parser.parseBaseSymbol(new BaseSymbol('REGEXP', 'Hello World'), 'Hallo Welt', null))
 			.toThrow(new MisMatchError('Expected /^Hello World/', 0));
-		expect(() => new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('REGEXP', 'Hello World'), 'Hallo Welt', new Node('MATCH', 'T', {}, [0, 0])))
+		expect(() => parser.parseBaseSymbol(new BaseSymbol('REGEXP', 'Hello World'), 'Hallo Welt', new Node('MATCH', 'T', {}, [0, 0])))
 			.toThrow(new MisMatchError('Expected /^Hello World/', 1));
+		expect(() => parser.parseBaseSymbol(new BaseSymbol('REGEXP', ';*'), 'Hello World', null))
+			.toThrow(new EmptyStringError());
 
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('REGEXP', 'Hello World'), 'Hello World', null))
+		// Match with RegExp
+		expect(parser.parseBaseSymbol(new BaseSymbol('REGEXP', 'Hello World'), 'Hello World', null))
 			.toBeInstanceOf(Node);
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('REGEXP', 'Hello World'), 'Hello World', null).toJSON())
+		expect(parser.parseBaseSymbol(new BaseSymbol('REGEXP', 'Hello World'), 'Hello World', null).toJSON())
 			.toStrictEqual({ type: 'MATCH', raw: 'Hello World', children: {}, range: [0, 10] });
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('REGEXP', '^Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])))
+
+		// Match with RegExp and precedingNode
+		expect(parser.parseBaseSymbol(new BaseSymbol('REGEXP', '^Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])))
 			.toBeInstanceOf(Node);
-		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('REGEXP', '^Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])).toJSON())
+		expect(parser.parseBaseSymbol(new BaseSymbol('REGEXP', '^Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])).toJSON())
 			.toStrictEqual({ type: 'MATCH', raw: 'Hello World', children: {}, range: [1, 11] });
 
-		// Mock call to parseRuleSet
+
+		// Mismatch with RuleSet
+		jest.spyOn(Parser.prototype, 'parseRuleSet').mockImplementation(() => {
+			throw new MisMatchError('Expected Hello World', 0);
+		});
+
+		expect(() => parser.parseBaseSymbol(new BaseSymbol('RULESET', 'Hello'), 'Hallo Welt', null))
+			.toThrow(new MisMatchError('Expected Hello World', 0));
+
+		Parser.prototype.parseRuleSet.mockRestore();
+
+		// RuleSetError with RuleSet
+		jest.spyOn(Parser.prototype, 'parseRuleSet').mockImplementation(() => {
+			throw new RuleSetError();
+		});
+
+		expect(() => parser.parseBaseSymbol(new BaseSymbol('RULESET', 'Hello'), 'Hallo Welt', null))
+			.toThrow(new MisMatchError(`Expected RuleSet "Hello"`, 0));
+
+		expect(() => parser.parseBaseSymbol(new BaseSymbol('RULESET', 'Hello'), 'Hallo Welt', new Node('MATCH', 'T', {}, [0, 0])))
+			.toThrow(new MisMatchError(`Expected RuleSet "Hello"`, 1));
+
+		Parser.prototype.parseRuleSet.mockRestore();
+
+		// Match with RuleSet
 		jest.spyOn(Parser.prototype, 'parseRuleSet').mockImplementation(() => {
 			return new Node('MATCH', 'Hello World', {}, [0, 10]);
 		});
 
+		// Match with RuleSet
 		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', null))
 			.toBeInstanceOf(Node);
 		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', null).toJSON())
 			.toStrictEqual({ type: 'MATCH', raw: 'Hello World', children: {}, range: [0, 10] });
+
+		// Match with RuleSet and precedingNode
 		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])))
 			.toBeInstanceOf(Node);
 		expect(new Parser(new Grammar()).parseBaseSymbol(new BaseSymbol('RULESET', 'Hello World'), 'Hello World', new Node('MATCH', 'T', {}, [0, 0])).toJSON())
