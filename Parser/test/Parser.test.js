@@ -100,19 +100,19 @@ describe('Testing Parser', () => {
 
 
 		// Mismatch with RuleSet
-		jest.spyOn(Parser.prototype, 'parseRuleSet').mockImplementation(() => {
-			throw new MisMatchError('Expected Hello World', 0);
-		});
+		jest.spyOn(Parser.prototype, 'parseRuleSet')
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected Hello World', 0);
+			});
 
 		expect(() => parser.parseBaseSymbol(new BaseSymbol('RULESET', 'Hello'), 'Hallo Welt', null))
 			.toThrow(new MisMatchError('Expected Hello World', 0));
 
-		Parser.prototype.parseRuleSet.mockRestore();
-
 		// RuleSetError with RuleSet
-		jest.spyOn(Parser.prototype, 'parseRuleSet').mockImplementation(() => {
-			throw new RuleSetError();
-		});
+		jest.spyOn(Parser.prototype, 'parseRuleSet')
+			.mockImplementation(() => {
+				throw new RuleSetError();
+			});
 
 		expect(() => parser.parseBaseSymbol(new BaseSymbol('RULESET', 'Hello'), 'Hallo Welt', null))
 			.toThrow(new MisMatchError(`Expected RuleSet "Hello"`, 0));
