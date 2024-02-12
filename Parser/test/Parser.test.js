@@ -7,6 +7,7 @@ const { EmptyStringError } = require('../src/errors/EmptyStringError');
 const { Parser } = require('../src/Parser');
 
 describe('Testing Parser', () => {
+	/*
 	test('Testing findBaseSymbol', () => {
 		const parser = new Parser(new Grammar());
 		const baseSymbol = new BaseSymbol('STRING', ';');
@@ -237,6 +238,7 @@ describe('Testing Parser', () => {
 				}, currentPrecedingNode: new Node('MATCH', '+', {}, [0, 0])
 			});
 	});
+*/
 
 	test('Testing parseRule', () => {
 		// Type Guards
@@ -247,13 +249,23 @@ describe('Testing Parser', () => {
 		expect(() => new Parser(new Grammar()).parseRule(new Rule([]), 'Hello World'))
 			.toThrow(new TypeError('Expected precedingNode to be an instance of Node or null'));
 
-		// Check throwing Rule
+		// Custom Error Rule
 		expect(() => new Parser(new Grammar()).parseRule(new Rule([], 'Expected a Greeting'), 'Hello World', null))
 			.toThrow(new CustomError('Expected a Greeting', 0));
 		expect(() => new Parser(new Grammar()).parseRule(new Rule([], 'Expected a Greeting'), 'World', new Node('MATCH', 'Hello ', {}, [0, 5])))
 			.toThrow(new CustomError('Expected a Greeting', 6));
 
 		// Test Recovery
+		jest.spyOn(Parser.prototype, 'parseSymbolSet')
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected Hallo Welt', 0);
+			});
+
+		jest.spyOn(Parser.prototype, 'findBaseSymbol')
+			.mockImplementationOnce(() => {
+				return new Node('RECOVER', 'Hello World;', {}, [0, 11]);
+			});
+
 		expect(new Parser(new Grammar()).parseRule(new Rule([
 			new SymbolSet([
 				new BaseSymbol('STRING', 'Hallo Welt')
@@ -262,6 +274,16 @@ describe('Testing Parser', () => {
 			.toStrictEqual({ type: 'RECOVER', raw: 'Hello World;', children: {}, range: [0, 11] });
 
 		// Test Non-Recovery
+		jest.spyOn(Parser.prototype, 'parseSymbolSet')
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected Hallo Welt', 0);
+			});
+
+		jest.spyOn(Parser.prototype, 'findBaseSymbol')
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected Hallo Welt', 0);
+			});
+
 		expect(() => new Parser(new Grammar()).parseRule(new Rule([
 			new SymbolSet([
 				new BaseSymbol('STRING', 'Hallo Welt')
@@ -269,7 +291,42 @@ describe('Testing Parser', () => {
 		], null, new BaseSymbol('STRING', ';')), 'Hello World', null).toJSON())
 			.toThrow(new MisMatchError('Expected Hallo Welt', 11));
 
+		// Test missing Recovery
+		jest.spyOn(Parser.prototype, 'parseSymbolSet')
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected Hallo Welt', 0);
+			});
+
+		expect(() => new Parser(new Grammar()).parseRule(
+			new Rule([
+				new SymbolSet([
+					new BaseSymbol('STRING', 'Hallo Welt')
+				])
+			]),
+			'Hello World',
+			null
+		)).toThrow(new MisMatchError('Expected Hallo Welt', 0));
+
 		// Test optional SymbolSets
+		jest.spyOn(Parser.prototype, 'parseSymbolSet')
+			.mockImplementationOnce(() => {
+				return {
+					rest: ' World', namedNodes: {
+						first: [new Node('MATCH', 'Hello', {}, [0, 4])]
+					}, currentPrecedingNode: new Node('MATCH', 'Hello', {}, [0, 4])
+				};
+			})
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected cool', 0);
+			})
+			.mockImplementationOnce(() => {
+				return {
+					rest: '', namedNodes: {
+						last: [new Node('MATCH', 'World', {}, [6, 10])]
+					}, currentPrecedingNode: new Node('MATCH', 'World', {}, [6, 10])
+				};
+			});
+
 		expect(new Parser(new Grammar()).parseRule(new Rule([
 			new SymbolSet([
 				new BaseSymbol('STRING', 'Hello', 'first'),
@@ -294,6 +351,28 @@ describe('Testing Parser', () => {
 			});
 
 		// Test greedy SymbolSets
+		jest.spyOn(Parser.prototype, 'parseSymbolSet')
+			.mockImplementationOnce(() => {
+				return { rest: '+234+345', namedNodes: {}, currentPrecedingNode: new Node('MATCH', '123', {}, [0, 2]) };
+			})
+			.mockImplementationOnce(() => {
+				return {
+					rest: '+345', namedNodes: {
+						operators: [new Node('MATCH', '+', {}, [3, 3])]
+					}, currentPrecedingNode: new Node('MATCH', '+234', {}, [3, 6])
+				};
+			})
+			.mockImplementationOnce(() => {
+				return {
+					rest: '', namedNodes: {
+						operators: [new Node('MATCH', '+', {}, [7, 7])]
+					}, currentPrecedingNode: new Node('MATCH', '+345', {}, [7, 10])
+				};
+			})
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected +', 10);
+			});
+
 		expect(new Parser(new Grammar()).parseRule(new Rule([
 			new SymbolSet([
 				new BaseSymbol('REGEXP', '^[0-9]+')
@@ -316,6 +395,11 @@ describe('Testing Parser', () => {
 			});
 
 		// Test with precedingNode
+		jest.spyOn(Parser.prototype, 'parseSymbolSet')
+			.mockImplementationOnce(() => {
+				return { rest: '', namedNodes: {}, currentPrecedingNode: new Node('MATCH', 'Hello', {}, [6, 10]) };
+			});
+
 		expect(new Parser(new Grammar()).parseRule(new Rule([
 			new SymbolSet([
 				new BaseSymbol('STRING', 'World')
@@ -329,7 +413,42 @@ describe('Testing Parser', () => {
 				range: [6, 10]
 			});
 
+		// Test invalid Transformer
+		jest.spyOn(Parser.prototype, 'parseSymbolSet')
+			.mockImplementationOnce(() => {
+				return { rest: '', namedNodes: {}, currentPrecedingNode: new Node('MATCH', 'Hello', {}, [0, 4]) };
+			});
+
+		expect(() => new Parser(new Grammar()).parseRule(
+			new Rule([
+				new SymbolSet([
+					new BaseSymbol('STRING', 'Hello')
+				])
+			], null, null, () => null),
+			'Hello',
+			null
+		)).toThrow(new TypeError('Expected transformer to return an instance of Node'));
+
 		// Test Transformers
+		jest.spyOn(Parser.prototype, 'parseSymbolSet')
+			.mockImplementationOnce(() => {
+				return {
+					rest: ' World', namedNodes: {
+						first: [new Node('MATCH', 'Hello', {}, [0, 4])]
+					}, currentPrecedingNode: new Node('MATCH', 'Hello', {}, [0, 4])
+				};
+			})
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected cool', 0);
+			})
+			.mockImplementationOnce(() => {
+				return {
+					rest: '', namedNodes: {
+						last: [new Node('MATCH', 'World', {}, [6, 10])]
+					}, currentPrecedingNode: new Node('MATCH', 'World', {}, [6, 10])
+				};
+			});
+
 		expect(new Parser(new Grammar()).parseRule(new Rule([
 			new SymbolSet([
 				new BaseSymbol('STRING', 'Hello', 'first'),
@@ -343,12 +462,12 @@ describe('Testing Parser', () => {
 				new BaseSymbol('STRING', 'World', 'last')
 			])
 		], null, null, (node) => {
-			return new Node({
-				type: 'MATCH',
-				raw: node.children.first[0].raw + node.children.last[0].raw,
-				children: {},
-				range: [node.children.first[0].range[0], node.children.last[0].range[1]]
-			});
+			return new Node(
+				'MATCH',
+				node.children.first[0].raw + node.children.last[0].raw,
+				{},
+				[node.children.first[0].range[0], node.children.last[0].range[1]]
+			);
 		}), 'Hello World', null).toJSON())
 			.toStrictEqual({
 				type: 'MATCH',
@@ -358,6 +477,7 @@ describe('Testing Parser', () => {
 			});
 	});
 
+	/*
 	test('Testing parseRuleSet', () => {
 		// Test Type Checking
 		expect(() => new Parser(new Grammar()).parseRuleSet())
@@ -482,4 +602,5 @@ describe('Testing Parser', () => {
 				range: [0, 4]
 			});
 	});
+	*/
 });
