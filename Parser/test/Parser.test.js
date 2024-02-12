@@ -1,6 +1,6 @@
 const { Grammar, RuleSet, Rule, SymbolSet, BaseSymbol, Node } = require('../../Core');
 const { MisMatchError } = require('../src/errors/MisMatchError');
-const { VariantError } = require('../src/errors/VariantError');
+const { RuleSetError } = require('../src/errors/RuleSetError');
 const { CustomError } = require('../src/errors/CustomError');
 
 const { Parser } = require('../src/Parser');
@@ -350,9 +350,9 @@ describe('Testing Parser', () => {
 		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet([
 			new Rule([], 'Expected a Greeting'),
 		]), 'Hello', null))
-			.toThrow(new VariantError('No Rule matched', 0));
+			.toThrow(new RuleSetError('No Rule matched', 0));
 
-		// Test getting a VariantError if no Rule matched
+		// Test getting a RuleSetError if no Rule matched
 		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet([
 			new Rule([
 				new SymbolSet([
@@ -365,7 +365,7 @@ describe('Testing Parser', () => {
 				])
 			])
 		]), 'Hola', null))
-			.toThrow(new VariantError('No Rule matched', 0));
+			.toThrow(new RuleSetError('No Rule matched', 0));
 		expect(() => new Parser(new Grammar()).parseRuleSet(new RuleSet([
 			new Rule([
 				new SymbolSet([
@@ -378,7 +378,7 @@ describe('Testing Parser', () => {
 				])
 			])
 		]), 'Hola', new Node('MATCH', 'Hello ', {}, [0, 5])))
-			.toThrow(new VariantError('No Rule matched', 6));
+			.toThrow(new RuleSetError('No Rule matched', 6));
 	});
 
 	test('Testing parse', () => {
