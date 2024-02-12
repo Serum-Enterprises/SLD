@@ -144,24 +144,34 @@ describe('Testing Parser', () => {
 	});
 
 	test('Testing parseSymbolSet', () => {
+		const parser = new Parser(new Grammar());
+
 		// Type Guards
-		expect(() => new Parser(new Grammar()).parseSymbolSet())
+		expect(() => parser.parseSymbolSet())
 			.toThrow(new TypeError('Expected symbolSet to be an instance of SymbolSet'));
-		expect(() => new Parser(new Grammar()).parseSymbolSet(new SymbolSet()))
+		expect(() => parser.parseSymbolSet(new SymbolSet()))
 			.toThrow(new TypeError('Expected source to be a String'));
-		expect(() => new Parser(new Grammar()).parseSymbolSet(new SymbolSet(), 'Hello World'))
+		expect(() => parser.parseSymbolSet(new SymbolSet(), 'Hello World'))
 			.toThrow(new TypeError('Expected precedingNode to be an instance of Node or null'));
 
-		// Test parseSymbolSet without a precedingNode
-		expect(new Parser(new Grammar()).parseSymbolSet(new SymbolSet([
+		jest.spyOn(Parser.prototype, 'parseBaseSymbol')
+			.mockImplementationOnce(() => new Node('MATCH', 'Hello', {}, [0, 4]))
+			.mockImplementationOnce(() => new Node('MATCH', ' ', {}, [5, 5]))
+			.mockImplementationOnce(() => new Node('MATCH', 'World', {}, [6, 10]));
+
+		// parseSymbolSet without a precedingNode
+		expect(parser.parseSymbolSet(new SymbolSet([
 			new BaseSymbol('STRING', 'Hello'),
 			new BaseSymbol('REGEXP', '^\\s*'),
 			new BaseSymbol('STRING', 'World')
 		]), 'Hello World', null))
 			.toStrictEqual({ rest: '', namedNodes: {}, currentPrecedingNode: new Node('MATCH', 'Hello World', {}, [0, 10]) });
 
-		// Test parseSymbolSet with a precedingNode
-		expect(new Parser(new Grammar()).parseSymbolSet(new SymbolSet([
+		jest.spyOn(Parser.prototype, 'parseBaseSymbol')
+			.mockImplementationOnce(() => new Node('MATCH', 'Hello', {}, [0, 4]))
+
+		// parseSymbolSet with a precedingNode
+		expect(parser.parseSymbolSet(new SymbolSet([
 			new BaseSymbol('STRING', 'World', 'word')
 		]), 'World', new Node('MATCH', 'Hello', {}, [1, 4])))
 			.toStrictEqual({
@@ -172,16 +182,26 @@ describe('Testing Parser', () => {
 				currentPrecedingNode: new Node('MATCH', 'World', {}, [7, 11])
 			});
 
-		// Testing an optional SymbolSet
-		expect(() => new Parser(new Grammar()).parseSymbolSet(new SymbolSet([
+		jest.spyOn(Parser.prototype, 'parseBaseSymbol')
+			.mockImplementationOnce(() => {
+				throw new MisMatchError('Expected Hello', 0);
+			});
+
+		// Optional SymbolSet
+		expect(() => parser.parseSymbolSet(new SymbolSet([
 			new BaseSymbol('STRING', 'Hello'),
 			new BaseSymbol('REGEXP', '^\\s*'),
 			new BaseSymbol('STRING', 'World')
 		], true), 'Hallo Welt', null))
 			.toThrow(new MisMatchError('Expected Hello', 0));
 
-		// Testing a SymbolSet with duplicate Symbol Names
-		expect(new Parser(new Grammar()).parseSymbolSet(new SymbolSet([
+		jest.spyOn(Parser.prototype, 'parseBaseSymbol')
+			.mockImplementationOnce(() => new Node('MATCH', '1', {}, [0, 0]))
+			.mockImplementationOnce(() => new Node('MATCH', '+', {}, [1, 1]))
+			.mockImplementationOnce(() => new Node('MATCH', '2', {}, [2, 2]));
+
+		// SymbolSet with duplicate Symbol Names
+		expect(parser.parseSymbolSet(new SymbolSet([
 			new BaseSymbol('REGEXP', '^[0-9]', 'digit'),
 			new BaseSymbol('STRING', '+', 'op'),
 			new BaseSymbol('REGEXP', '^[0-9]', 'digit'),
@@ -198,10 +218,28 @@ describe('Testing Parser', () => {
 				}, currentPrecedingNode: new Node('MATCH', '1,2,3', {}, [0, 10])
 			});
 
+		jest.spyOn(Parser.prototype, 'parseBaseSymbol')
+			.mockImplementationOnce(() => {
+				throw new EmptyStringError();
+			})
+			.mockImplementationOnce(() => new Node('MATCH', '+', {}, [0, 0]));
+
+		// SymbolSet with EmptyStringError
+		expect(parser.parseSymbolSet(new SymbolSet([
+			new BaseSymbol('REGEXP', '^[0-9]*', 'digit'),
+			new BaseSymbol('STRING', '+', 'op'),
+		], false, false), '+', null))
+			.toStrictEqual({
+				rest: '', namedNodes: {
+					op: [
+						new Node('MATCH', '+', {}, [0, 0])
+					]
+				}, currentPrecedingNode: new Node('MATCH', '+', {}, [0, 0])
+			});
 	});
 
 	test('Testing parseRule', () => {
-		// Check Type Checking
+		// Type Guards
 		expect(() => new Parser(new Grammar()).parseRule())
 			.toThrow(new TypeError('Expected rule to be an instance of Rule'));
 		expect(() => new Parser(new Grammar()).parseRule(new Rule([])))
