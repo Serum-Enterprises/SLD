@@ -615,7 +615,7 @@ describe('Testing Parser', () => {
 	});
 
 	test('Testing parse', () => {
-		// Test Type Checking
+		// Type Guards
 		expect(() => new Parser(new Grammar()).parse())
 			.toThrow(new TypeError('Expected source to be a String'));
 		expect(() => new Parser(new Grammar()).parse('Hello World'))
@@ -625,8 +625,16 @@ describe('Testing Parser', () => {
 		expect(() => new Parser(new Grammar()).parse('Hello World', 'Hello World', true, 123))
 			.toThrow(new TypeError('Expected precedingNode to be an instance of Node or null'));
 
+		// RuleSet existence
 		expect(() => new Parser(new Grammar()).parse('Hello World', 'greeting', true, null))
 			.toThrow(new ReferenceError('Expected rootRuleSet to be an existing RuleSet'));
+
+		// EoF Error
+		jest.spyOn(Parser.prototype, 'parseRuleSet')
+			.mockImplementationOnce(() => {
+				return new Node('MATCH', 'Hello', {}, [0, 4]);
+			});
+
 		expect(() => new Parser(new Grammar({
 			greeting: new RuleSet([
 				new Rule([
@@ -637,6 +645,12 @@ describe('Testing Parser', () => {
 			])
 		})).parse('Hello World', 'greeting', true, null))
 			.toThrow(new MisMatchError('Expected End of File', 5));
+
+		// Normal Usage
+		jest.spyOn(Parser.prototype, 'parseRuleSet')
+			.mockImplementationOnce(() => {
+				return new Node('MATCH', 'Hello', {}, [0, 4]);
+			});
 
 		expect(new Parser(new Grammar({
 			greeting: new RuleSet([
@@ -653,5 +667,43 @@ describe('Testing Parser', () => {
 				children: {},
 				range: [0, 4]
 			});
+
+		// RuleSetError
+		jest.spyOn(Parser.prototype, 'parseRuleSet')
+			.mockImplementationOnce(() => {
+				throw new RuleSetError();
+			});
+
+		expect(() => new Parser(
+			new Grammar({
+				greeting: new RuleSet([
+					new Rule([
+						new SymbolSet([
+							new BaseSymbol('STRING', 'Hello')
+						])
+					])
+				])
+			})
+		).parse('Hallo', 'greeting'))
+			.toThrow(new MisMatchError(`Expected RuleSet "greeting"`, 0));
+
+		// RuleSetError with precedingNode
+		jest.spyOn(Parser.prototype, 'parseRuleSet')
+			.mockImplementationOnce(() => {
+				throw new RuleSetError();
+			});
+
+		expect(() => new Parser(
+			new Grammar({
+				greeting: new RuleSet([
+					new Rule([
+						new SymbolSet([
+							new BaseSymbol('STRING', 'Hello')
+						])
+					])
+				])
+			})
+		).parse('Hallo', 'greeting', false, new Node('MATCH', 'World ', {}, [0, 5])))
+			.toThrow(new MisMatchError(`Expected RuleSet "greeting"`, 6));
 	});
 });
