@@ -7,7 +7,6 @@ const { EmptyStringError } = require('../src/errors/EmptyStringError');
 const { Parser } = require('../src/Parser');
 
 describe('Testing Parser', () => {
-	/*
 	test('Testing findBaseSymbol', () => {
 		const parser = new Parser(new Grammar());
 		const baseSymbol = new BaseSymbol('STRING', ';');
@@ -238,7 +237,6 @@ describe('Testing Parser', () => {
 				}, currentPrecedingNode: new Node('MATCH', '+', {}, [0, 0])
 			});
 	});
-*/
 
 	test('Testing parseRule', () => {
 		// Type Guards
@@ -477,7 +475,6 @@ describe('Testing Parser', () => {
 			});
 	});
 
-	/*
 	test('Testing parseRuleSet', () => {
 		// Test Type Checking
 		expect(() => new Parser(new Grammar()).parseRuleSet())
@@ -602,5 +599,4 @@ describe('Testing Parser', () => {
 				range: [0, 4]
 			});
 	});
-	*/
 });
