@@ -1,4 +1,5 @@
 const { Rule } = require('./Rule.js');
+const { Node } = require('./Node.js');
 
 class RuleSet {
 	#rules;
@@ -7,7 +8,7 @@ class RuleSet {
 	/**
 	 * Create a new RuleSet Instance
 	 * @param {Rule[]} [rules = []]
-	 * @param {function | null} [transformer = null]
+	 * @param {((node: Node) => Node) | null} [transformer = null]
 	 */
 	constructor(rules = [], transformer = null) {
 		if (!Array.isArray(rules))
@@ -50,7 +51,7 @@ class RuleSet {
 
 	/**
 	 * Get the transformer of this RuleSet
-	 * @returns {function | null}
+	 * @returns {(node: Node) => Node}
 	 */
 	get transformer() {
 		return this.#transformer;
@@ -58,7 +59,7 @@ class RuleSet {
 
 	/**
 	 * Set the transformer of this RuleSet
-	 * @param {function | null} value
+	 * @param {(node: Node) => Node} value
 	 */
 	set transformer(value) {
 		if (value !== null && typeof value !== 'function')

@@ -1,5 +1,6 @@
 const { BaseSymbol } = require('./BaseSymbol');
 const { SymbolSet } = require('./SymbolSet');
+const { Node } = require('./Node');
 
 class Rule {
 	#symbolSets;
@@ -12,7 +13,7 @@ class Rule {
 	 * @param {SymbolSet[]} [symbolSets = []] 
 	 * @param {string | null} [throwMessage = null] 
 	 * @param {BaseSymbol | null} [recoverSymbol = null]
-	 * @param {function | null} [transformer = null]
+	 * @param {((node: Node) => Node) | null} [transformer = null]
 	 */
 	constructor(symbolSets = [], throwMessage = null, recoverSymbol = null, transformer = null) {
 		if (!Array.isArray(symbolSets))
@@ -102,7 +103,7 @@ class Rule {
 
 	/**
 	 * Get the transformer of this Rule
-	 * @returns {function | null}
+	 * @returns {(node: Node) => Node}
 	 */
 	get transformer() {
 		return this.#transformer;
@@ -110,7 +111,7 @@ class Rule {
 
 	/**
 	 * Set the transformer of this Rule
-	 * @param {function | null} value
+	 * @param {(node: Node) => Node} value
 	 */
 	set transformer(value) {
 		if (value !== null && typeof value !== 'function')
