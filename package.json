@@ -1,8 +1,8 @@
 {
-	"name": "@serum-enterprises/serum-language-designer",
-	"version": "2.0.0-beta.4",
-	"description": "A modern Grammar Builder and Parser",
-	"main": "./build/index.js",
+	"name": "@serum-enterprises/sld",
+	"version": "1.0.0-beta.0",
+	"description": "A modern Language Design Tool and Parser",
+	"main": "./index.js",
 	"scripts": {
 		"test": "jest ."
 	},
@@ -17,11 +17,9 @@
 		"url": "https://github.com/Serum-Enterprises/Serum-Language-Designer/issues"
 	},
 	"homepage": "https://github.com/Serum-Enterprises/Serum-Language-Designer#readme",
-	"dependencies": {
-		"@types/jest": "^29.5.10",
-		"@types/node": "^20.10.0"
-	},
 	"devDependencies": {
+		"@types/jest": "^29.5.12",
+		"@types/node": "^20.11.17",
 		"jest": "^29.7.0"
 	}
 }
