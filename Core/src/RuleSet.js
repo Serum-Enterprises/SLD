@@ -75,7 +75,7 @@ class RuleSet {
 	debug() {
 		return {
 			rules: this.#rules.map(rule => rule.debug()),
-			transformer: this.#transformer ? 'function' : null
+			transformer: this.#transformer ? '[object Function]' : null
 		}
 	}
 }
