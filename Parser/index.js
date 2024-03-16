@@ -1,6 +1,12 @@
 const { Node } = require('../Core');
-const { Parser } = require('./src/Parser');
+
+const { Grammar } = require('./src/Grammar');
+const { RuleSet } = require('./src/RuleSet');
+const { Rule } = require('./src/Rule');
+const { SymbolSet } = require('./src/SymbolSet');
+const { BaseSymbol } = require('./src/BaseSymbol');
+
 const { MisMatchError } = require('./src/errors/MisMatchError');
 const { CustomError } = require('./src/errors/CustomError');
 
-module.exports = { Parser, Node, MisMatchError, CustomError };
+module.exports = { Node, Grammar, RuleSet, Rule, SymbolSet, BaseSymbol, MisMatchError, CustomError };
