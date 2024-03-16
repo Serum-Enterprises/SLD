@@ -1,6 +1,6 @@
-const { Rule: RuleDC, BaseSymbol: BaseSymbolDC, SymbolSet: SymbolSetDC, Node } = require('../../Core');
+const Parser = require('../../Parser');
 
-class Rule extends RuleDC {
+class Rule extends Parser.Rule {
 	/**
 	 * Create a new Rule Instance and start matching
 	 * @returns {QuantitySelector}
@@ -66,7 +66,7 @@ class Rule extends RuleDC {
 
 	/**
 	 * Set a Transformer Function for this Rule
-	 * @param {(node: Node) => Node} transformer 
+	 * @param {(node: Parser.Node) => Parser.Node} transformer 
 	 * @returns {Rule}
 	 */
 	transform(transformer) {
@@ -276,13 +276,13 @@ class SymbolSelector {
 			throw new TypeError('Expected name to be a String or null');
 
 		if (this.#recoverSymbol)
-			this.#rule.recoverSymbol = new BaseSymbolDC('STRING', value, name);
+			this.#rule.recoverSymbol = new Parser.BaseSymbol('STRING', value, name);
 		else {
 			this.#rule.symbolSets = [
 				...this.#rule.symbolSets,
-				new SymbolSetDC([
-					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\\s*')] : [],
-					new BaseSymbolDC('STRING', value, name)
+				new Parser.SymbolSet([
+					...this.#whiteSpacePrefix ? [new Parser.BaseSymbol('REGEXP', '\\s*')] : [],
+					new Parser.BaseSymbol('STRING', value, name)
 				], this.#optional, this.#greedy)
 			];
 		}
@@ -304,13 +304,13 @@ class SymbolSelector {
 			throw new TypeError('Expected name to be a String or null');
 
 		if (this.#recoverSymbol)
-			this.#rule.recoverSymbol = new BaseSymbolDC('REGEXP', (value instanceof RegExp) ? value.source : value, name);
+			this.#rule.recoverSymbol = new Parser.BaseSymbol('REGEXP', (value instanceof RegExp) ? value.source : value, name);
 		else {
 			this.#rule.symbolSets = [
 				...this.#rule.symbolSets,
-				new SymbolSetDC([
-					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\\s*')] : [],
-					new BaseSymbolDC('REGEXP', (value instanceof RegExp) ? value.source : value, name)
+				new Parser.SymbolSet([
+					...this.#whiteSpacePrefix ? [new Parser.BaseSymbol('REGEXP', '\\s*')] : [],
+					new Parser.BaseSymbol('REGEXP', (value instanceof RegExp) ? value.source : value, name)
 				], this.#optional, this.#greedy)
 			];
 		}
@@ -331,13 +331,13 @@ class SymbolSelector {
 			throw new TypeError('Expected name to be a String or null');
 
 		if (this.#recoverSymbol)
-			this.#rule.recoverSymbol = new BaseSymbolDC('RULESET', value, name);
+			this.#rule.recoverSymbol = new Parser.BaseSymbol('RULESET', value, name);
 		else {
 			this.#rule.symbolSets = [
 				...this.#rule.symbolSets,
-				new SymbolSetDC([
-					...this.#whiteSpacePrefix ? [new BaseSymbolDC('REGEXP', '\\s*')] : [],
-					new BaseSymbolDC('RULESET', value, name)
+				new Parser.SymbolSet([
+					...this.#whiteSpacePrefix ? [new Parser.BaseSymbol('REGEXP', '\\s*')] : [],
+					new Parser.BaseSymbol('RULESET', value, name)
 				], this.#optional, this.#greedy)
 			];
 		}

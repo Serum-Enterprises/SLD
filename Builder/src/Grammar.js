@@ -1,9 +1,9 @@
-const { Grammar: GrammarDC, RuleSet: RuleSetDC } = require('../../Core');
+const Parser = require('../../Parser');
 
-class Grammar extends GrammarDC {
+class Grammar extends Parser.Grammar {
 	/**
 	 * Create a new Grammar Instance
-	 * @param {{[key: string]: RuleSetDC}} ruleSets 
+	 * @param {{[key: string]: Parser.RuleSet}} ruleSets 
 	 * @returns {Grammar}
 	 */
 	static create(ruleSets = {}) {

@@ -1,9 +1,9 @@
-const { RuleSet: RuleSetDC, Rule: RuleDC, Node } = require('../../Core');
+const Parser = require('../../Parser');
 
-class RuleSet extends RuleSetDC {
+class RuleSet extends Parser.RuleSet {
 	/**
 	 * Create a new RuleSet Instance
-	 * @param {RuleDC[]} rules 
+	 * @param {Parser.Rule[]} rules 
 	 * @returns {RuleSet}
 	 */
 	static create(rules = []) {
@@ -12,7 +12,7 @@ class RuleSet extends RuleSetDC {
 
 	/**
 	 * Set a Transformer function for this RuleSet
-	 * @param {(node: Node) => Node} transformer 
+	 * @param {(node: Parser.Node) => Parser.Node} transformer 
 	 * @returns {RuleSet}
 	 */
 	transform(transformer) {
