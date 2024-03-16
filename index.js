@@ -1,5 +1,5 @@
 const Core = require('./Core');
-const Builder = require('./Builder');
 const Parser = require('./Parser');
+const Builder = require('./Builder');
 
-module.exports = { Core, Builder, Parser };
+module.exports = { Core, Parser, Builder };
