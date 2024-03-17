@@ -28,18 +28,18 @@ class Rule extends Core.Rule {
 
 		// Attempt to parse all SymbolSets in the Rule
 		try {
-			for (let symbolSet of this.symbolSets) {
+			for (let i = 0; i < this.symbolSets.length; i++) {
 				try {
-					const result = symbolSet.parse(rest, currentPrecedingNode, grammarContext);
+					const result = this.symbolSets[i].parse(rest, currentPrecedingNode, grammarContext);
 
 					// Update Rest, namedNodes and currentPrecedingNode
 					({ rest, namedNodes, currentPrecedingNode } = { ...result, namedNodes: Core.Node.mergeNodeMaps([namedNodes, result.namedNodes]) });
 
 					// If the SymbolSet is greedy, try to match until it throws an Error
-					if (symbolSet.greedy) {
+					if (this.symbolSets[i].greedy) {
 						while (true) {
 							try {
-								const result = symbolSet.parse(rest, currentPrecedingNode, grammarContext);
+								const result = this.symbolSets[i].parse(rest, currentPrecedingNode, grammarContext);
 
 								// Update Rest, namedNodes and currentPrecedingNode
 								({ rest, namedNodes, currentPrecedingNode } = { ...result, namedNodes: Core.Node.mergeNodeMaps([namedNodes, result.namedNodes]) })
@@ -51,7 +51,7 @@ class Rule extends Core.Rule {
 					}
 				}
 				catch (error) {
-					if (symbolSet.optional)
+					if (this.symbolSets[i].optional)
 						continue;
 
 					// If the optional Flag is not set, propagate the Error to the caller.

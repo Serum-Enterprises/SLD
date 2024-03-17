@@ -1,5 +1,7 @@
 const Core = require('../../Core');
 
+const { EmptyStringError } = require('./errors/EmptyStringError');
+
 class SymbolSet extends Core.SymbolSet {
 	/**
 	 * Parse this SymbolSet and return the rest of the source String, the named Nodes and the last Node that was parsed

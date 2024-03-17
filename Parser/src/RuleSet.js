@@ -1,5 +1,7 @@
 const Core = require('../../Core');
 
+const { RuleSetError } = require('./errors/RuleSetError');
+
 class RuleSet extends Core.RuleSet {
 	/** Parse a RuleSet and return the Node that was parsed
 	 * @param {string} source 

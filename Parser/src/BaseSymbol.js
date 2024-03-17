@@ -1,5 +1,9 @@
 const Core = require('../../Core');
 
+const { MisMatchError } = require('./errors/MisMatchError');
+const { EmptyStringError } = require('./errors/EmptyStringError');
+const { RuleSetError } = require('./errors/RuleSetError');
+
 class BaseSymbol extends Core.BaseSymbol {
 	/**
 	 * Find this BaseSymbol in the source and return a Recovery Node or null
@@ -87,7 +91,7 @@ class BaseSymbol extends Core.BaseSymbol {
 			}
 			case 'RULESET': {
 				try {
-					const result = this.parseRuleSet(grammarContext.ruleSets[this.value], source, precedingNode);
+					const result = grammarContext.ruleSets[this.value].parse(source, precedingNode, grammarContext);
 
 					if (precedingNode)
 						return precedingNode.createFollower('MATCH', result.raw, result.children)
