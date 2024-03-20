@@ -49,6 +49,6 @@ describe('Testing RuleSet', () => {
 		const rule = new Rule([]);
 
 		expect(new RuleSet([rule]).debug()).toEqual({ rules: [rule.debug()], transformer: null });
-		expect(new RuleSet([rule], () => {}).debug(true)).toEqual({ rules: [rule.debug(true)], transformer: 'function' });
+		expect(new RuleSet([rule], () => {}).debug(true)).toEqual({ rules: [rule.debug(true)], transformer: '[object Function]' });
 	})
 });
