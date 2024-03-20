@@ -14,12 +14,12 @@ class Grammar extends Core.Grammar {
 
 		Object.entries(this.ruleSets).forEach(([name, ruleSet]) => {
 			ruleSet.rules.forEach((rule, ruleIndex) => {
-				if(rule.recoverSymbol instanceof Core.BaseSymbol && rule.recoverSymbol.type === 'RULESET' && !ruleSetNames.includes(rule.recoverSymbol.value))
+				if (rule.recoverSymbol instanceof Core.BaseSymbol && rule.recoverSymbol.type === 'RULESET' && !ruleSetNames.includes(rule.recoverSymbol.value))
 					throw new RuleSetError(`RuleSet "${rule.recoverSymbol.value}" used as a Recovery Symbol at ${name}:#${ruleIndex} does not exist`);
 
 				rule.symbolSets.forEach((symbolSet, symbolSetIndex) => {
 					symbolSet.symbols.forEach((symbol, symbolIndex) => {
-						if(symbol.type === 'RULESET' && !ruleSetNames.includes(symbol.value))
+						if (symbol.type === 'RULESET' && !ruleSetNames.includes(symbol.value))
 							throw new RuleSetError(`RuleSet "${symbol.value}" used at ${name}:Rule #${ruleIndex}:SymbolSet #${symbolSetIndex}:Symbol #${symbolIndex} does not exist`);
 					});
 				});
@@ -53,20 +53,12 @@ class Grammar extends Core.Grammar {
 
 		this.verifyRuleSetExistence();
 
-		try {
-			const result = this.ruleSets[rootRuleSet].parse(source, precedingNode, this);
+		const result = this.ruleSets[rootRuleSet].parse(source, precedingNode, this);
 
-			if (failOnRest && result.raw !== source)
-				throw new MisMatchError('Expected End of File', result.range[1] + 1);
+		if (failOnRest && result.raw !== source)
+			throw new MisMatchError('Expected End of File', result.range[1] + 1);
 
-			return result;
-		}
-		catch (error) {
-			if (error instanceof RuleSetError)
-				throw new MisMatchError(`Expected RuleSet "${rootRuleSet}"`, precedingNode ? precedingNode.range[1] + 1 : 0);
-
-			throw error;
-		}
+		return result;
 	}
 }
 

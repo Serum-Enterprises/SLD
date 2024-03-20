@@ -20,17 +20,20 @@ class RuleSet extends Core.RuleSet {
 			throw new TypeError('Expected grammarContext to be an instance of Grammar');
 
 		let result = null;
+		let errors = [];
 
 		for (let i = 0; i < this.rules.length; i++) {
 			try {
 				result = this.rules[i].parse(source, precedingNode, grammarContext);
 				break;
 			}
-			catch (error) { }
+			catch (error) {
+				errors.push(error);
+			}
 		}
 
 		if (!result)
-			throw new RuleSetError();
+			throw new RuleSetError(`No Rule was able to parse the source at Position ${precedingNode ? precedingNode.range[0] : 0}`, { cause: errors });
 
 		// Transform the given Node if a transformer was set
 		if (this.transformer) {
