@@ -90,20 +90,12 @@ class BaseSymbol extends Core.BaseSymbol {
 				return new Core.Node('MATCH', match[0], {}, [0, match[0].length - 1]);
 			}
 			case 'RULESET': {
-				try {
-					const result = grammarContext.ruleSets[this.value].parse(source, precedingNode, grammarContext);
+				const result = grammarContext.ruleSets[this.value].parse(source, precedingNode, grammarContext);
 
-					if (precedingNode)
-						return precedingNode.createFollower('MATCH', result.raw, result.children)
+				if (precedingNode)
+					return precedingNode.createFollower('MATCH', result.raw, result.children)
 
-					return new Core.Node('MATCH', result.raw, result.children, [0, result.raw.length - 1]);
-				}
-				catch (error) {
-					if (error instanceof RuleSetError)
-						throw new MisMatchError(`Expected RuleSet "${this.value}"`, precedingNode ? precedingNode.range[1] + 1 : 0);
-
-					throw error;
-				}
+				return new Core.Node('MATCH', result.raw, result.children, [0, result.raw.length - 1]);
 			}
 		}
 	}
