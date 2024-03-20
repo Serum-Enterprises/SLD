@@ -72,8 +72,6 @@ class Rule extends Core.Rule {
 			throw error;
 		}
 
-		// TODO: Add Transformer Function support
-
 		// Construct the Node and return it
 		const raw = source.slice(0, source.length - rest.length);
 		let result = precedingNode ?
