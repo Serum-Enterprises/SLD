@@ -1,5 +1,7 @@
 const Core = require('../../Core');
 
+const { CustomError } = require('./errors/CustomError');
+
 class Rule extends Core.Rule {
 	/**
 	 * Parse the Rule and return the Node that was parsed
