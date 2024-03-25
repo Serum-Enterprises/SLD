@@ -1,5 +1,6 @@
 const Core = require('../../Core');
 
+const { CustomError } = require('./errors/CustomError');
 const { RuleSetError } = require('./errors/RuleSetError');
 
 class RuleSet extends Core.RuleSet {
@@ -28,6 +29,9 @@ class RuleSet extends Core.RuleSet {
 				break;
 			}
 			catch (error) {
+				if (error instanceof CustomError)
+					throw error;
+
 				errors.push(error);
 			}
 		}
