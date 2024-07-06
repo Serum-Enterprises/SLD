@@ -1,6 +1,6 @@
 const Core = require('../../Core');
 
-const { EmptyStringError } = require('./errors/EmptyStringError');
+const { EmptyStringError } = require('../../Core/src/errors/EmptyStringError');
 
 class SymbolSet extends Core.SymbolSet {
 	/**

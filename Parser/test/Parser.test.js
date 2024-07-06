@@ -1,8 +1,9 @@
 const { Grammar, RuleSet, Rule, SymbolSet, BaseSymbol, Node } = require('../../Core');
-const { MisMatchError } = require('../src/errors/MisMatchError');
-const { RuleSetError } = require('../src/errors/RuleSetError');
-const { CustomError } = require('../src/errors/CustomError');
-const { EmptyStringError } = require('../src/errors/EmptyStringError');
+
+const { MisMatchError } = require('../../Core/src/errors/MisMatchError');
+const { EmptyStringError } = require('../../Core/src/errors/EmptyStringError');
+const { RuleSetError } = require('../../Core/src/errors/RuleSetError');
+const { CustomError } = require('../../Core/src/errors/CustomError');
 
 const { Parser } = require('../src/Parser');
 

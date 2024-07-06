@@ -1,8 +1,8 @@
 const Core = require('../../Core');
 
-const { MisMatchError } = require('./errors/MisMatchError');
-const { EmptyStringError } = require('./errors/EmptyStringError');
-const { RuleSetError } = require('./errors/RuleSetError');
+const { MisMatchError } = require('../../Core/src/errors/MisMatchError');
+const { EmptyStringError } = require('../../Core/src/errors/EmptyStringError');
+const { RuleSetError } = require('../../Core/src/errors/RuleSetError');
 
 class BaseSymbol extends Core.BaseSymbol {
 	/**

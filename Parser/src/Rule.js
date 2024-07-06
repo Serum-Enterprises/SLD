@@ -1,6 +1,6 @@
 const Core = require('../../Core');
 
-const { CustomError } = require('./errors/CustomError');
+const { CustomError } = require('../../Core/src/errors/CustomError');
 
 class Rule extends Core.Rule {
 	/**

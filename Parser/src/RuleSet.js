@@ -1,7 +1,7 @@
 const Core = require('../../Core');
 
-const { CustomError } = require('./errors/CustomError');
-const { RuleSetError } = require('./errors/RuleSetError');
+const { CustomError } = require('../../Core/src/errors/CustomError');
+const { RuleSetError } = require('../../Core/src/errors/RuleSetError');
 
 class RuleSet extends Core.RuleSet {
 	/** Parse a RuleSet and return the Node that was parsed

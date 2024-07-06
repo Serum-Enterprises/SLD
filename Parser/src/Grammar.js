@@ -1,7 +1,7 @@
 const Core = require('../../Core');
 
-const { RuleSetError } = require('./errors/RuleSetError');
-const { MisMatchError } = require('./errors/MisMatchError');
+const { MisMatchError } = require('../../Core/src/errors/MisMatchError');
+const { RuleSetError } = require('../../Core/src/errors/RuleSetError');
 
 class Grammar extends Core.Grammar {
 	/**
