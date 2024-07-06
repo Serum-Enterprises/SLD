@@ -41,16 +41,6 @@ class Grammar {
 
 		this.#ruleSets = value;
 	}
-
-	/**
-	 * Return Debug Information about this Grammar
-	 * @returns {unknown}
-	 */
-	debug() {
-		return Object.entries(this.#ruleSets).reduce((ruleSets, [name, ruleSet]) => {
-			return { ...ruleSets, [name]: ruleSet.debug() };
-		}, {});
-	}
 }
 
 module.exports = { Grammar };

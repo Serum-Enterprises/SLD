@@ -92,18 +92,6 @@ class SymbolSet {
 
 		this.#greedy = value;
 	}
-
-	/**
-	 * Return Debug Information about this SymbolSet
-	 * @returns {unknown}
-	 */
-	debug() {
-		return {
-			symbols: this.#symbols.map(symbol => symbol.debug()),
-			optional: this.#optional,
-			greedy: this.#greedy
-		};
-	}
 }
 
 module.exports = { SymbolSet };

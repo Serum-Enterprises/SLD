@@ -67,17 +67,6 @@ class RuleSet {
 
 		this.#transformer = value;
 	}
-
-	/**
-	 * Return Debug Information about this RuleSet
-	 * @returns {unknown}
-	 */
-	debug() {
-		return {
-			rules: this.#rules.map(rule => rule.debug()),
-			transformer: this.#transformer ? '[object Function]' : null
-		}
-	}
 }
 
 module.exports = { RuleSet };

@@ -120,19 +120,6 @@ class Rule {
 		this.#transformer = value;
 
 	}
-
-	/**
-	 * Return Debug Information about this Rule
-	 * @returns {unknown}
-	 */
-	debug() {
-		return {
-			symbolSets: this.#symbolSets.map(symbolSet => symbolSet.debug()),
-			throwMessage: this.#throwMessage,
-			recoverSymbol: this.#recoverSymbol ? this.#recoverSymbol.debug() : null,
-			transformer: this.#transformer ? 'function' : null
-		};
-	}
 }
 
 module.exports = { Rule };

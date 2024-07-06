@@ -86,18 +86,6 @@ class BaseSymbol {
 
 		this.#name = value;
 	}
-
-	/**
-	 * Return Debug Information about this BaseSymbol
-	 * @returns {unknown}
-	 */
-	debug() {
-		return {
-			type: this.type,
-			value: this.value,
-			name: this.name
-		};
-	}
 }
 
 module.exports = { BaseSymbol }
