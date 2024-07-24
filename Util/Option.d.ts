@@ -9,6 +9,11 @@ export abstract class Option<T> {
 	static get None(): typeof None;
 
 	/**
+	 * Returns the constructor for the Option Variant
+	 */
+	is(): typeof this;
+
+	/**
 	 * Check if the Option is a Some Variant
 	 */
 	isSome(): this is Some<T>;
@@ -16,6 +21,33 @@ export abstract class Option<T> {
 	 * Check if the Option is a None Variant
 	 */
 	isNone(): this is None;
+
+	/**
+	 * Expects the Option to be Some, otherwise throws the given error
+	 */
+	expectSome<M>(error: M): asserts this is Some<T>;
+	/**
+	 * Expects the Option to be None, otherwise throws the given error
+	 */
+	expectNone<M>(error: M): asserts this is None;
+
+	/**
+	 * Unwrap the Result or throw the Error
+	 */
+	unwrap<E>(error: E): T;
+	/**
+	 * Unwrap the Result or return a default value
+	 */
+	unwrapOr(defaultValue: T): T;
+	/**
+	 * Map Result<T, E> to Result<U, E> by applying a function
+	 */
+	map<U>(fn: (value: T) => U): Option<U>;
+
+	/**
+	 * Match the Option
+	 */
+	match<R>(onSome: (value: T) => R, onNone: () => R): R;
 }
 
 /**

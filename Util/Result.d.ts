@@ -9,14 +9,52 @@ export abstract class Result<T, E> {
 	static get Err(): typeof Err;
 
 	/**
+	 * Returns the constructor for the Result Variant
+	 */
+	is(): typeof this;
+
+	/**
 	 * Check if the Result is Ok
 	 */
 	isOk(): this is Ok<T>;
-
 	/**
 	 * Check if the Result is Err
 	 */
 	isErr(): this is Err<E>;
+
+	/**
+	 * Expects the Result to be Ok, otherwise throws the given error
+	 */
+	expectOk<M>(error: M): asserts this is Ok<T>;
+	/**
+	 * Expects the Result to be Err, otherwise throws the given error
+	 */
+	expectErr<M>(error: M): asserts this is Err<E>;
+
+	/**
+	 * Unwrap the Result or throw the Error
+	 */
+	unwrap(): T;
+
+	/**
+	 * Unwrap the Result or throw the Error
+	 */
+	unwrap(): T;
+
+	/**
+	 * Unwrap the Result or return a default value
+	 */
+	unwrapOr(defaultValue: T): T;
+
+	/**
+	 * Map Result<T, E> to Result<U, E> by applying a function
+	 */
+	map<U>(fn: (value: T) => U): Result<U, E>;
+
+	/**
+	 * Match the Result
+	 */
+	match<R>(onOk: (value: T) => R, onErr: (error: E) => R): R;
 }
 
 /*
