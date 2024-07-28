@@ -1,4 +1,4 @@
-import { Option } from '../Option/Option';
+import { Option } from '../../Option/Option';
 
 export class Node {
 	static create(raw: string, children: Option<{ [key: string]: Node[] }>): Node;
