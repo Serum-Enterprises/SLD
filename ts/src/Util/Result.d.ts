@@ -1,4 +1,4 @@
-import type { Option } from '../Option/Option';
+import type { Option } from './Option';
 
 export abstract class Result<T, E> {
 	/**

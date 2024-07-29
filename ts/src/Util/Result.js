@@ -1,5 +1,5 @@
-const { Some, None } = require('../Option/Option');
-const { panic } = require('../panic/panic');
+const { Some, None } = require('./Option');
+const { panic } = require('./panic');
 
 class Result {
 	static Ok(value) {

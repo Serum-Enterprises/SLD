@@ -1,4 +1,5 @@
-const { Ok, Err } = require('../Result/Result');
+const { Ok, Err } = require('./Result');
+const { panic } = require('./panic');
 
 class Option {
 	static Some(value) {
