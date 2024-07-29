@@ -1,4 +1,4 @@
-class SPLError extends Error {
+class SLDError extends Error {
 	#location;
 
 	constructor(location, message, options) {
@@ -11,4 +11,4 @@ class SPLError extends Error {
 	}
 }
 
-module.exports = { SPLError };
+module.exports = { SLDError };
