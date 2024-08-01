@@ -1,5 +1,4 @@
-import { Option } from '../Util/Option/Option';
-import { Result } from '../Util/Result/Result';
+import { Result, Option, ParseError } from '../Util';
 
 import type { Grammar } from '../Grammar/Grammar';
 
@@ -13,5 +12,5 @@ export class BaseSymbol {
 	get name(): Option<string>;
 
 	find(source: string, precedingNode: Option<Node>, grammarContext: Grammar): Option<Node>;
-	parse(source: string, precedingNode: Option<Node>, grammarContext: Grammar): Result<Node, string>;
+	parse(source: string, precedingNode: Option<Node>, grammarContext: Grammar): Result<Node, ParseError>
 }

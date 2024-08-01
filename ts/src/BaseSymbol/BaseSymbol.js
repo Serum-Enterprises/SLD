@@ -1,8 +1,4 @@
-const { Result } = require('../Util/Result/Result');
-const { Option } = require('../Util/Option/Option');
-const { Node } = require('../Util/Node/Node');
-
-const MisMatchError = require('../Util/Error/MisMatchError/MismatchError');
+const { Result, Option, Node } = require('../Util');
 
 class BaseSymbol {
 	#type;
@@ -50,7 +46,11 @@ class BaseSymbol {
 		switch (this.#type) {
 			case 'STRING': {
 				if (!source.startsWith(this.#value))
-					return Result.Err(new MisMatchError(precedingNode.match(node => node.range[1] + 1, () => 0), `Expected ${this.#value}`));
+					return Result.Err({
+						message: `Expected ${this.#value}`,
+						location: precedingNode.match(node => node.range[1] + 1, () => 0),
+						stack: [{ source, precedingNode, grammarContext }]
+					});
 
 				return Result.Some(precedingNode.match(
 					node => Node.createFollowerWith(node, this.#value, Result.Some({})),
@@ -58,14 +58,22 @@ class BaseSymbol {
 				));
 			}
 			case 'REGEXP': {
-				const match = source.match(value.source.startsWith('^') ? value : new RegExp(`^${value.source}`, value.flags));
+				const match = source.match(this.#value.source.startsWith('^') ? value : new RegExp(`^${this.#value.source}`, this.#value.flags));
 
 				if (!match)
-					return Result.Err(new MisMatchError(precedingNode.match(node => node.range[1] + 1, () => 0), `Expected /^${this.#value}/`));
+					return Result.Err({
+						message: `Expected ${this.#value}`,
+						location: precedingNode.match(node => node.range[1] + 1, () => 0),
+						stack: [{ source, precedingNode, grammarContext }]
+					});
 
 				if (match[0].length === 0)
-					return Result.Err(new EmptyStringError());
-
+					return Result.Err({
+						message: `Empty Match`,
+						location: precedingNode.match(node => node.range[1] + 1, () => 0),
+						stack: [{ source, precedingNode, grammarContext }]
+					});
+					
 				return Result.Some(precedingNode.match(
 					node => Node.createFollowerWith(node, match[0], Result.Some({})),
 					() => Node.create(match[0], Result.Some({}))
