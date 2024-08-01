@@ -4,7 +4,7 @@ export abstract class Option<T> {
 	/**
 	 * Create a new Some Variant
 	 */
-	static Some(value: T): Some<T>;
+	static Some<T>(value: T): Some<T>;
 	/**
 	 * Create a new None Variant
 	 */

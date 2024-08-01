@@ -4,19 +4,19 @@ export abstract class Result<T, E> {
 	/**
 	 * Create a new Ok Variant
 	 */
-	static Ok(value: T): Ok<T>;
+	static Ok<T>(value: T): Ok<T>;
 	/**
 	 * Create a new Err Variant
 	 */
-	static Err(error: E): Err<E>;
+	static Err<E>(error: E): Err<E>;
 
 	/**
 	 * Check if the Result is Ok
 	 */
 	isOk(): this is Ok<T>;
 	/**
-		 * Check if the Result is Err
-		 */
+	 * Check if the Result is Err
+	 */
 	isErr(): this is Err<E>;
 
 	/**
