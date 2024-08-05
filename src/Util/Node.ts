@@ -47,7 +47,7 @@ export class Node {
 	/**
 	 * Construct a new node
 	 */
-	private constructor(type: string, raw: string, children: { [key: string]: Node[] }, range: [number, number]) {
+	constructor(type: string, raw: string, children: { [key: string]: Node[] }, range: [number, number]) {
 		this._type = type;
 		this._raw = raw;
 		this._children = children;
