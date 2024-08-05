@@ -1,1 +1,0 @@
-export function panic(message: string): never;
