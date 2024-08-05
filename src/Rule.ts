@@ -53,11 +53,11 @@ export class Rule {
 		return this;
 	}
 
-	followedBy(): QuantitySelector {
+	get followedBy(): QuantitySelector {
 		return new QuantitySelector(this, true, false);
 	}
 
-	directlyFollowedBy(): QuantitySelector {
+	get directlyFollowedBy(): QuantitySelector {
 		return new QuantitySelector(this, false, false);
 	}
 
