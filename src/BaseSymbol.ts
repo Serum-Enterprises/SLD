@@ -3,6 +3,7 @@ import { Option } from './Util';
 import { Node, ParseError } from './Util';
 
 import type { Grammar } from './Grammar';
+import type { RuleSet } from './RuleSet';
 
 export class BaseSymbol {
 	private _type: "STRING" | "REGEXP" | "RULESET";
@@ -76,7 +77,7 @@ export class BaseSymbol {
 			}
 			case 'RULESET': {
 				// TODO: Check if the Stack needs to be updated
-				return (grammarContext.ruleSets[this._value as string]).parse(source, precedingNode, grammarContext);
+				return ((grammarContext.ruleSets[this._value as string]) as RuleSet).parse(source, precedingNode, grammarContext);
 			}
 		}
 	}

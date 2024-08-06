@@ -79,7 +79,7 @@ export class Grammar {
 		if(missingRuleSets.length > 0)
 			return Result.Err({ message: `RuleSet(s) ${missingRuleSets.join(', ')} do not exist`, location: 0, stack: [] });
 
-		const result = this.ruleSets[rootRuleSet].parse(source, precedingNode, this);
+		const result = (this.ruleSets[rootRuleSet] as RuleSet).parse(source, precedingNode, this);
 
 		if (result.isOk()) {
 			if (failOnRest && result.value.raw !== source)
