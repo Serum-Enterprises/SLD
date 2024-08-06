@@ -66,7 +66,7 @@ export class BaseSymbol {
 						stack: [{ source, precedingNode, grammarContext }]
 					});
 
-				if (match[0].length === 0)
+				if (!match[0] || match[0].length === 0)
 					return Result.Err({
 						message: `Empty Match`,
 						location: precedingNode.match(node => node.range[1] + 1, () => 0),
