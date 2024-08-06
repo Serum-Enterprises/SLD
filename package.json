@@ -1,8 +1,9 @@
 {
 	"name": "@serum-enterprises/sld",
-	"version": "2.0.0-alpha.0",
+	"version": "2.0.0-alpha.1",
 	"description": "A modern Language Design Tool and Parser",
-	"main": "./index.js",
+	"main": "./build/index.js",
+	"types": "./types/index.d.ts",
 	"scripts": {},
 	"repository": {
 		"type": "git",
