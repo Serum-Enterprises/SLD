@@ -5,7 +5,7 @@ import { Node, ParseError } from './Util';
 import type { BaseSymbol } from './BaseSymbol';
 import type { Grammar } from './Grammar';
 
-export type ParseResult = { rest: string, namedNodes: { [key: string]: Node[] }, currentPrecedingNode: Option<Node> };
+export type ParseResult = { rest: string, namedNodes: Map<string, Node[]>, currentPrecedingNode: Option<Node> };
 
 export class SymbolSet {
 	private _symbols: BaseSymbol[];
@@ -33,7 +33,7 @@ export class SymbolSet {
 	parse(source: string, precedingNode: Option<Node>, grammarContext: Grammar): Result<ParseResult, ParseError> {
 		let rest: string = source;
 		let currentPrecedingNode: Option<Node> = precedingNode;
-		const namedNodes: { [key: string]: Node[] } = {};
+		const namedNodes: Map<string, Node[]> = new Map();
 
 		// Match every Symbol in the SymbolSet
 		for (let baseSymbol of this._symbols) {
@@ -50,9 +50,10 @@ export class SymbolSet {
 
 				baseSymbol.name.match(
 					name => {
-						if (!namedNodes[name])
-							namedNodes[name] = [];
-						namedNodes[name].push(result);
+						if(!namedNodes.has(name))
+							namedNodes.set(name, []);
+
+						(namedNodes.get(name) as Node[]).push(result);
 					},
 					() => { }
 				);

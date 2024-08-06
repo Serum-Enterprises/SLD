@@ -73,7 +73,7 @@ export class Rule {
 	parse(source: string, precedingNode: Option<Node>, grammarContext: Grammar): Result<Node, ParseError> {
 		let rest: string = source;
 		let currentPrecedingNode: Option<Node> = precedingNode;
-		let namedNodes: { [key: string]: Node[] } = {};
+		let namedNodes: Map<string, Node[]> = new Map();
 
 		// If a Custom Throw Message was set, throw an Error
 		if (this._throwMessage.isSome())
@@ -89,17 +89,22 @@ export class Rule {
 
 			if (parseResult.isOk()) {
 				// If there was no Error, update the rest, namedNodes and currentPrecedingNode
-				({ rest, namedNodes, currentPrecedingNode } = { ...parseResult.value, namedNodes: Node.mergeNodeMaps([namedNodes, parseResult.value.namedNodes]) });
+				rest = parseResult.value.rest;
+				namedNodes = Node.mergeNodeMaps([namedNodes, parseResult.value.namedNodes]);
+				currentPrecedingNode = parseResult.value.currentPrecedingNode;
 
 				// If the SymbolSet is greedy, try to match until there is an Error and always update rest, namedNodes and currentPrecedingNode
 				if (symbolSet.greedy) {
 					while (true) {
 						const parseResult = symbolSet.parse(rest, currentPrecedingNode, grammarContext);
 
-						if (parseResult.isOk())
-							({ rest, namedNodes, currentPrecedingNode } = { ...parseResult.value, namedNodes: Node.mergeNodeMaps([namedNodes, parseResult.value.namedNodes]) });
-						else
+						if (parseResult.isOk()) {
+							rest = parseResult.value.rest;
+							namedNodes = Node.mergeNodeMaps([namedNodes, parseResult.value.namedNodes]);
+							currentPrecedingNode = parseResult.value.currentPrecedingNode;
+						} else {
 							break;
+						}
 					}
 				}
 			}
