@@ -1,5 +1,5 @@
-import { Result, Ok, Err } from './Util';
-import { Option, Some, None } from './Util';
+import { Result } from './Util';
+import { Option } from './Util';
 import { Node, ParseError } from './Util';
 
 import type { RuleSet } from './RuleSet';

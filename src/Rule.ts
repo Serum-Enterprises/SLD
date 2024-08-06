@@ -1,5 +1,5 @@
-import { Result, Ok, Err } from './Util';
-import { Option, Some, None } from './Util';
+import { Result, Err } from './Util';
+import { Option, Some } from './Util';
 import { Node, ParseError } from './Util';
 
 import { BaseSymbol } from './BaseSymbol';
