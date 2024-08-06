@@ -8,7 +8,7 @@ The Serum Language Designer (SLD) is a powerful Tool to create and parse Languag
 - Source String Range for each Node and Error
 - Recovery from Errors with Symbols
 - Customizable Error Messages
-- Transforming Hooks for AST Nodes
+- Transforming Functions for AST Nodes
 
 ## Usage
 
@@ -20,13 +20,13 @@ To install the SLD, you can use the following command:
 npm install @serum-enterprises/sld
 ```
 
-### Structure
+### Utilities
 
-The SLD is divided into three Modules that build on Top of each other. You generally ever only need to use the Builder Module, if you are not using your own Parsing or dislike the Builder API. The Modules are as following:
+The SLD features a set of Utility Classes that help with development in general. These are:
+ - `Option<T>`: A Rust-like Option Type that can be either `Some<T>` or `None`.
+ - `Result<T, E>`: A Rust-like Result Type that can be either `Ok<T>` or `Err<E>`.
 
-- Core: The Core Module contains the basic building Blocks and DataClasses for the SLD.
-- Parser: The Parser Module builds on top of the Core Module and contains the Parser API to parse Source Strings into ASTs.
-- Builder: The Builder Module builds on top of the Parser Module and contains a Builder API to create Grammars in a more readable and easy way by utilizing Method Chaining.
+ Both of these Types are useful for Error Handling and can be used in combination with the SLD. They are also used in the SLD itself for Error Handling. Additionally, they have a method called `match` that can be used to match the Type and get the Value or Error out of it.
 
 ### Example
 
@@ -45,9 +45,9 @@ To start creating the Transformer Function we will first create some simple Help
 /**
  * Get the first Node in the Array of a Children.
  * If the there is no Node present or the Child does not exist, it returns null.
- * @param {Builder.Node} node 
+ * @param {Node} node 
  * @param {string} name 
- * @returns {Builder.Node | null}
+ * @returns {Option<Node>}
  */
 function getFirstChild(node, name) {
 	return name in node.children ? node.children[name][0] : null;
@@ -57,7 +57,7 @@ function getFirstChild(node, name) {
 ```js
 /**
  * Get the Precedence of an Operator
- * @param {string} operator 
+ * @param {string} operator
  * @returns {number}
  */
 function precedence(operator) {
@@ -105,14 +105,14 @@ function rotateTreeLeft(node) {
 		return node;
 
 	// Nodes are immutable, so we have to create a new Left Node
-	const newLeft = new Builder.Node('MATCH', node.raw.slice(left.range[0], leftOfRight.range[1] + 1), {
+	const newLeft = new Node('MATCH', node.raw.slice(left.range[0], leftOfRight.range[1] + 1), {
 		left: [left],
 		operator: [operator],
 		right: [leftOfRight],
 	}, [left.range[0], leftOfRight.range[1]]);
 
 	// Nodes are immutable, so we have to create a new Root Node
-	const newRoot = new Builder.Node('MATCH', node.raw, {
+	const newRoot = new Node('MATCH', node.raw, {
 		left: [newLeft],
 		operator: [operatorOfRight],
 		right: [rightOfRight],
@@ -123,38 +123,34 @@ function rotateTreeLeft(node) {
 }
 ```
 
-Now that we created the Transformer Function, we can start creating the Grammar. For this, it is easier to pull up some Classes of the Builder API:
+Now that we created the Transformer Function, we can start creating the Grammar.
 
 ```js
-const { Grammar, RuleSet, Rule } = Builder;
-```
+const grammar = Grammar.create();
 
-With these Classes we can the create the Grammar for our Calculator:
-```js
-const grammar = Grammar.create({
-	// Match either a Number or a Recursive Expression
-	// If it is a Recursive Expression, apply the rotateTreeLeft Transformer to counteract the left-associativity of the Operators
-	Expression: RuleSet.create([
-		Rule.match().one().ruleset('Number', 'left')
-			.followedBy().one().ruleset('Operator', 'operator')
-			.followedBy().one().ruleset('Expression', 'right')
-			// Here we have our Transformer Function hooked in, which will be called every time the Rule is matched successfully
-			.transform(node => rotateTreeLeft(node)),
-		Rule.match().one().ruleset('Number'),
-	]),
-	// Match one of the Operators
-	Operator: RuleSet.create([
-		Rule.match().one().string('+'),
-		Rule.match().one().string('-'),
-		Rule.match().one().string('*'),
-		Rule.match().one().string('/'),
-	]),
-	// This matches either a Float in the Format of 0.001 or .001 or a simple Integer
-	Number: RuleSet.create([
-		Rule.match().one().regexp(/\d*\.\d+/),
-		Rule.match().one().regexp(/\d+/),
-	])
-});
+const Expression = RuleSet.create([
+	Rule.match.one.ruleset('Number', 'left')
+		.followedBy.one.ruleset('Operator', 'operator')
+		.followedBy.one.ruleset('Expression', 'right')
+		.transform(rotateTreeLeft),
+	Rule.match.one.ruleset('Number'),
+]);
+
+const Operator = RuleSet.create([
+	Rule.match.one.string('+'),
+	Rule.match.one.string('-'),
+	Rule.match.one.string('*'),
+	Rule.match.one.string('/'),
+]);
+
+const Number = RuleSet.create([
+	Rule.match.one.regexp(/\d*\.\d+/),
+	Rule.match.one.regexp(/\d+/),
+]);
+
+grammar.registerRuleSet('Expression', Expression);
+grammar.registerRuleSet('Operator', Operator);
+grammar.registerRuleSet('Number', Number);
 ```
 
 We can now called the parse Method of the Grammar to parse a Source String:
@@ -162,7 +158,7 @@ We can now called the parse Method of the Grammar to parse a Source String:
 ```js
 console.log(
 	JSON.stringify(
-		grammar.parse("2 * 3 + 4 / 2", "Expression", true),
+		grammar.parse("2 * 3 + 4 / 2", "Expression", true, Option.None()),
 		null,
 		2
 	)
@@ -283,9 +279,4 @@ The Result of this would look like this:
         12
     ]
 }
-```
-
-You can run this Example yourself by running:
-```sh
-node README.example.js
 ```
