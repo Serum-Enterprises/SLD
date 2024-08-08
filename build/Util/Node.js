@@ -59,5 +59,19 @@ class Node {
     createFollower(raw, children) {
         return children.match(children => new Node("MATCH", raw, children, [this._range[1] + 1, this._range[1] + raw.length]), () => new Node("RECOVER", raw, new Map(), [this._range[1] + 1, this._range[1] + raw.length]));
     }
+    toJSON() {
+        const children = {};
+        this._children.forEach((value, key) => {
+            children[key] = value;
+        });
+        return {
+            type: this._type,
+            raw: this._raw,
+            children: Array.from(this._children.entries()).reduce((result, [key, value]) => {
+                return { ...result, [key]: value };
+            }, {}),
+            range: this._range
+        };
+    }
 }
 exports.Node = Node;

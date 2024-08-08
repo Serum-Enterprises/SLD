@@ -1,4 +1,7 @@
 import { Option } from './Option';
+export declare type JSON = null | boolean | number | string | Array<JSON> | {
+    [key: string]: JSON;
+};
 export declare class Node {
     private _type;
     private _raw;
@@ -28,4 +31,5 @@ export declare class Node {
      * Create a node logically following this node
      */
     createFollower(raw: string, children: Option<Map<string, Node[]>>): Node;
+    toJSON(): JSON;
 }
