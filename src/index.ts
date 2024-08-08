@@ -4,7 +4,7 @@ import { Rule } from './Rule';
 import { SymbolSet } from './SymbolSet';
 import { BaseSymbol } from './BaseSymbol';
 
-import { Node, ParseError } from './Util';
+import { Node, JSON, ParseError } from './Util';
 import { Option, Some, None } from './Util';
 import { Result, Ok, Err } from './Util';
 
@@ -21,5 +21,6 @@ export {
 	None,
 	Result,
 	Ok,
-	Err
+	Err,
+	JSON
 }
