@@ -23,7 +23,7 @@ export declare class Node {
     /**
      * Construct a new node
      */
-    constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number]);
+    constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number], meta: JSON);
     get type(): string;
     get raw(): string;
     get children(): Map<string, Node[]>;

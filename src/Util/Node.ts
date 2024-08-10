@@ -32,8 +32,8 @@ export class Node {
 	 */
 	static create(raw: string, children: Option<Map<string, Node[]>>): Node {
 		return children.match(
-			children => new Node("MATCH", raw, children, [0, raw.length - 1]),
-			() => new Node("RECOVER", raw, new Map(), [0, raw.length - 1])
+			children => new Node("MATCH", raw, children, [0, raw.length - 1], null),
+			() => new Node("RECOVER", raw, new Map(), [0, raw.length - 1], null)
 		);
 	}
 
@@ -50,12 +50,12 @@ export class Node {
 	/**
 	 * Construct a new node
 	 */
-	constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number]) {
+	constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number], meta: JSON) {
 		this._type = type;
 		this._raw = raw;
 		this._children = children;
 		this._range = range;
-		this._meta = null;
+		this._meta = meta;
 	}
 
 	get type(): string {
@@ -83,8 +83,8 @@ export class Node {
 	 */
 	createFollower(raw: string, children: Option<Map<string, Node[]>>): Node {
 		return children.match(
-			children => new Node("MATCH", raw, children, [this._range[1] + 1, this._range[1] + raw.length]),
-			() => new Node("RECOVER", raw, new Map(), [this._range[1] + 1, this._range[1] + raw.length])
+			children => new Node("MATCH", raw, children, [this._range[1] + 1, this._range[1] + raw.length], null),
+			() => new Node("RECOVER", raw, new Map(), [this._range[1] + 1, this._range[1] + raw.length], null)
 		);
 	}
 
@@ -99,7 +99,7 @@ export class Node {
 			type: this._type,
 			raw: this._raw,
 			children: Array.from(this._children.entries()).reduce((result, [key, value]) => {
-				return {...result, [key]: value};
+				return { ...result, [key]: value };
 			}, {}),
 			range: this._range,
 			meta: this._meta
