@@ -25,7 +25,7 @@ class Node {
      * Create a new node
      */
     static create(raw, children) {
-        return children.match(children => new Node("MATCH", raw, children, [0, raw.length - 1], null), () => new Node("RECOVER", raw, new Map(), [0, raw.length - 1], null));
+        return children.match(children => new Node("MATCH", raw, children, [0, raw.length - 1], {}), () => new Node("RECOVER", raw, new Map(), [0, raw.length - 1], {}));
     }
     /**
      * Create a node with an optional preceding node
@@ -58,11 +58,18 @@ class Node {
     get meta() {
         return this._meta;
     }
+    set meta(meta) {
+        this._meta = meta;
+    }
+    setMeta(meta) {
+        this.meta = meta;
+        return this;
+    }
     /**
      * Create a node logically following this node
      */
     createFollower(raw, children) {
-        return children.match(children => new Node("MATCH", raw, children, [this._range[1] + 1, this._range[1] + raw.length], null), () => new Node("RECOVER", raw, new Map(), [this._range[1] + 1, this._range[1] + raw.length], null));
+        return children.match(children => new Node("MATCH", raw, children, [this._range[1] + 1, this._range[1] + raw.length], {}), () => new Node("RECOVER", raw, new Map(), [this._range[1] + 1, this._range[1] + raw.length], {}));
     }
     toJSON() {
         const children = {};

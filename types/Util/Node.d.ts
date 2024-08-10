@@ -23,12 +23,22 @@ export declare class Node {
     /**
      * Construct a new node
      */
-    constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number], meta: JSON);
+    constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number], meta: {
+        [key: string]: JSON;
+    });
     get type(): string;
     get raw(): string;
     get children(): Map<string, Node[]>;
     get range(): [number, number];
-    get meta(): JSON;
+    get meta(): {
+        [key: string]: JSON;
+    };
+    set meta(meta: {
+        [key: string]: JSON;
+    });
+    setMeta(meta: {
+        [key: string]: JSON;
+    }): Node;
     /**
      * Create a node logically following this node
      */

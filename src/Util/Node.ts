@@ -7,7 +7,7 @@ export class Node {
 	private _raw: string;
 	private _children: Map<string, Node[]>;
 	private _range: [number, number];
-	private _meta: JSON;
+	private _meta: { [key: string]: JSON };
 
 	/**
 	 * Merge two NodeMaps
@@ -32,8 +32,8 @@ export class Node {
 	 */
 	static create(raw: string, children: Option<Map<string, Node[]>>): Node {
 		return children.match(
-			children => new Node("MATCH", raw, children, [0, raw.length - 1], null),
-			() => new Node("RECOVER", raw, new Map(), [0, raw.length - 1], null)
+			children => new Node("MATCH", raw, children, [0, raw.length - 1], {}),
+			() => new Node("RECOVER", raw, new Map(), [0, raw.length - 1], {})
 		);
 	}
 
@@ -50,7 +50,7 @@ export class Node {
 	/**
 	 * Construct a new node
 	 */
-	constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number], meta: JSON) {
+	constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number], meta: { [key: string]: JSON }) {
 		this._type = type;
 		this._raw = raw;
 		this._children = children;
@@ -74,8 +74,18 @@ export class Node {
 		return this._range;
 	}
 
-	get meta(): JSON {
+	get meta(): { [key: string]: JSON } {
 		return this._meta;
+	}
+
+	set meta(meta: { [key: string]: JSON }) {
+		this._meta = meta;
+	}
+
+	setMeta(meta: { [key: string]: JSON }): Node {
+		this.meta = meta;
+
+		return this;
 	}
 
 	/**
@@ -83,8 +93,8 @@ export class Node {
 	 */
 	createFollower(raw: string, children: Option<Map<string, Node[]>>): Node {
 		return children.match(
-			children => new Node("MATCH", raw, children, [this._range[1] + 1, this._range[1] + raw.length], null),
-			() => new Node("RECOVER", raw, new Map(), [this._range[1] + 1, this._range[1] + raw.length], null)
+			children => new Node("MATCH", raw, children, [this._range[1] + 1, this._range[1] + raw.length], {}),
+			() => new Node("RECOVER", raw, new Map(), [this._range[1] + 1, this._range[1] + raw.length], {})
 		);
 	}
 
