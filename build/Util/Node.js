@@ -6,6 +6,7 @@ class Node {
     _raw;
     _children;
     _range;
+    _meta;
     /**
      * Merge two NodeMaps
      */
@@ -40,6 +41,7 @@ class Node {
         this._raw = raw;
         this._children = children;
         this._range = range;
+        this._meta = null;
     }
     get type() {
         return this._type;
@@ -52,6 +54,9 @@ class Node {
     }
     get range() {
         return this._range;
+    }
+    get meta() {
+        return this._meta;
     }
     /**
      * Create a node logically following this node
@@ -70,7 +75,8 @@ class Node {
             children: Array.from(this._children.entries()).reduce((result, [key, value]) => {
                 return { ...result, [key]: value };
             }, {}),
-            range: this._range
+            range: this._range,
+            meta: this._meta
         };
     }
 }

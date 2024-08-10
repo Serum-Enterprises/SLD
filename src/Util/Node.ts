@@ -7,6 +7,7 @@ export class Node {
 	private _raw: string;
 	private _children: Map<string, Node[]>;
 	private _range: [number, number];
+	private _meta: JSON;
 
 	/**
 	 * Merge two NodeMaps
@@ -54,6 +55,7 @@ export class Node {
 		this._raw = raw;
 		this._children = children;
 		this._range = range;
+		this._meta = null;
 	}
 
 	get type(): string {
@@ -70,6 +72,10 @@ export class Node {
 
 	get range(): [number, number] {
 		return this._range;
+	}
+
+	get meta(): JSON {
+		return this._meta;
 	}
 
 	/**
@@ -95,7 +101,8 @@ export class Node {
 			children: Array.from(this._children.entries()).reduce((result, [key, value]) => {
 				return {...result, [key]: value};
 			}, {}),
-			range: this._range
+			range: this._range,
+			meta: this._meta
 		};
 	}
 }

@@ -7,6 +7,7 @@ export declare class Node {
     private _raw;
     private _children;
     private _range;
+    private _meta;
     /**
      * Merge two NodeMaps
      */
@@ -27,6 +28,7 @@ export declare class Node {
     get raw(): string;
     get children(): Map<string, Node[]>;
     get range(): [number, number];
+    get meta(): JSON;
     /**
      * Create a node logically following this node
      */
