@@ -1,5 +1,5 @@
 import { Option } from './Option';
-export declare type JSON = null | boolean | number | string | Array<JSON> | {
+export type JSON = null | boolean | number | string | JSON[] | {
     [key: string]: JSON;
 };
 export declare class Node {
@@ -7,7 +7,6 @@ export declare class Node {
     private _raw;
     private _children;
     private _range;
-    private _meta;
     /**
      * Merge two NodeMaps
      */
@@ -23,22 +22,11 @@ export declare class Node {
     /**
      * Construct a new node
      */
-    constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number], meta: {
-        [key: string]: JSON;
-    });
+    constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number]);
     get type(): string;
     get raw(): string;
     get children(): Map<string, Node[]>;
     get range(): [number, number];
-    get meta(): {
-        [key: string]: JSON;
-    };
-    set meta(meta: {
-        [key: string]: JSON;
-    });
-    setMeta(meta: {
-        [key: string]: JSON;
-    }): Node;
     /**
      * Create a node logically following this node
      */

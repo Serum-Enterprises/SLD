@@ -1,13 +1,12 @@
 import { Option } from './Option';
 
-export type JSON = null | boolean | number | string | Array<JSON> | { [key: string]: JSON };
+export type JSON = null | boolean | number | string | JSON[] | { [key: string]: JSON };
 
 export class Node {
 	private _type: string;
 	private _raw: string;
 	private _children: Map<string, Node[]>;
 	private _range: [number, number];
-	private _meta: { [key: string]: JSON };
 
 	/**
 	 * Merge two NodeMaps
@@ -32,8 +31,8 @@ export class Node {
 	 */
 	static create(raw: string, children: Option<Map<string, Node[]>>): Node {
 		return children.match(
-			children => new Node("MATCH", raw, children, [0, raw.length - 1], {}),
-			() => new Node("RECOVER", raw, new Map(), [0, raw.length - 1], {})
+			children => new Node("MATCH", raw, children, [0, raw.length - 1]),
+			() => new Node("RECOVER", raw, new Map(), [0, raw.length - 1])
 		);
 	}
 
@@ -50,12 +49,11 @@ export class Node {
 	/**
 	 * Construct a new node
 	 */
-	constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number], meta: { [key: string]: JSON }) {
+	constructor(type: string, raw: string, children: Map<string, Node[]>, range: [number, number]) {
 		this._type = type;
 		this._raw = raw;
 		this._children = children;
 		this._range = range;
-		this._meta = meta;
 	}
 
 	get type(): string {
@@ -74,27 +72,13 @@ export class Node {
 		return this._range;
 	}
 
-	get meta(): { [key: string]: JSON } {
-		return this._meta;
-	}
-
-	set meta(meta: { [key: string]: JSON }) {
-		this._meta = meta;
-	}
-
-	setMeta(meta: { [key: string]: JSON }): Node {
-		this.meta = meta;
-
-		return this;
-	}
-
 	/**
 	 * Create a node logically following this node
 	 */
 	createFollower(raw: string, children: Option<Map<string, Node[]>>): Node {
 		return children.match(
-			children => new Node("MATCH", raw, children, [this._range[1] + 1, this._range[1] + raw.length], {}),
-			() => new Node("RECOVER", raw, new Map(), [this._range[1] + 1, this._range[1] + raw.length], {})
+			children => new Node("MATCH", raw, children, [this._range[1] + 1, this._range[1] + raw.length]),
+			() => new Node("RECOVER", raw, new Map(), [this._range[1] + 1, this._range[1] + raw.length])
 		);
 	}
 
@@ -112,7 +96,6 @@ export class Node {
 				return { ...result, [key]: value };
 			}, {}),
 			range: this._range,
-			meta: this._meta
 		};
 	}
 }

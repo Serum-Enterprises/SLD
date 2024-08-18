@@ -3,7 +3,7 @@ import { Option } from './Util';
 import { Node, ParseError } from './Util';
 import type { BaseSymbol } from './BaseSymbol';
 import type { Grammar } from './Grammar';
-export declare type ParseResult = {
+export type ParseResult = {
     rest: string;
     namedNodes: Map<string, Node[]>;
     currentPrecedingNode: Option<Node>;

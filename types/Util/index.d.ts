@@ -4,7 +4,7 @@ import type { Grammar } from '../Grammar';
 export { Result, Ok, Err } from './Result';
 export { panic } from './panic';
 export { Node, JSON, Option, Some, None };
-export declare type ParseError = {
+export type ParseError = {
     message: string;
     location: number;
     stack: {
